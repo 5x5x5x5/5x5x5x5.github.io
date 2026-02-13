@@ -748,11 +748,10 @@ input, select, textarea {
 /* Profile */
 	.profile img {
 		width: 100%;
-		height: auto;
+		height: 100%;
+		object-fit: cover;
 		clip-path: circle();
 		display: block;
-		margin-left: auto;
-		margin-right: auto;
 	}
 
 /* Image */
@@ -1439,9 +1438,10 @@ input, select, textarea {
 		#header .logo {
 			width: 10.1rem;
 			height: 10.1rem;
-			line-height: 5rem;
+			line-height: 10.1rem;
 			border: solid 1px #333;/*#ffffff;*/
 			border-radius: 80%;
+			overflow: hidden;
 		}
 
 			#header .logo .icon:before {
