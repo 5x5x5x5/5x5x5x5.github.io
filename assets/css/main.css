@@ -532,17 +532,17 @@ input, select, textarea {
 
 		input[type="checkbox"]:checked + label:before,
 		input[type="radio"]:checked + label:before {
-			background: #333;#ffffff !important;
-			border-color: #333;#ffffff !important;
-			color: #ffffff;#1b1f22;
+			background: #ffffff !important;
+			border-color: #ffffff !important;
+			color: #1b1f22;
 			content: '\f00c';
 		}
 
 		input[type="checkbox"]:focus + label:before,
 		input[type="radio"]:focus + label:before {
-			background: #ffffff;rgba(255, 255, 255, 0.075);
-			border-color: #333;#ffffff;
-			box-shadow: 0 0 0 1px #333;#ffffff;
+			background: rgba(255, 255, 255, 0.075);
+			border-color: #ffffff;
+			box-shadow: 0 0 0 1px #ffffff;
 		}
 
 	input[type="checkbox"] + label:before {
