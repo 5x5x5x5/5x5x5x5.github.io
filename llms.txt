@@ -1,0 +1,51 @@
+# Daniel Siegle
+
+> AI/ML Engineer — North Carolina
+> Founder, Deep Learning RTP | Possible Futures, LLC
+
+## About
+
+Daniel Siegle is an AI/ML engineer based in North Carolina. He contracts through
+Possible Futures, LLC, focusing on LLM training and fine-tuning as well as
+traditional ML projects across the biotech and life-sciences space.
+
+He holds an M.S. in Pharmaceutical Sciences from North Carolina Central University,
+where his thesis — "Cytochrome P450 Inhibitor Classification with Statistical
+Learning" — benchmarked Bayesian binary QSAR against scikit-learn classifiers on
+HTS luminescence assay data for five CYP isozymes (1A2, 2C9, 2C19, 2D6, 3A4).
+He earned a B.S. in Biology from UNC-Chapel Hill.
+
+Industry experience includes four years at Q2 Solutions (Scientific Programmer,
+then Bioinformatics Software Engineer at Q2 Genomics), teaching AI for Health and
+Life Sciences at the North Carolina School of Science and Mathematics (NCSSM), and
+drug manufacturing at Biogen Idec.
+
+He founded Deep Learning RTP, a 1,700+ member community meetup in the Research
+Triangle with 400+ past events focused on deep learning and AI.
+
+## Links
+
+- Website: https://5x5x5x5.github.io
+- Consultancy: https://5x5x5x5.com
+- GitHub: https://github.com/5x5x5x5 (84 public repos)
+- LinkedIn: https://www.linkedin.com/in/daniel-siegle/
+- Bluesky: https://bsky.app/profile/danielsiegle.bsky.social
+- Meetup: https://www.meetup.com/deep-learning-rtp/
+- Email: daniel.siegle@gmail.com
+
+## Key Projects
+
+- **LLM Training Pipeline**: Production LLM fine-tuning infrastructure —
+  50K+ training examples, 500+ tokens/sec throughput
+- **gut-typist**: Lua-based typing tutor built for the terminal
+- **CYP450 Inhibitor Classification**: M.S. thesis — Bayesian QSAR vs
+  scikit-learn classifiers for drug metabolism screening
+- **LLM Tuning Demonstration**: End-to-end LLM fine-tuning walkthrough
+- **Neural Network in NumPy**: From-scratch neural network implementation
+- **Deep Learning RTP**: 1,700+ member AI/ML community, 400+ events
+
+## Topics
+
+machine learning, LLM, fine-tuning, bioinformatics, computational biology,
+cheminformatics, QSAR, deep learning, protein design, next-generation sequencing,
+neural networks, NLP, biotech, drug discovery, AI education

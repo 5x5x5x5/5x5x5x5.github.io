@@ -1,3 +1,38 @@
-# robotstxt.org/
+# 5x5x5x5.github.io — robots.txt
+# Updated: 2026-03-06
 
 User-agent: *
+Allow: /
+Disallow: /assets/
+Disallow: /images/
+
+# AI crawlers — welcome
+User-agent: GPTBot
+Allow: /
+Allow: /llms.txt
+
+User-agent: ChatGPT-User
+Allow: /
+Allow: /llms.txt
+
+User-agent: Claude-Web
+Allow: /
+Allow: /llms.txt
+
+User-agent: Anthropic-AI
+Allow: /
+Allow: /llms.txt
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: CCBot
+Allow: /
+
+Sitemap: https://5x5x5x5.github.io/sitemap.xml
