@@ -27,7 +27,7 @@ Triangle with 400+ past events focused on deep learning and AI.
 
 - Website: https://5x5x5x5.github.io
 - Consultancy: https://5x5x5x5.com
-- GitHub: https://github.com/5x5x5x5 (84 public repos)
+- GitHub: https://github.com/5x5x5x5 (100+ public repos)
 - LinkedIn: https://www.linkedin.com/in/daniel-siegle/
 - Bluesky: https://bsky.app/profile/danielsiegle.bsky.social
 - Meetup: https://www.meetup.com/deep-learning-rtp/
@@ -35,12 +35,23 @@ Triangle with 400+ past events focused on deep learning and AI.
 
 ## Key Projects
 
-- **LLM Training Pipeline**: Production LLM fine-tuning infrastructure —
-  50K+ training examples, 500+ tokens/sec throughput
-- **gut-typist**: Lua-based typing tutor built for the terminal
+- **Applied ML Portfolio**: Applied ML and pharma projects — AWS MLOps, RAG,
+  CNNs, drug discovery (https://5x5x5x5.github.io/applied-ml-portfolio/)
+- **dear-reader-bench**: LLM benchmark for translating comedic narration —
+  do humor, voice, and running gags survive the trip into another language?
+- **GRPO Fine-Tuning on Modal**: LoRA-tunes small Qwen models on Countdown
+  arithmetic and MBPP code generation with verifiable, sandboxed rewards
+- **Gorganzola**: AI director's commentary tracks for films from a subtitle
+  file and a persona
+- **Marketplace & Auction**: Two-sided marketplace API with independent buyer
+  price and seller payout, plus a minimal sealed-bid call auction
+- **Quant Lessons**: Eight-unit quant finance curriculum
+  (https://5x5x5x5.github.io/quant-lessons/), also in Malick voiceover as
+  malick-money
+- **Gutenberg Typist**: Vim plugin for touch-typing practice by transcribing
+  Project Gutenberg books (https://5x5x5x5.github.io/gutenberg-typist/)
 - **CYP450 Inhibitor Classification**: M.S. thesis — Bayesian QSAR vs
   scikit-learn classifiers for drug metabolism screening
-- **LLM Tuning Demonstration**: End-to-end LLM fine-tuning walkthrough
 - **Neural Network in NumPy**: From-scratch neural network implementation
 - **Deep Learning RTP**: 1,700+ member AI/ML community, 400+ events
 
