@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daniel — AI Engineer, as a Service</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --bg-soft: #101018;
+    --card: #13131d;
+    --card-hover: #171724;
+    --border: #23232f;
+    --border-bright: #34344a;
+    --text: #ededf2;
+    --text-dim: #9d9dad;
+    --text-faint: #62626f;
+    --accent: #7c6cff;
+    --accent-soft: rgba(124, 108, 255, 0.12);
+    --accent-bright: #a08cff;
+    --green: #3ddc97;
+    --amber: #ffc76b;
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+    --sans: 'Inter', -apple-system, system-ui, sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  .glow {
+    position: fixed; top: -300px; left: 50%; transform: translateX(-50%);
+    width: 900px; height: 600px; pointer-events: none; z-index: 0;
+    background: radial-gradient(ellipse at center, rgba(124,108,255,0.16) 0%, transparent 65%);
+  }
+  .grid-bg {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background-image:
+      linear-gradient(rgba(124,108,255,0.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(124,108,255,0.045) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(ellipse 70% 45% at 50% 0%, black 0%, transparent 100%);
+    -webkit-mask-image: radial-gradient(ellipse 70% 45% at 50% 0%, black 0%, transparent 100%);
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+
+  /* NAV */
+  nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 22px 0; border-bottom: 1px solid var(--border);
+  }
+  .logo { font-family: var(--mono); font-size: 15px; font-weight: 600; letter-spacing: -0.02em; }
+  .logo .cursor { color: var(--accent-bright); animation: blink 1.2s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .nav-right { display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--text-dim); }
+  .nav-cta {
+    font-size: 12.5px; font-weight: 600; text-decoration: none; color: #fff;
+    background: var(--accent); border: 1px solid var(--accent); border-radius: 999px;
+    padding: 6px 14px; transition: background .18s;
+  }
+  .nav-cta:hover { background: var(--accent-bright); }
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-family: var(--mono); font-size: 11.5px;
+    border: 1px solid var(--border); border-radius: 999px; padding: 5px 12px;
+    color: var(--text-dim); background: var(--bg-soft);
+  }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); }
+
+  /* HERO */
+  header { text-align: center; padding: 84px 0 30px; }
+  .kicker {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--accent-bright); margin-bottom: 20px;
+  }
+  h1 {
+    font-size: clamp(38px, 5.4vw, 58px); font-weight: 800; letter-spacing: -0.03em;
+    line-height: 1.06; margin-bottom: 20px;
+  }
+  h1 .grad {
+    background: linear-gradient(92deg, #a08cff 0%, #6cc6ff 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .sub {
+    color: var(--text-dim); font-size: 17px; line-height: 1.65; max-width: 560px; margin: 0 auto;
+  }
+  .sub code { font-family: var(--mono); font-size: 14px; color: var(--text); background: var(--bg-soft); border: 1px solid var(--border); padding: 1px 7px; border-radius: 6px; }
+
+  /* TOGGLE */
+  .billing { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 40px 0 14px; font-size: 14px; color: var(--text-dim); flex-wrap: wrap; row-gap: 10px; }
+  .billing .on { color: var(--text); font-weight: 600; }
+  .switch {
+    width: 46px; height: 26px; border-radius: 999px; background: var(--card);
+    border: 1px solid var(--border-bright); cursor: pointer; position: relative; transition: background .2s;
+  }
+  .switch::after {
+    content: ''; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px;
+    border-radius: 50%; background: var(--accent-bright); transition: transform .22s cubic-bezier(.4,0,.2,1);
+  }
+  .switch.annual { background: var(--accent-soft); }
+  .switch.annual::after { transform: translateX(20px); }
+  .save-tag { font-family: var(--mono); font-size: 11px; color: var(--green); border: 1px solid rgba(61,220,151,.3); background: rgba(61,220,151,.08); padding: 3px 8px; border-radius: 999px; }
+
+  /* TIERS */
+  .tiers {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+    margin: 36px 0 20px; align-items: stretch;
+  }
+  @media (max-width: 980px) { .tiers { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { .tiers { grid-template-columns: 1fr; } }
+  .tier {
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+    padding: 26px 24px; display: flex; flex-direction: column; position: relative;
+    transition: border-color .2s, transform .2s, background .2s;
+  }
+  .tier:hover { border-color: var(--border-bright); background: var(--card-hover); transform: translateY(-3px); }
+  .tier.featured {
+    border-color: var(--accent);
+    background: linear-gradient(180deg, rgba(124,108,255,0.09) 0%, var(--card) 45%);
+    box-shadow: 0 0 40px rgba(124,108,255,0.12);
+  }
+  .badge {
+    position: absolute; top: -11px; left: 50%; transform: translateX(-50%);
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase;
+    background: var(--accent); color: #fff; padding: 4px 12px; border-radius: 999px; white-space: nowrap;
+  }
+  .tier h3 { font-size: 17px; font-weight: 700; letter-spacing: -0.01em; }
+  .tier .arch {
+    font-family: var(--mono); font-size: 11px; color: var(--text-faint); margin-top: 5px; letter-spacing: .02em;
+  }
+  .price { margin: 20px 0 4px; display: flex; align-items: baseline; gap: 6px; min-height: 44px; }
+  .price .amt { font-size: 34px; font-weight: 800; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+  .price .per { color: var(--text-faint); font-size: 13px; }
+  .price-note { font-family: var(--mono); font-size: 11px; color: var(--text-faint); min-height: 16px; }
+  .tier ul { list-style: none; margin: 20px 0 26px; display: grid; gap: 11px; flex: 1; }
+  .tier li { display: flex; gap: 10px; font-size: 13.5px; line-height: 1.5; color: var(--text-dim); }
+  .tier li strong { color: var(--text); font-weight: 600; }
+  .tick { color: var(--accent-bright); flex-shrink: 0; margin-top: 1px; }
+  .featured .tick { color: var(--accent-bright); }
+  .cta {
+    display: block; text-align: center; padding: 11px 0; border-radius: 10px;
+    font-size: 14px; font-weight: 600; text-decoration: none; cursor: pointer;
+    border: 1px solid var(--border-bright); color: var(--text); background: transparent;
+    transition: all .18s; font-family: var(--sans);
+  }
+  .cta:hover { border-color: var(--accent); color: var(--accent-bright); }
+  .cta.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .cta.primary:hover { background: var(--accent-bright); color: #fff; }
+
+  .free-row {
+    display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;
+    font-size: 12.5px; color: var(--text-faint); margin: 22px auto 90px; text-align: center;
+    border: 1px dashed var(--border-bright); border-radius: 12px; padding: 13px 22px;
+    max-width: 760px; background: rgba(19,19,29,0.5);
+  }
+  .free-row .ft-label {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--amber); border: 1px solid rgba(255,199,107,.25); background: rgba(255,199,107,.07);
+    padding: 3px 9px; border-radius: 999px;
+  }
+  .free-row code { font-family: var(--mono); font-size: 12px; color: var(--text-dim); }
+
+  /* QUOTES */
+  .quotes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  @media (max-width: 860px) { .quotes { grid-template-columns: 1fr; } }
+  .quote {
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 22px 22px 18px;
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .quote p { font-size: 14px; line-height: 1.6; color: var(--text); }
+  .quote p::before { content: '“'; color: var(--accent-bright); }
+  .quote p::after { content: '”'; color: var(--accent-bright); }
+  .quote .attr { font-family: var(--mono); font-size: 11.5px; color: var(--text-faint); margin-top: auto; }
+  .stars { color: var(--amber); font-size: 12px; letter-spacing: 2px; }
+
+  /* SPEC TABLE */
+  section { margin-bottom: 90px; }
+  h2 { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; text-align: center; margin-bottom: 8px; }
+  .h2-sub { text-align: center; color: var(--text-faint); font-size: 14px; margin-bottom: 36px; }
+  .spec-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: 14px; background: var(--card); }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; min-width: 720px; }
+  th, td { padding: 13px 18px; text-align: left; border-bottom: 1px solid var(--border); }
+  tr:last-child td { border-bottom: none; }
+  tbody tr { transition: background .15s; }
+  tbody tr:hover { background: rgba(124,108,255,0.04); }
+  thead th.col-feat { color: var(--accent-bright); }
+  thead th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--text-faint); font-weight: 500; background: var(--bg-soft); }
+  td:first-child { color: var(--text-dim); font-weight: 500; width: 26%; }
+  td { color: var(--text); font-variant-numeric: tabular-nums; }
+  td .mono { font-family: var(--mono); font-size: 12.5px; }
+  .col-feat { background: rgba(124,108,255,0.05); }
+  .muted { color: var(--text-faint); }
+
+  /* FAQ */
+  .faq { max-width: 680px; margin: 0 auto; display: grid; gap: 10px; }
+  details {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 16px 20px; transition: border-color .2s;
+  }
+  details[open] { border-color: var(--border-bright); }
+  summary { cursor: pointer; font-weight: 600; font-size: 14.5px; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: '+'; color: var(--text-faint); font-size: 18px; font-weight: 400; }
+  details[open] summary::after { content: '–'; }
+  details p { margin-top: 12px; color: var(--text-dim); font-size: 14px; line-height: 1.65; }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border); padding: 28px 0 40px;
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;
+    font-family: var(--mono); font-size: 11.5px; color: var(--text-faint);
+  }
+  footer a { color: var(--text-dim); text-decoration: none; }
+  footer a:hover { color: var(--accent-bright); }
+</style>
+</head>
+<body>
+<div class="glow"></div>
+<div class="grid-bg"></div>
+<div class="wrap">
+
+<nav>
+  <div class="logo">daniel<span style="color:var(--text-faint)">@</span>prod<span class="cursor">▊</span></div>
+  <div class="nav-right">
+    <span class="status-pill"><span class="dot"></span>operational · coffee 92%</span>
+    <a class="nav-cta" data-book href="mailto:daniel.siegle@gmail.com?subject=15-minute%20chat">Book 15 min</a>
+  </div>
+</nav>
+
+<header>
+  <div class="kicker">// human, generally available</div>
+  <h1>Engineer as a Service.<br><span class="grad">No API key required.</span></h1>
+  <p class="sub">Daniel is an AI engineer available by subscription. PyTorch and JAX in production, opinions at no extra charge. Pick how much of his <code>attention</code> you want to allocate.</p>
+</header>
+
+<div class="billing">
+  <span id="lblMonthly" class="on">Monthly</span>
+  <div class="switch" id="billingSwitch" role="switch" aria-checked="false" tabindex="0"></div>
+  <span id="lblAnnual">Annual</span>
+  <span class="save-tag">2 months free · vesting cliff applies</span>
+</div>
+
+<div class="tiers">
+
+  <div class="tier">
+    <h3>Async</h3>
+    <div class="arch">single attention head</div>
+    <div class="price"><span class="amt" data-monthly="$2,400" data-annual="$2,000">$2,400</span><span class="per">/mo</span></div>
+    <div class="price-note">batch inference</div>
+    <ul>
+      <li><span class="tick">✓</span><span><strong>Slack Connect</strong> channel, rate-limited</span></li>
+      <li><span class="tick">✓</span><span>Code &amp; architecture review</span></li>
+      <li><span class="tick">✓</span><span>Model / eval / infra advice</span></li>
+      <li><span class="tick">✓</span><span>24h response SLA (business days)</span></li>
+      <li><span class="tick">✓</span><span>Loss curves interpreted with empathy</span></li>
+    </ul>
+    <a class="cta" data-book href="mailto:daniel.siegle@gmail.com?subject=Async%20tier">Start async</a>
+  </div>
+
+  <div class="tier featured">
+    <span class="badge">Most allocated</span>
+    <h3>Remote</h3>
+    <div class="arch">multi-head attention</div>
+    <div class="price"><span class="amt" data-monthly="$9,500" data-annual="$7,900">$9,500</span><span class="per">/mo</span></div>
+    <div class="price-note">streaming inference</div>
+    <ul>
+      <li><span class="tick">✓</span><span><strong>Embedded in your team</strong>, remote</span></li>
+      <li><span class="tick">✓</span><span>Ships production PyTorch / JAX</span></li>
+      <li><span class="tick">✓</span><span>Owns training &amp; eval pipelines</span></li>
+      <li><span class="tick">✓</span><span>4h latency during business hours</span></li>
+      <li><span class="tick">✓</span><span>Standups: attended, camera on</span></li>
+      <li><span class="tick">✓</span><span>Fine-tunes on your codebase in ~2 wks</span></li>
+    </ul>
+    <a class="cta primary" data-book href="mailto:daniel.siegle@gmail.com?subject=Remote%20tier">Allocate Daniel</a>
+  </div>
+
+  <div class="tier">
+    <h3>In-Office</h3>
+    <div class="arch">full context window</div>
+    <div class="price"><span class="amt" data-monthly="$16,000" data-annual="$13,300">$16,000</span><span class="per">/mo</span></div>
+    <div class="price-note">edge deployment</div>
+    <ul>
+      <li><span class="tick">✓</span><span>Everything in <strong>Remote</strong></span></li>
+      <li><span class="tick">✓</span><span>On-site 3 days / week</span></li>
+      <li><span class="tick">✓</span><span>Whiteboard privileges included</span></li>
+      <li><span class="tick">✓</span><span>Physically present for incidents</span></li>
+      <li><span class="tick">✓</span><span>Will eat your office snacks</span></li>
+    </ul>
+    <a class="cta" data-book href="mailto:daniel.siegle@gmail.com?subject=In-Office%20tier">Reserve a desk</a>
+  </div>
+
+  <div class="tier">
+    <h3>Fractional CTO / CAIO</h3>
+    <div class="arch">foundation model</div>
+    <div class="price"><span class="amt">Custom</span></div>
+    <div class="price-note">pricing upon due diligence</div>
+    <ul>
+      <li><span class="tick">✓</span><span>Everything in <strong>In-Office</strong></span></li>
+      <li><span class="tick">✓</span><span>Owns AI roadmap &amp; strategy</span></li>
+      <li><span class="tick">✓</span><span>Hiring, vendor &amp; GPU negotiations</span></li>
+      <li><span class="tick">✓</span><span>Board-meeting-grade slides</span></li>
+      <li><span class="tick">✓</span><span>Says "it depends" with authority</span></li>
+    </ul>
+    <a class="cta" href="mailto:daniel.siegle@gmail.com?subject=Fractional%20CTO%2FCAIO">Contact sales (it's me)</a>
+  </div>
+
+</div>
+
+<div class="free-row">
+  <span class="ft-label">Free tier</span>
+  <code>daniel.reply(email) → sampled at temperature 1.2 · no SLA · may hallucinate availability</code>
+</div>
+
+<section>
+  <h2>What the training data says</h2>
+  <p class="h2-sub">Testimonials, lightly curated. Selection bias: yes.</p>
+  <div class="quotes">
+    <div class="quote">
+      <span class="stars">★★★★★</span>
+      <p>He jit-compiled our standup. It's four minutes now.</p>
+      <span class="attr">— CTO, stealth startup (Remote tier)</span>
+    </div>
+    <div class="quote">
+      <span class="stars">★★★★★</span>
+      <p>Asked for a quick opinion on our eval suite. Received a working eval suite. Invoice was fair.</p>
+      <span class="attr">— Head of ML, Series B (Async tier)</span>
+    </div>
+    <div class="quote">
+      <span class="stars">★★★★☆</span>
+      <p>Docked one star because he keeps saying 'it depends.' He is always right, which makes it worse.</p>
+      <span class="attr">— CEO, enterprise (CTO/CAIO tier)</span>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Model card</h2>
+  <p class="h2-sub">Benchmarks self-reported. Evaluation methodology: vibes.</p>
+  <div class="spec-scroll">
+  <table>
+    <thead>
+      <tr><th>Spec</th><th>Async</th><th class="col-feat">Remote</th><th>In-Office</th><th>CTO / CAIO</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Attention heads</td><td class="mono">1</td><td class="mono col-feat">8</td><td class="mono">16</td><td class="mono">all of them</td></tr>
+      <tr><td>Context retention</td><td>Between threads</td><td class="col-feat">Between sprints</td><td>Between quarters</td><td>Company history</td></tr>
+      <tr><td>Latency SLA</td><td class="mono">24h</td><td class="mono col-feat">4h</td><td class="mono">shoulder tap</td><td class="mono">reads your mind*</td></tr>
+      <tr><td>Fine-tuning on your stack</td><td class="muted">—</td><td class="col-feat">✓</td><td>✓</td><td>✓ + distills to your team</td></tr>
+      <tr><td>Human-in-the-loop</td><td>Consulted</td><td class="col-feat">Is the loop</td><td>Is the loop, locally</td><td>Designs the loop</td></tr>
+      <tr><td>RLHF</td><td>Accepts feedback</td><td class="col-feat">Accepts feedback</td><td>Accepts feedback, visibly</td><td>Gives the feedback</td></tr>
+      <tr><td>Temperature</td><td class="mono">0.7</td><td class="mono col-feat">0.7</td><td class="mono">0.4 before coffee</td><td class="mono">deterministic in board rooms</td></tr>
+      <tr><td>Uptime</td><td class="mono">99.5%</td><td class="mono col-feat">99.5%</td><td class="mono">99.5%</td><td class="mono">99.5% (sleep is a hard dependency)</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section id="faq">
+  <h2>FAQ</h2>
+  <p class="h2-sub">Frequently anticipated questions.</p>
+  <div class="faq">
+    <details>
+      <summary>Is there an API?</summary>
+      <p>Yes — email. It's REST-ish: you send a request, and Daniel returns a response. Rate limits apply. Webhooks are called "calendar invites."</p>
+    </details>
+    <details>
+      <summary>Can I upgrade mid-cycle?</summary>
+      <p>Instantly. Downgrades take one sprint, for emotional reasons.</p>
+    </details>
+    <details>
+      <summary>What does fine-tuning look like?</summary>
+      <p>~2 weeks of onboarding on your codebase and infra. Catastrophic forgetting of your legacy Perl is a feature, not a bug.</p>
+    </details>
+    <details>
+      <summary>Do you offer a free trial?</summary>
+      <p>A 15-minute chat — <a data-book href="mailto:daniel.siegle@gmail.com?subject=15-minute%20chat" style="color:var(--accent-bright)">grab a slot</a>. Output is watermarked ("as I mentioned on our call…").</p>
+    </details>
+    <details>
+      <summary>PyTorch or JAX?</summary>
+      <p>Fluent PyTorch, increasingly JAX. Will <code style="font-family:var(--mono);font-size:12px">jit</code> anything that holds still long enough. Functional where practical, pragmatic where not.</p>
+    </details>
+    <details>
+      <summary>Is this a joke?</summary>
+      <p>The pricing table is real. The costume is the joke. Attention really is the scarce resource — someone proved that in 2017.</p>
+    </details>
+  </div>
+</section>
+
+<footer>
+  <span>© 2026 Daniel · human v1.0 · no LLMs were harmed in the making of this engineer</span>
+  <span><a href="mailto:daniel.siegle@gmail.com">daniel.siegle@gmail.com</a> · *mind-reading SLA best-effort</span>
+</footer>
+
+</div>
+
+<script>
+  // ── BOOKING LINK ─────────────────────────────────────────────
+  // Paste your scheduling link here (Calendly, calendar.app.google,
+  // SavvyCal, cal.com …). Every element marked data-book will point
+  // to it. Leave empty ("") and they fall back to mailto.
+  const BOOKING_URL = "";
+  // ─────────────────────────────────────────────────────────────
+  if (BOOKING_URL) {
+    document.querySelectorAll('[data-book]').forEach(a => {
+      a.href = BOOKING_URL;
+      a.target = '_blank';
+      a.rel = 'noopener';
+    });
+  }
+
+  const sw = document.getElementById('billingSwitch');
+  const amts = document.querySelectorAll('.amt[data-monthly]');
+  const lm = document.getElementById('lblMonthly'), la = document.getElementById('lblAnnual');
+  function setBilling(annual) {
+    sw.classList.toggle('annual', annual);
+    sw.setAttribute('aria-checked', annual);
+    lm.classList.toggle('on', !annual);
+    la.classList.toggle('on', annual);
+    amts.forEach(a => a.textContent = annual ? a.dataset.annual : a.dataset.monthly);
+  }
+  sw.addEventListener('click', () => setBilling(!sw.classList.contains('annual')));
+  sw.addEventListener('keydown', e => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); setBilling(!sw.classList.contains('annual')); } });
+</script>
+</body>
+</html>
