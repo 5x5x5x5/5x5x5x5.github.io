@@ -41,7 +41,7 @@ Triangle with 400+ past events focused on deep learning and AI.
   do humor, voice, and running gags survive the trip into another language?
 - **GRPO Fine-Tuning on Modal**: LoRA-tunes small Qwen models on Countdown
   arithmetic and MBPP code generation with verifiable, sandboxed rewards
-- **Gorganzola**: AI director's commentary tracks for films from a subtitle
+- **commentary-track**: AI director's commentary tracks for films from a subtitle
   file and a persona
 - **Marketplace & Auction**: Two-sided marketplace API with independent buyer
   price and seller payout, plus a minimal sealed-bid call auction
