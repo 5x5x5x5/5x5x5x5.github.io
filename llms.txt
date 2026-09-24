@@ -50,6 +50,12 @@ Triangle with 400+ past events focused on deep learning and AI.
   malick-money
 - **Gutenberg Typist**: Vim plugin for touch-typing practice by transcribing
   Project Gutenberg books (https://5x5x5x5.github.io/gutenberg-typist/)
+- **Fourteen Years of AI Vocabulary**: 78 terms tracked across 625,000 arXiv
+  AI papers, 2012-2026 (https://5x5x5x5.github.io/ai-vocabulary/)
+- **APL, Out Loud**: Beginner APL tutorial with a live in-page interpreter and
+  voice input (https://5x5x5x5.github.io/apl/)
+- **ELIZA**: The 1966 DOCTOR script in WebAssembly
+  (https://5x5x5x5.github.io/eliza/)
 - **CYP450 Inhibitor Classification**: M.S. thesis — Bayesian QSAR vs
   scikit-learn classifiers for drug metabolism screening
 - **Neural Network in NumPy**: From-scratch neural network implementation

@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fourteen years of AI vocabulary</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#12100E;
+  --paper:#EDE8DE;
+  --paper-2:#E3DCCE;
+  --rule:#C4BAA6;
+  --dim:#7A7267;
+  /* term-category palette: pigment names, not UI names */
+  --c-classical:#8A8578;
+  --c-stalwart:#2E4B4F;
+  --c-absorbed:#6B7F6E;
+  --c-fad:#B4472C;
+  --c-revival:#9C6B1E;
+  --c-ssl:#4A6C8C;
+  --c-vision:#7A4E7E;
+  --c-llm:#1C3A5E;
+  --c-socio:#8C5A3C;
+  --c-perennial:#9A9484;
+  --c-trap:#C0392B;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:"IBM Plex Sans",system-ui,sans-serif;
+  font-size:15px;line-height:1.55;
+  background-image:radial-gradient(rgba(0,0,0,.022) 1px,transparent 1px);
+  background-size:3px 3px;
+}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px 96px}
+
+/* ---------- masthead ---------- */
+header{padding:56px 0 28px;border-bottom:2px solid var(--ink)}
+.eyebrow{
+  font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--dim);margin:0 0 18px
+}
+h1{
+  font-family:Fraunces,Georgia,serif;font-weight:900;
+  font-size:clamp(38px,7.2vw,84px);line-height:.95;letter-spacing:-.022em;
+  margin:0 0 18px;max-width:16ch;
+}
+h1 em{font-style:italic;font-weight:400}
+.standfirst{
+  max-width:62ch;font-size:17px;line-height:1.6;margin:0 0 26px;color:#2C2822
+}
+.facts{
+  display:flex;flex-wrap:wrap;gap:0;border-top:1px solid var(--rule);
+  font-family:"IBM Plex Mono",monospace;font-size:12px
+}
+.fact{padding:12px 24px 12px 0;margin-right:24px;border-right:1px solid var(--rule)}
+.fact:last-child{border-right:0}
+.fact b{display:block;font-size:19px;font-weight:600;letter-spacing:-.01em}
+.fact span{color:var(--dim);letter-spacing:.05em;text-transform:uppercase;font-size:10px}
+
+/* ---------- section furniture ---------- */
+section{padding:56px 0 0}
+.shead{display:flex;align-items:baseline;gap:16px;margin-bottom:6px;border-bottom:1px solid var(--ink);padding-bottom:8px}
+.shead h2{font-family:Fraunces,serif;font-weight:600;font-size:26px;margin:0;letter-spacing:-.01em}
+.shead .tag{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin-left:auto}
+.note{max-width:64ch;color:#3A352E;margin:14px 0 26px;font-size:15px}
+
+/* ---------- cloud ---------- */
+.stage{
+  position:relative;background:var(--paper-2);
+  border:1px solid var(--rule);border-radius:2px;overflow:hidden
+}
+#cloud{display:block;width:100%;height:auto}
+.word{cursor:pointer}
+.word text{
+  font-family:Fraunces,Georgia,serif;font-weight:600;
+  transition:font-size .55s cubic-bezier(.4,0,.2,1),fill-opacity .55s ease
+}
+.word{transition:opacity .45s ease}
+.stage:hover .word{opacity:.42}
+.stage .word:hover{opacity:1}
+.word.pinned{opacity:1!important}
+.yearstamp{
+  font-family:Fraunces,serif;font-weight:900;
+  fill:var(--ink);opacity:.085;font-size:190px;letter-spacing:-.04em
+}
+/* ---------- transport ---------- */
+.transport{
+  display:flex;align-items:center;gap:18px;padding:14px 16px;
+  border:1px solid var(--rule);border-top:0;background:var(--paper)
+}
+button.play{
+  font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.08em;
+  text-transform:uppercase;background:var(--ink);color:var(--paper);
+  border:0;border-radius:2px;padding:10px 18px;cursor:pointer;min-width:86px
+}
+button.play:hover{background:#2E2A24}
+button.play:focus-visible,input:focus-visible,.chip:focus-visible{outline:2px solid var(--c-fad);outline-offset:2px}
+.scrub{flex:1;display:flex;flex-direction:column;gap:5px}
+input[type=range]{width:100%;accent-color:var(--c-fad);margin:0}
+.ticks{
+  display:flex;justify-content:space-between;
+  font-family:"IBM Plex Mono",monospace;font-size:9.5px;color:var(--dim)
+}
+.readout{
+  font-family:"IBM Plex Mono",monospace;font-size:12px;text-align:right;
+  min-width:132px;line-height:1.35
+}
+.readout b{font-size:22px;font-weight:600;display:block;letter-spacing:-.01em;line-height:1.1}
+.readout span{display:block;color:var(--dim);font-size:11px}
+
+/* ---------- legend ---------- */
+.legend{display:flex;flex-wrap:wrap;gap:6px;margin:18px 0 0}
+.chip{
+  font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.05em;
+  text-transform:uppercase;padding:5px 10px;border:1px solid var(--rule);
+  border-radius:2px;background:transparent;cursor:pointer;color:var(--dim)
+}
+.chip .sw{display:inline-block;width:8px;height:8px;margin-right:6px;vertical-align:-1px}
+.chip.off{opacity:.32}
+.chip[aria-pressed=true]{border-color:var(--ink);color:var(--ink)}
+
+/* ---------- stream ---------- */
+#stream{display:block;width:100%;height:auto;background:var(--paper-2);border:1px solid var(--rule)}
+
+/* ---------- family key ---------- */
+.famkey{
+  margin-top:22px;border-top:1px solid var(--rule);
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:0
+}
+.fam{padding:14px 20px 14px 0;border-bottom:1px solid var(--rule)}
+.fam:nth-child(odd){padding-right:28px}
+.fam .fname{
+  font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.13em;
+  text-transform:uppercase;margin-bottom:5px;display:flex;align-items:center;gap:8px
+}
+.fam .fname .sw{width:9px;height:9px;flex:none}
+.fam .fname .ct{margin-left:auto;color:var(--dim);letter-spacing:.05em}
+.fam .gloss{font-size:12.5px;color:var(--dim);margin-bottom:6px;line-height:1.45}
+.fam .members{font-size:12.5px;line-height:1.65;color:#3A352E}
+
+/* ---------- sparkline grid ---------- */
+.grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));
+  gap:0;border-top:1px solid var(--rule);border-left:1px solid var(--rule)
+}
+.cell{
+  border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);
+  padding:11px 12px 9px;position:relative;background:var(--paper)
+}
+.cell:hover{background:var(--paper-2)}
+.cell h4{
+  font-family:"IBM Plex Sans",sans-serif;font-weight:600;font-size:12.5px;
+  margin:0 0 1px;letter-spacing:-.005em
+}
+.cell .meta{
+  font-family:"IBM Plex Mono",monospace;font-size:9.5px;color:var(--dim);
+  letter-spacing:.03em;margin-bottom:6px
+}
+.cell svg{display:block;width:100%;height:38px;overflow:visible}
+.cell .dec{
+  position:absolute;top:10px;right:11px;font-family:"IBM Plex Mono",monospace;
+  font-size:9.5px;font-weight:600
+}
+
+/* ---------- findings ---------- */
+.finds{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:0;border-left:1px solid var(--rule)}
+.find{border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);border-top:1px solid var(--rule);padding:20px 22px}
+.find .k{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin-bottom:9px}
+.find h3{font-family:Fraunces,serif;font-weight:600;font-size:19px;margin:0 0 8px;letter-spacing:-.01em}
+.find p{margin:0;font-size:14px;line-height:1.55;color:#3A352E}
+.find .num{font-family:"IBM Plex Mono",monospace;font-weight:600}
+
+/* ---------- method ---------- */
+.method{border-top:2px solid var(--ink);margin-top:56px;padding-top:22px;font-size:13.5px;color:#3A352E;max-width:76ch}
+.method h3{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;margin:0 0 12px;color:var(--dim)}
+.method p{margin:0 0 11px}
+.method code{font-family:"IBM Plex Mono",monospace;font-size:12px;background:var(--paper-2);padding:1px 5px;border-radius:2px}
+
+.tip{
+  position:fixed;pointer-events:none;opacity:0;transition:opacity .12s;
+  background:var(--ink);color:var(--paper);padding:8px 11px;border-radius:2px;
+  font-family:"IBM Plex Mono",monospace;font-size:11px;line-height:1.5;z-index:50;
+  max-width:250px
+}
+@media (max-width:640px){
+  .wrap{padding:0 16px 64px}
+  .transport{flex-wrap:wrap}
+  .readout{text-align:left;min-width:0}
+  .yearstamp{font-size:120px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important;animation:none!important}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">arXiv cs.LG · cs.CL · cs.AI · cs.CV · cs.NE · cs.RO · cs.IR · stat.ML — 2012 to 2026</p>
+  <h1>What the field <em>called</em> itself</h1>
+  <p class="standfirst">
+    Every term below is measured the same way: the share of that year's AI papers whose title
+    or abstract mentions it. Share, not count — the corpus grew 31-fold across this window,
+    and raw counts would make everything look like a boom. Some of these words won. Some died.
+    A few won so completely they stopped being worth saying.
+  </p>
+  <div class="facts">
+    <div class="fact"><b>625,296</b><span>papers scanned</span></div>
+    <div class="fact"><b>78</b><span>terms tracked</span></div>
+    <div class="fact"><b>3,650 → 114,801</b><span>papers/yr, 2012 → 2025</span></div>
+    <div class="fact"><b>2026-07-27</b><span>snapshot date</span></div>
+  </div>
+</header>
+
+<section>
+  <div class="shead">
+    <h2>The cloud</h2>
+    <span class="tag">size &prop; &radic;share · top 40 terms per year</span>
+  </div>
+  <p class="note">
+    Press play, or drag the year. Words hold their position across years so you can watch
+    individual terms swell and shrink in place — the usual random-placement word cloud makes
+    that impossible to see. Only each year's 40 largest terms are drawn, so the canvas stays readable; the cutoff climbs from 0.02% in 2013 to 1.04% in 2026 as the field's vocabulary concentrates. Click any word to pin its trajectory.
+  </p>
+
+  <div class="stage">
+    <svg id="cloud" viewBox="0 0 1400 760" role="img" aria-label="Animated word cloud of AI research terminology by year"></svg>
+  </div>
+  <div class="transport">
+    <button class="play" id="play" aria-label="Play or pause the animation">Play</button>
+    <div class="scrub">
+      <input type="range" id="year" min="0" max="14" value="0" step="1" aria-label="Year">
+      <div class="ticks" id="ticks"></div>
+    </div>
+    <div class="readout" id="readout"></div>
+  </div>
+
+  <div class="legend" id="legend"></div>
+</section>
+
+<section>
+  <div class="shead">
+    <h2>Cycles</h2>
+    <span class="tag">stacked share · streamgraph</span>
+  </div>
+  <p class="note">
+    The same data stacked by vocabulary family. The classical band shrinking to a hairline while
+    the LLM band swallows the top half is the whole story in one shape. Toggle families in the
+    legend above; the key underneath lists what's in each.
+  </p>
+  <svg id="stream" viewBox="0 0 1120 420" role="img" aria-label="Streamgraph of term families over time"></svg>
+
+  <div class="famkey" id="famkey"></div>
+</section>
+
+<section>
+  <div class="shead">
+    <h2>Every term, one line each</h2>
+    <span class="tag">ordered by peak year · red = past peak</span>
+  </div>
+  <p class="note">
+    Word clouds are bad at trajectory — area scales nonlinearly and the eye can't compare
+    across frames. These can. Each sparkline is that term's share from 2012 to 2026, scaled to
+    its own maximum; the marker sits on the peak year. The percentage is the drop from peak
+    to now. Reading left to right and top to bottom walks forward through the field's
+    successive crests: classical methods first, then the CNN years, then the LLM era.
+  </p>
+  <div class="grid" id="grid"></div>
+</section>
+
+<section>
+  <div class="shead">
+    <h2>What the data says</h2>
+    <span class="tag">five findings</span>
+  </div>
+  <div class="finds">
+    <div class="find">
+      <div class="k">Total extinction</div>
+      <h3>Capsule networks</h3>
+      <p>Peaked at <span class="num">0.24%</span> in 2018, three years after Hinton's push.
+      In 2026 the figure rounds to <span class="num">0.00%</span> — a 98% collapse and the only
+      term in the set that effectively hits zero. GANs are the runner-up: <span class="num">2.86%</span>
+      in 2018 down to <span class="num">0.27%</span>, killed outright by diffusion.</p>
+    </div>
+    <div class="find">
+      <div class="k">Won by disappearing</div>
+      <h3>Word embeddings</h3>
+      <p>From <span class="num">1.89%</span> in 2017 to <span class="num">0.11%</span> now — a
+      94% fall that means the opposite of failure. Neural machine translation did the same
+      (95% down). Both became so standard that naming them stopped carrying information.
+      A falling line is ambiguous: it can mean death or total victory.</p>
+    </div>
+    <div class="find">
+      <div class="k">The measurement trap</div>
+      <h3>"Agent" vs "agentic"</h3>
+      <p>Bare <span class="num">agent</span> sits flat at 3.5–5.5% for twelve years — that's RL
+      and multi-agent systems, nothing to do with LLMs. Then <span class="num">6.3 → 9.6 → 14.6%</span>
+      in three years. Query the naive term and you inherit a decade of unrelated baseline;
+      <span class="num">agentic</span> was near-zero until 2023.</p>
+    </div>
+    <div class="find">
+      <div class="k">The heir outruns the parent</div>
+      <h3>Flow matching</h3>
+      <p>Normalizing flows peaked at <span class="num">0.33%</span> in 2021 and faded — the
+      invertibility constraint was never worth it. Flow matching, its unconstrained descendant,
+      is already at <span class="num">1.08%</span>: more than triple its ancestor's all-time high,
+      reached in a third of the time.</p>
+    </div>
+    <div class="find">
+      <div class="k">Not a revival — a replacement</div>
+      <h3>Two interpretabilities</h3>
+      <p>XAI never crashed; it climbed to <span class="num">1.95%</span> and plateaued.
+      Mechanistic interpretability sat in noise at <span class="num">0.03%</span> for a decade,
+      then went <span class="num">0.21 → 0.57 → 0.99%</span>. Same research goal, disjoint
+      vocabulary, communities that barely cite each other.</p>
+    </div>
+    <div class="find">
+      <div class="k">The controls hold</div>
+      <h3>Nothing is drifting</h3>
+      <p>Bayesian methods peak in 2012 at <span class="num">6.44%</span> and fall 92%.
+      SVMs fall 89%, topic models 93% — monotonic decline, exactly as a control should.
+      Meanwhile neuro-symbolic (<span class="num">0.52%</span>) and spiking networks
+      (<span class="num">0.58%</span>) never inflect at all. The trends are real, not
+      an artifact of corpus growth.</p>
+    </div>
+  </div>
+</section>
+
+<div class="method">
+  <h3>Method &amp; caveats</h3>
+  <p>
+    Source: full arXiv metadata snapshot (<code>librarian-bots/arxiv-metadata-snapshot</code>,
+    dated 2026-07-27), filtered to the eight AI/ML categories listed above — 625,296 papers with
+    a v1 submission date between 2012 and 2026. Each term is a regex matched against title +
+    abstract; a paper counts once per term regardless of how many times the phrase appears.
+    Denominator is all papers in that year, so every figure is a share and terms may overlap.
+  </p>
+  <p>
+    <b>2026 is partial</b> — roughly seven months, 80,856 papers. Shares are still comparable;
+    a full-year count would not be.
+  </p>
+  <p>
+    Acronyms that collide with English words (<code>KAN</code>, <code>LoRA</code>,
+    <code>ViT</code>) are matched case-sensitively. <code>RAG</code> is matched as
+    "retrieval-augmented" and <code>GAN</code> as "generative adversarial" to avoid
+    <em>rag</em> and <em>gan</em>. Bare <code>agent</code> is kept deliberately as a
+    demonstration of what naive matching costs you.
+  </p>
+  <p>
+    Known soft spots: <em>prompting</em> catches generic uses of "prompt"; <em>attention</em>
+    catches some prose usage; <em>diffusion</em> picks up physical and graph diffusion in the
+    early years. Terms measure vocabulary, not quality, citations, or influence — a word can
+    fall because the idea failed or because it won so thoroughly it went without saying, and
+    this chart cannot tell you which.
+  </p>
+</div>
+
+</div>
+<div class="tip" id="tip"></div>
+
+<script>
+const DATA = {"years":[2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026],"n_papers":[3650,4879,5219,7037,10888,16219,24603,35046,46889,52036,57468,72215,93490,114801,80856],"meta":{"source":"arXiv metadata snapshot (librarian-bots/arxiv-metadata-snapshot, 2026-07-27)","categories":"cs.LG cs.CL cs.AI cs.CV cs.NE cs.RO cs.IR stat.ML","field":"title + abstract","year_basis":"v1 submission date","partial_year":2026,"total_papers":625296},"terms":[{"l":"SVM","c":"classical","s":[1.315,1.414,1.494,1.35,1.166,1.116,0.837,0.728,0.582,0.471,0.383,0.305,0.267,0.283,0.16],"n":[48,69,78,95,127,181,206,255,273,245,220,220,250,325,129]},{"l":"random forest","c":"classical","s":[0.274,0.348,0.786,0.952,0.882,1.03,0.98,1.033,0.919,0.859,0.806,0.704,0.682,0.795,0.59],"n":[10,17,41,67,96,167,241,362,431,447,463,508,638,913,477]},{"l":"logistic regression","c":"classical","s":[0.685,0.43,0.536,0.639,0.698,0.561,0.524,0.428,0.439,0.386,0.327,0.303,0.295,0.362,0.393],"n":[25,21,28,45,76,91,129,150,206,201,188,219,276,416,318]},{"l":"topic model","c":"classical","s":[1.562,0.758,0.92,1.137,1.139,0.666,0.459,0.317,0.294,0.269,0.205,0.22,0.185,0.193,0.112],"n":[57,37,48,80,124,108,113,111,138,140,118,159,173,221,91]},{"l":"bayesian nonparametrics","c":"classical","s":[6.438,4.939,2.721,2.174,1.681,1.591,1.496,1.23,1.25,1.111,0.91,0.792,0.627,0.635,0.533],"n":[235,241,142,153,183,258,368,431,586,578,523,572,586,729,431]},{"l":"deep learning","c":"stalwart","s":[0.274,0.922,1.686,3.922,5.419,8.94,11.011,11.031,11.627,11.063,10.221,8.891,7.716,6.763,4.251],"n":[10,45,88,276,590,1450,2709,3866,5452,5757,5874,6421,7214,7764,3437]},{"l":"neural network","c":"stalwart","s":[3.041,4.017,6.725,14.964,19.489,24.181,26.021,24.653,23.099,20.907,18.791,15.412,12.647,10.134,7.019],"n":[111,196,351,1053,2122,3922,6402,8640,10831,10879,10799,11130,11824,11634,5675]},{"l":"CNN","c":"stalwart","s":[0.082,0.615,2.702,7.304,9.781,11.647,11.795,9.604,7.912,6.899,5.516,3.977,3.259,2.722,1.838],"n":[3,30,141,514,1065,1889,2902,3366,3710,3590,3170,2872,3047,3125,1486]},{"l":"LSTM / RNN","c":"stalwart","s":[0.192,0.369,0.92,3.24,5.648,6.073,5.601,4.514,3.427,2.944,2.182,1.685,1.513,1.45,1.02],"n":[7,18,48,228,615,985,1378,1582,1607,1532,1254,1217,1415,1664,825]},{"l":"reinforcement learning","c":"stalwart","s":[1.753,1.271,1.15,1.464,2.599,4.069,4.76,5.664,5.573,5.606,5.579,5.28,5.023,7.251,7.878],"n":[64,62,60,103,283,660,1171,1985,2613,2917,3206,3813,4696,8324,6370]},{"l":"attention","c":"stalwart","s":[0.0,0.021,0.057,0.355,0.863,1.023,1.662,2.246,2.218,2.764,2.81,2.61,2.734,2.9,2.14],"n":[0,1,3,25,94,166,409,787,1040,1438,1615,1885,2556,3329,1730]},{"l":"transformer","c":"stalwart","s":[0.0,0.021,0.019,0.114,0.165,0.222,0.496,1.683,2.977,5.823,7.846,8.46,8.387,8.246,7.764],"n":[0,1,1,8,18,36,122,590,1396,3030,4509,6109,7841,9466,6278]},{"l":"word embeddings","c":"absorbed","s":[0.055,0.123,0.479,1.151,1.819,1.893,1.553,1.492,1.158,0.813,0.529,0.371,0.281,0.161,0.111],"n":[2,6,25,81,198,307,382,523,543,423,304,268,263,185,90]},{"l":"seq2seq","c":"absorbed","s":[0.0,0.021,0.134,0.497,1.148,1.899,2.13,2.206,1.744,1.664,1.49,1.188,0.846,0.656,0.497],"n":[0,1,7,35,125,308,524,773,818,866,856,858,791,753,402]},{"l":"ResNet / residual","c":"absorbed","s":[0.0,0.0,0.0,0.043,1.001,1.578,1.837,1.749,1.561,1.566,1.244,1.004,0.845,0.892,0.825],"n":[0,0,0,3,109,256,452,613,732,815,715,725,790,1024,667]},{"l":"dropout","c":"absorbed","s":[0.055,0.348,0.364,0.725,0.634,0.586,0.614,0.528,0.52,0.498,0.426,0.337,0.279,0.31,0.386],"n":[2,17,19,51,69,95,151,185,244,259,245,243,261,356,312]},{"l":"batch norm","c":"absorbed","s":[0.0,0.0,0.0,0.128,0.294,0.284,0.329,0.317,0.314,0.277,0.231,0.212,0.167,0.134,0.192],"n":[0,0,0,9,32,46,81,111,147,144,133,153,156,154,155]},{"l":"neural MT","c":"absorbed","s":[0.0,0.0,0.134,0.128,0.707,0.888,0.951,0.756,0.563,0.432,0.31,0.229,0.153,0.058,0.044],"n":[0,0,7,9,77,144,234,265,264,225,178,165,143,67,36]},{"l":"transfer learning","c":"absorbed","s":[0.685,0.471,0.479,0.91,1.313,2.115,2.422,2.719,3.114,3.042,2.805,2.333,1.846,1.568,1.085],"n":[25,23,25,64,143,343,596,953,1460,1583,1612,1685,1726,1800,877]},{"l":"GAN","c":"fad","s":[0.0,0.0,0.057,0.1,0.624,2.368,2.861,2.734,2.054,1.853,1.477,0.989,0.694,0.521,0.272],"n":[0,0,3,7,68,384,704,958,963,964,849,714,649,598,220]},{"l":"VAE","c":"fad","s":[0.0,0.0,0.0,0.142,0.441,0.752,0.906,1.113,0.945,0.886,0.752,0.649,0.523,0.623,0.48],"n":[0,0,0,10,48,122,223,390,443,461,432,469,489,715,388]},{"l":"normalizing flow","c":"fad","s":[0.0,0.0,0.0,0.014,0.028,0.043,0.045,0.168,0.318,0.327,0.317,0.291,0.204,0.191,0.191],"n":[0,0,0,1,3,7,11,59,149,170,182,210,191,219,154]},{"l":"NAS / AutoML","c":"fad","s":[0.0,0.0,0.019,0.014,0.018,0.068,0.236,0.651,0.734,0.726,0.524,0.4,0.32,0.245,0.213],"n":[0,0,1,1,2,11,58,228,344,378,301,289,299,281,172]},{"l":"adversarial examples","c":"fad","s":[0.0,0.0,0.057,0.256,0.432,1.381,2.463,2.705,2.815,2.591,2.334,1.991,1.687,1.456,1.045],"n":[0,0,3,18,47,224,606,948,1320,1348,1341,1438,1577,1671,845]},{"l":"capsule network","c":"fad","s":[0.0,0.0,0.0,0.0,0.0,0.006,0.24,0.217,0.13,0.088,0.073,0.035,0.022,0.02,0.004],"n":[0,0,0,0,0,1,59,76,61,46,42,25,21,23,3]},{"l":"neural ODE","c":"fad","s":[0.0,0.0,0.0,0.0,0.0,0.0,0.004,0.063,0.143,0.15,0.195,0.15,0.134,0.153,0.148],"n":[0,0,0,0,0,0,1,22,67,78,112,108,125,176,120]},{"l":"federated learning","c":"fad","s":[0.0,0.0,0.0,0.0,0.028,0.031,0.159,0.428,1.022,1.557,1.858,1.822,1.678,1.395,0.929],"n":[0,0,0,0,3,5,39,150,479,810,1068,1316,1569,1601,751]},{"l":"data-centric AI","c":"fad","s":[0.0,0.0,0.0,0.0,0.0,0.0,0.004,0.0,0.004,0.033,0.056,0.06,0.056,0.043,0.031],"n":[0,0,0,0,0,0,1,0,2,17,32,43,52,49,25]},{"l":"KAN","c":"fad","s":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.006,0.008,0.007,0.003,0.225,0.273,0.183],"n":[0,0,0,0,0,0,0,0,3,4,4,2,210,313,148]},{"l":"mixture of experts","c":"revival","s":[0.082,0.041,0.057,0.071,0.055,0.099,0.065,0.071,0.085,0.136,0.191,0.223,0.582,1.011,1.448],"n":[3,2,3,5,6,16,16,25,40,71,110,161,544,1161,1171]},{"l":"XAI / explainability","c":"revival","s":[0.0,0.246,0.096,0.227,0.312,0.469,0.532,0.85,1.318,1.474,1.688,1.842,1.919,1.949,1.548],"n":[0,12,5,16,34,76,131,298,618,767,970,1330,1794,2238,1252]},{"l":"mech interp / SAE","c":"revival","s":[0.027,0.041,0.057,0.028,0.037,0.037,0.016,0.028,0.013,0.013,0.017,0.055,0.179,0.501,0.756],"n":[1,2,3,2,4,6,4,10,6,7,10,40,167,575,611]},{"l":"knowledge distillation","c":"revival","s":[0.0,0.0,0.019,0.028,0.064,0.123,0.228,0.488,0.74,0.915,1.168,1.235,1.189,1.192,1.216],"n":[0,0,1,2,7,20,56,171,347,476,671,892,1112,1369,983]},{"l":"pruning / quantization","c":"revival","s":[1.014,0.758,1.092,1.094,1.277,1.239,1.63,1.672,1.824,1.828,1.923,1.893,2.29,2.711,3.171],"n":[37,37,57,77,139,201,401,586,855,951,1105,1367,2141,3112,2564]},{"l":"meta-learning","c":"revival","s":[0.11,0.021,0.077,0.043,0.165,0.345,0.606,0.816,1.051,1.03,0.915,0.685,0.49,0.412,0.304],"n":[4,1,4,3,18,56,149,286,493,536,526,495,458,473,246]},{"l":"self-supervised","c":"ssl","s":[0.027,0.0,0.0,0.071,0.119,0.339,0.423,0.936,1.973,2.908,3.653,3.347,2.47,2.049,1.838],"n":[1,0,0,5,13,55,104,328,925,1513,2099,2417,2309,2352,1486]},{"l":"contrastive learning","c":"ssl","s":[0.027,0.0,0.0,0.028,0.046,0.056,0.065,0.08,0.678,1.612,2.368,2.268,1.914,1.638,1.216],"n":[1,0,0,2,5,9,16,28,318,839,1361,1638,1789,1880,983]},{"l":"masked modelling","c":"ssl","s":[0.0,0.0,0.0,0.014,0.0,0.0,0.004,0.06,0.188,0.244,0.564,0.454,0.387,0.294,0.237],"n":[0,0,0,1,0,0,1,21,88,127,324,328,362,337,192]},{"l":"BERT","c":"ssl","s":[0.0,0.0,0.0,0.0,0.009,0.006,0.037,1.549,2.482,2.51,1.858,1.476,1.123,0.907,0.663],"n":[0,0,0,0,1,1,9,543,1164,1306,1068,1066,1050,1041,536]},{"l":"vision transformer","c":"vision","s":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.013,0.605,1.195,1.167,1.038,1.079,0.883],"n":[0,0,0,0,0,0,0,0,6,315,687,843,970,1239,714]},{"l":"ViT","c":"vision","s":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.009,0.361,0.844,0.964,1.006,0.945,0.939],"n":[0,0,0,0,0,0,0,0,4,188,485,696,940,1085,759]},{"l":"diffusion model","c":"vision","s":[0.11,0.061,0.077,0.057,0.037,0.043,0.037,0.014,0.062,0.179,0.846,3.62,4.927,5.063,4.036],"n":[4,3,4,4,4,7,9,5,29,93,486,2614,4606,5812,3263]},{"l":"flow matching","c":"vision","s":[0.0,0.0,0.0,0.0,0.009,0.0,0.0,0.006,0.0,0.0,0.012,0.06,0.226,0.665,1.08],"n":[0,0,0,0,1,0,0,2,0,0,7,43,211,763,873]},{"l":"NeRF / splatting","c":"vision","s":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.034,0.217,0.492,1.014,1.492,1.291,1.114],"n":[0,0,0,0,0,0,0,0,16,113,283,732,1395,1482,901]},{"l":"multimodal / VLM","c":"vision","s":[0.301,0.574,0.498,0.966,0.974,1.406,1.366,1.37,1.429,1.839,2.509,4.251,6.974,11.071,12.762],"n":[11,28,26,68,106,228,336,480,670,957,1442,3070,6520,12710,10319]},{"l":"GNN","c":"vision","s":[0.027,0.021,0.0,0.014,0.037,0.247,0.699,1.607,2.269,2.769,3.009,2.77,2.514,2.149,1.53],"n":[1,1,0,1,4,40,172,563,1064,1441,1729,2000,2350,2467,1237]},{"l":"LLM","c":"llm","s":[0.027,0.0,0.0,0.0,0.0,0.0,0.004,0.028,0.049,0.163,0.856,9.059,20.104,26.826,28.383],"n":[1,0,0,0,0,0,1,10,23,85,492,6542,18795,30797,22949]},{"l":"GPT","c":"llm","s":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.168,0.343,0.5,0.842,4.628,5.228,4.027,3.433],"n":[0,0,0,0,0,0,0,59,161,260,484,3342,4888,4623,2776]},{"l":"foundation model","c":"llm","s":[0.0,0.0,0.0,0.0,0.0,0.0,0.004,0.0,0.002,0.035,0.202,1.185,2.266,3.296,3.804],"n":[0,0,0,0,0,0,1,0,1,18,116,856,2118,3784,3076]},{"l":"scaling laws","c":"llm","s":[0.027,0.021,0.038,0.014,0.018,0.018,0.008,0.017,0.013,0.046,0.073,0.193,0.356,0.416,0.485],"n":[1,1,2,1,2,3,2,6,6,24,42,139,333,478,392]},{"l":"in-context learning","c":"llm","s":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.025,0.155,0.788,1.118,0.943,0.745],"n":[0,0,0,0,0,0,0,0,0,13,89,569,1045,1083,602]},{"l":"few-shot / zero-shot","c":"llm","s":[0.0,0.061,0.172,0.426,0.514,0.764,0.967,1.504,2.028,2.731,3.52,5.118,5.219,4.948,5.079],"n":[0,3,9,30,56,124,238,527,951,1421,2023,3696,4879,5680,4107]},{"l":"prompting","c":"llm","s":[0.137,0.103,0.057,0.085,0.184,0.191,0.163,0.174,0.267,0.557,1.824,6.019,8.746,9.625,9.913],"n":[5,5,3,6,20,31,40,61,125,290,1048,4347,8177,11050,8015]},{"l":"chain-of-thought","c":"llm","s":[0.0,0.0,0.0,0.0,0.009,0.006,0.008,0.003,0.004,0.015,0.087,0.6,1.019,2.195,2.094],"n":[0,0,0,0,1,1,2,1,2,8,50,433,953,2520,1693]},{"l":"RLHF / DPO","c":"llm","s":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.004,0.002,0.033,0.28,0.943,1.237,1.144],"n":[0,0,0,0,0,0,0,0,2,1,19,202,882,1420,925]},{"l":"hallucination","c":"llm","s":[0.0,0.021,0.057,0.028,0.11,0.105,0.191,0.148,0.132,0.202,0.217,0.756,1.65,2.183,2.731],"n":[0,1,3,2,12,17,47,52,62,105,125,546,1543,2506,2208]},{"l":"RAG","c":"llm","s":[0.0,0.0,0.0,0.0,0.0,0.0,0.004,0.0,0.006,0.025,0.094,0.302,1.452,2.297,2.209],"n":[0,0,0,0,0,0,1,0,3,13,54,218,1357,2637,1786]},{"l":"long context","c":"llm","s":[0.027,0.041,0.0,0.043,0.064,0.018,0.016,0.043,0.04,0.046,0.038,0.166,0.713,1.039,1.522],"n":[1,2,0,3,7,3,4,15,19,24,22,120,667,1193,1231]},{"l":"LoRA / PEFT","c":"llm","s":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.019,0.061,0.422,1.096,1.484,1.775],"n":[0,0,0,0,0,0,0,0,0,10,35,305,1025,1704,1435]},{"l":"state space / Mamba","c":"llm","s":[0.0,0.082,0.038,0.114,0.119,0.062,0.049,0.049,0.034,0.05,0.054,0.058,0.878,0.861,0.728],"n":[0,4,2,8,13,10,12,17,16,26,31,42,821,989,589]},{"l":"test-time compute","c":"llm","s":[0.0,0.041,0.0,0.0,0.028,0.0,0.016,0.04,0.043,0.048,0.07,0.06,0.166,1.699,1.756],"n":[0,2,0,0,3,0,4,14,20,25,40,43,155,1950,1420]},{"l":"agentic","c":"llm","s":[0.0,0.0,0.038,0.0,0.046,0.105,0.085,0.108,0.102,0.115,0.136,0.331,0.974,3.245,7.171],"n":[0,0,2,0,5,17,21,38,48,60,78,239,911,3725,5798]},{"l":"agent (bare)","c":"trap","s":[3.534,3.915,3.813,2.913,3.6,4.162,4.837,5.227,5.161,5.433,5.439,5.498,6.329,9.63,14.632],"n":[129,191,199,205,392,675,1190,1832,2420,2827,3126,3970,5917,11055,11831]},{"l":"world model","c":"llm","s":[0.055,0.061,0.057,0.071,0.073,0.018,0.065,0.054,0.075,0.079,0.123,0.213,0.302,0.611,1.291],"n":[2,3,3,5,8,3,16,19,35,41,71,154,282,701,1044]},{"l":"synthetic data","c":"llm","s":[1.014,0.902,0.92,0.952,1.13,1.048,1.028,0.976,1.058,1.063,1.161,1.281,1.55,1.675,1.468],"n":[37,44,48,67,123,170,253,342,496,553,667,925,1449,1923,1187]},{"l":"jailbreak / red team","c":"llm","s":[0.0,0.0,0.0,0.0,0.0,0.006,0.016,0.006,0.002,0.008,0.01,0.151,0.585,0.86,1.054],"n":[0,0,0,0,0,1,4,2,1,4,6,109,547,987,852]},{"l":"verifiable rewards","c":"llm","s":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.017,1.153,2.23],"n":[0,0,0,0,0,0,0,0,0,0,0,0,16,1324,1803]},{"l":"VLA / embodied","c":"llm","s":[0.027,0.021,0.038,0.014,0.018,0.043,0.041,0.049,0.056,0.098,0.15,0.222,0.395,1.03,1.98],"n":[1,1,2,1,2,7,10,17,26,51,86,160,369,1183,1601]},{"l":"fairness / bias","c":"socio","s":[0.11,0.103,0.096,0.142,0.22,0.388,0.589,0.919,1.137,1.34,1.564,1.587,1.512,1.528,1.192],"n":[4,5,5,10,24,63,145,322,533,697,899,1146,1414,1754,964]},{"l":"differential privacy","c":"socio","s":[0.137,0.041,0.287,0.441,0.322,0.29,0.354,0.511,0.58,0.613,0.76,0.629,0.578,0.517,0.437],"n":[5,2,15,31,35,47,87,179,272,319,437,454,540,594,353]},{"l":"AI safety","c":"socio","s":[0.0,0.0,0.019,0.0,0.046,0.031,0.024,0.04,0.026,0.025,0.026,0.054,0.097,0.214,0.244],"n":[0,0,1,0,5,5,6,14,12,13,15,39,91,246,197]},{"l":"AGI","c":"socio","s":[0.027,0.061,0.038,0.028,0.046,0.049,0.069,0.046,0.053,0.065,0.051,0.183,0.194,0.233,0.179],"n":[1,3,2,2,5,8,17,16,25,34,29,132,181,268,145]},{"l":"neuro-symbolic","c":"perennial","s":[0.0,0.0,0.0,0.014,0.055,0.037,0.028,0.071,0.134,0.144,0.197,0.23,0.29,0.366,0.522],"n":[0,0,0,1,6,6,7,25,63,75,113,166,271,420,422]},{"l":"spiking / neuromorphic","c":"perennial","s":[0.192,0.144,0.326,0.483,0.45,0.388,0.346,0.459,0.505,0.44,0.525,0.554,0.579,0.534,0.441],"n":[7,7,17,34,49,63,85,161,237,229,302,400,541,613,357]},{"l":"quantum ML","c":"perennial","s":[0.0,0.021,0.019,0.028,0.064,0.049,0.085,0.057,0.109,0.173,0.226,0.241,0.215,0.247,0.194],"n":[0,1,1,2,7,8,21,20,51,90,130,174,201,284,157]},{"l":"continual learning","c":"perennial","s":[0.0,0.061,0.019,0.057,0.138,0.29,0.39,0.519,0.591,0.809,0.887,1.014,1.033,1.035,1.118],"n":[0,3,1,4,15,47,96,182,277,421,510,732,966,1188,904]},{"l":"AI for science","c":"perennial","s":[0.027,0.061,0.057,0.014,0.046,0.012,0.004,0.017,0.013,0.023,0.051,0.053,0.048,0.075,0.073],"n":[1,3,3,1,5,2,1,6,6,12,29,38,45,86,59]},{"l":"self-play / MCTS","c":"perennial","s":[0.274,0.082,0.192,0.128,0.101,0.228,0.305,0.268,0.249,0.244,0.217,0.197,0.277,0.38,0.396],"n":[10,4,10,9,11,37,75,94,117,127,125,142,259,436,320]}]};
+const YEARS = DATA.years, NY = YEARS.length;
+const CATS = {
+  classical:["Classical ML","--c-classical"], stalwart:["Stalwarts","--c-stalwart"],
+  absorbed:["Absorbed","--c-absorbed"], fad:["Fads","--c-fad"],
+  revival:["Revivals","--c-revival"], ssl:["Self-supervised","--c-ssl"],
+  vision:["Vision / generative","--c-vision"], llm:["LLM era","--c-llm"],
+  socio:["Sociotechnical","--c-socio"], perennial:["Perennials","--c-perennial"],
+  trap:["Measurement trap","--c-trap"]
+};
+const css = k => getComputedStyle(document.documentElement).getPropertyValue(k).trim();
+const COL = Object.fromEntries(Object.entries(CATS).map(([k,v])=>[k,css(v[1])]));
+const NS = "http://www.w3.org/2000/svg";
+const el = (t,a={}) => { const n=document.createElementNS(NS,t);
+  for(const k in a) n.setAttribute(k,a[k]); return n; };
+const tip = document.getElementById('tip');
+function showTip(e,html){ tip.innerHTML=html; tip.style.opacity=1;
+  const x=Math.min(e.clientX+14, innerWidth-266), y=Math.max(8,e.clientY-10);
+  tip.style.left=x+'px'; tip.style.top=y+'px'; }
+function hideTip(){ tip.style.opacity=0; }
+
+/* ============================ WORD CLOUD ============================ */
+const W=1400, H=760, PAD=12, TOPN=40;
+const cloud = document.getElementById('cloud');
+const maxShare = Math.max(...DATA.terms.flatMap(t=>t.s));
+// font size from share: sqrt keeps perceived area roughly linear in share
+const fsize = s => s<=0 ? 0 : 9 + 58*Math.sqrt(s/maxShare);
+
+// Stable layout: place every term once, using its PEAK size, greedy spiral pack.
+// Terms then grow/shrink in place across years instead of jumping around.
+const placed = [];
+// Canvas gives exact text widths; if it's unavailable, fall back to a per-character
+// estimate so the layout still works rather than taking the page down.
+let meas = null;
+try { meas = document.createElement('canvas').getContext('2d'); } catch(e) { meas = null; }
+function textWidth(str, fs){
+  if(meas){ meas.font = `600 ${fs}px Fraunces, Georgia, serif`; return meas.measureText(str).width; }
+  return str.length * fs * 0.52;
+}
+const ordered = DATA.terms
+  .map(t=>({...t, peak:Math.max(...t.s)}))
+  .sort((a,b)=>b.peak-a.peak);
+
+function rectsOverlap(a,b){
+  return !(a.x2<b.x1-4 || a.x1>b.x2+4 || a.y2<b.y1-3 || a.y1>b.y2+3);
+}
+ordered.forEach((t,i)=>{
+  const fs = fsize(t.peak);
+  const w = textWidth(t.l, fs), h = fs*0.78;
+  // spiral outward from centre until a free slot is found
+  let a=0, r=0, x=W/2, y=H/2, tries=0;
+  while(tries++ < 12000){
+    x = W/2 + r*Math.cos(a)*1.5;
+    y = H/2 + r*Math.sin(a);
+    const box={x1:x-w/2,x2:x+w/2,y1:y-h/2,y2:y+h/2};
+    const inside = box.x1>PAD && box.x2<W-PAD && box.y1>PAD && box.y2<H-PAD;
+    if(inside && !placed.some(p=>rectsOverlap(box,p.box))){
+      placed.push({...t, x, y, box, fsPeak:fs}); return;
+    }
+    a += 0.22; r += 0.30;
+  }
+  placed.push({...t, x, y, box:{x1:x,x2:x,y1:y,y2:y}, fsPeak:fs});
+});
+
+const stamp = el('text',{class:'yearstamp','text-anchor':'middle',x:W/2,y:H/2+78});
+cloud.appendChild(stamp);
+const nodes = new Map();
+placed.forEach(t=>{
+  const g = el('g',{class:'word'});
+  const tx = el('text',{'text-anchor':'middle',x:t.x,y:t.y,fill:COL[t.c]});
+  tx.textContent = t.l;
+  g.appendChild(tx);
+  g.addEventListener('mousemove',e=>{
+    const i=+slider.value;
+    showTip(e,`<b>${t.l}</b><br>${YEARS[i]}: ${t.s[i].toFixed(2)}% · ${t.n[i].toLocaleString()} papers<br>peak ${YEARS[t.s.indexOf(Math.max(...t.s))]} at ${Math.max(...t.s).toFixed(2)}%`);
+  });
+  g.addEventListener('mouseleave',hideTip);
+  g.addEventListener('click',()=>{ g.classList.toggle('pinned'); });
+  cloud.appendChild(g);
+  nodes.set(t.l,{g,tx,t});
+});
+
+const hidden = new Set();
+function drawCloud(i){
+  stamp.textContent = YEARS[i];
+  // Only the TOPN largest terms of this year are shown. The cutoff rises as the
+  // field concentrates, which is itself informative — and it keeps the canvas legible.
+  const live = placed.filter(t=>!hidden.has(t.c));
+  const cutoff = live.map(t=>t.s[i]).sort((a,b)=>b-a)[Math.min(TOPN,live.length)-1] ?? 0;
+  nodes.forEach(({g,tx,t})=>{
+    if(hidden.has(t.c) || t.s[i] < cutoff || t.s[i] <= 0){
+      g.setAttribute('opacity',0); g.style.pointerEvents='none'; return;
+    }
+    const fs = fsize(t.s[i]);
+    g.setAttribute('opacity',1); g.style.pointerEvents='';
+    tx.setAttribute('font-size', fs.toFixed(2));
+    tx.setAttribute('fill-opacity', Math.min(1, 0.5 + 0.5*(fs-11)/24).toFixed(3));
+  });
+}
+
+/* ============================ TRANSPORT ============================ */
+const slider = document.getElementById('year');
+const readout = document.getElementById('readout');
+const playBtn = document.getElementById('play');
+slider.max = NY-1;
+document.getElementById('ticks').innerHTML =
+  YEARS.map((y,i)=> (i%2===0||i===NY-1) ? `<span>${y}</span>` : `<span></span>`).join('');
+
+function drawReadout(i){
+  const n = DATA.n_papers[i];
+  readout.innerHTML = `<b>${YEARS[i]}${i===NY-1?'*':''}</b><span>${n.toLocaleString()} papers</span>`;
+}
+function setYear(i){ slider.value=i; drawCloud(i); drawReadout(i); markStream(i); }
+
+let timer=null;
+function play(){
+  playBtn.textContent='Pause';
+  timer = setInterval(()=>{
+    let i = (+slider.value + 1);
+    if(i>NY-1) i=0;
+    setYear(i);
+  }, 1100);
+}
+function pause(){ playBtn.textContent='Play'; clearInterval(timer); timer=null; }
+playBtn.addEventListener('click',()=> timer?pause():play());
+slider.addEventListener('input',()=>{ pause(); setYear(+slider.value); });
+
+/* ============================ LEGEND ============================ */
+const legend = document.getElementById('legend');
+Object.entries(CATS).forEach(([k,[label]])=>{
+  const b=document.createElement('button');
+  b.className='chip'; b.setAttribute('aria-pressed','true');
+  b.innerHTML=`<span class="sw" style="background:${COL[k]}"></span>${label}`;
+  b.addEventListener('click',()=>{
+    if(hidden.has(k)){hidden.delete(k);b.classList.remove('off');b.setAttribute('aria-pressed','true');}
+    else{hidden.add(k);b.classList.add('off');b.setAttribute('aria-pressed','false');}
+    drawCloud(+slider.value); drawStream();
+  });
+  legend.appendChild(b);
+});
+
+/* ============================ STREAMGRAPH ============================ */
+const SW=1120, SH=420, SM={t:16,r:16,b:34,l:46};
+const stream = document.getElementById('stream');
+const CAT_ORDER=["classical","absorbed","stalwart","ssl","vision","revival","perennial","socio","fad","trap","llm"];
+
+function drawStream(){
+  stream.innerHTML='';
+  const cats = CAT_ORDER.filter(c=>!hidden.has(c));
+  const series = cats.map(c => YEARS.map((_,i)=>
+    DATA.terms.filter(t=>t.c===c).reduce((a,t)=>a+t.s[i],0)));
+  const totals = YEARS.map((_,i)=> series.reduce((a,s)=>a+s[i],0));
+  const maxTot = Math.max(...totals,1);
+  const x = i => SM.l + i*(SW-SM.l-SM.r)/(NY-1);
+  const y = v => SH-SM.b - v/maxTot*(SH-SM.t-SM.b);
+
+  // gridlines
+  for(let g=0; g<=maxTot; g+=20){
+    stream.appendChild(el('line',{x1:SM.l,x2:SW-SM.r,y1:y(g),y2:y(g),
+      stroke:css('--rule'),'stroke-width':1}));
+    const lb=el('text',{x:SM.l-8,y:y(g)+4,'text-anchor':'end',
+      'font-family':'IBM Plex Mono, monospace','font-size':10,fill:css('--dim')});
+    lb.textContent=g+'%'; stream.appendChild(lb);
+  }
+  // stacked bands, bottom-up
+  const base = YEARS.map(()=>0);
+  series.forEach((s,si)=>{
+    const top = s.map((v,i)=>base[i]+v);
+    let d = `M ${x(0)} ${y(base[0])}`;
+    for(let i=0;i<NY;i++) d += ` L ${x(i)} ${y(top[i])}`;
+    for(let i=NY-1;i>=0;i--) d += ` L ${x(i)} ${y(base[i])}`;
+    d+=' Z';
+    const p = el('path',{d, fill:COL[cats[si]], 'fill-opacity':.88,
+      stroke:css('--paper'), 'stroke-width':.75});
+    p.addEventListener('mousemove',e=>{
+      const i = Math.max(0,Math.min(NY-1, Math.round((e.offsetX* (SW/stream.clientWidth) - SM.l)/((SW-SM.l-SM.r)/(NY-1)))));
+      showTip(e,`<b>${CATS[cats[si]][0]}</b><br>${YEARS[i]}: ${s[i].toFixed(1)}% combined share`);
+    });
+    p.addEventListener('mouseleave',hideTip);
+    stream.appendChild(p);
+    for(let i=0;i<NY;i++) base[i]=top[i];
+  });
+  // x axis
+  YEARS.forEach((yr,i)=>{
+    if(i%2 && i!==NY-1) return;
+    const t=el('text',{x:x(i),y:SH-12,'text-anchor':'middle',
+      'font-family':'IBM Plex Mono, monospace','font-size':10,fill:css('--dim')});
+    t.textContent=yr+(i===NY-1?'*':''); stream.appendChild(t);
+  });
+  streamMark = el('line',{y1:SM.t,y2:SH-SM.b,stroke:css('--ink'),
+    'stroke-width':1.5,'stroke-dasharray':'3 3',opacity:.5});
+  stream.appendChild(streamMark);
+  markStream(+slider.value);
+}
+let streamMark=null;
+function markStream(i){
+  if(!streamMark) return;
+  const px = SM.l + i*(SW-SM.l-SM.r)/(NY-1);
+  streamMark.setAttribute('x1',px); streamMark.setAttribute('x2',px);
+}
+
+/* ============================ FAMILY KEY ============================ */
+const GLOSS = {
+  classical:"Pre-deep-learning methods. Included as controls — they should decline monotonically.",
+  stalwart:"Terms that anchored the field for a decade or more.",
+  absorbed:"Won so completely they stopped being worth naming.",
+  fad:"Rose sharply, then fell. Some failed; some were replaced.",
+  revival:"Faded, then returned — often to a different community.",
+  ssl:"The pretraining-objective wave that preceded the LLM era.",
+  vision:"Vision and generative modelling.",
+  llm:"Vocabulary that barely existed before 2020.",
+  socio:"Terms about AI's effects rather than its mechanics.",
+  perennial:"Always about to happen. Included as a counterweight — they never inflect.",
+  trap:"Deliberately naive matching, kept to show what it costs."
+};
+const famkey = document.getElementById('famkey');
+CAT_ORDER.slice().reverse().forEach(c=>{
+  const members = DATA.terms.filter(t=>t.c===c)
+    .sort((a,b)=>Math.max(...b.s)-Math.max(...a.s)).map(t=>t.l);
+  const d=document.createElement('div'); d.className='fam';
+  d.innerHTML=`
+    <div class="fname"><span class="sw" style="background:${COL[c]}"></span>
+      ${CATS[c][0]}<span class="ct">${members.length} term${members.length>1?'s':''}</span></div>
+    <div class="gloss">${GLOSS[c]}</div>
+    <div class="members">${members.join(' · ')}</div>`;
+  famkey.appendChild(d);
+});
+
+/* ============================ SPARKLINES ============================ */
+const grid=document.getElementById('grid');
+// Ordered by peak year ascending, so the grid reads as a timeline of when each
+// term crested. Ties within a year break by peak share, largest first.
+const peakIdx = t => t.s.indexOf(Math.max(...t.s));
+[...DATA.terms]
+  .sort((a,b)=> (peakIdx(a)-peakIdx(b)) || (Math.max(...b.s)-Math.max(...a.s)))
+  .forEach(t=>{
+  const pk=Math.max(...t.s), pi=t.s.indexOf(pk), now=t.s[NY-1];
+  const dec = pk>0 ? 1-now/pk : 0;
+  const c=document.createElement('div'); c.className='cell';
+  const gw=154, gh=38;
+  const X=i=>i*gw/(NY-1), Y=v=>gh-(pk>0? v/pk*gh : 0);
+  const pts=t.s.map((v,i)=>`${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(' ');
+  const area=`0,${gh} ${pts} ${gw},${gh}`;
+  c.innerHTML=`
+    <h4>${t.l}</h4>
+    <div class="meta">peak ${YEARS[pi]} · ${pk.toFixed(2)}%</div>
+    <div class="dec" style="color:${dec>0.5?COL.fad:(dec>0.15?COL.revival:COL.absorbed)}">
+      ${dec>0.02 ? '−'+Math.round(dec*100)+'%' : '↑'}
+    </div>
+    <svg viewBox="0 0 ${gw} ${gh}" preserveAspectRatio="none">
+      <polygon points="${area}" fill="${COL[t.c]}" fill-opacity=".14"/>
+      <polyline points="${pts}" fill="none" stroke="${COL[t.c]}" stroke-width="1.6"
+        vector-effect="non-scaling-stroke" stroke-linejoin="round"/>
+      <circle cx="${X(pi).toFixed(1)}" cy="${Y(pk).toFixed(1)}" r="2.6" fill="${COL[t.c]}"/>
+    </svg>`;
+  c.addEventListener('mousemove',e=>showTip(e,
+    `<b>${t.l}</b><br>peak ${YEARS[pi]} · ${pk.toFixed(2)}% (${t.n[pi].toLocaleString()} papers)<br>2026: ${now.toFixed(2)}%`));
+  c.addEventListener('mouseleave',hideTip);
+  grid.appendChild(c);
+});
+
+/* ============================ INIT ============================ */
+drawStream();
+setYear(0);
+const reduced = typeof matchMedia === 'function' &&
+  matchMedia('(prefers-reduced-motion: reduce)').matches;
+if(!reduced) setTimeout(play, 900);
+</script>
+</body>
+</html>
