@@ -165,6 +165,20 @@
   .cta.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
   .cta.primary:hover { background: var(--accent-bright); color: #fff; }
 
+  .oneoff {
+    display: flex; align-items: center; gap: 22px 28px; flex-wrap: wrap;
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+    padding: 22px 26px; transition: border-color .2s, background .2s;
+  }
+  .oneoff:hover { border-color: var(--border-bright); background: var(--card-hover); }
+  .oneoff .oo-head { min-width: 190px; }
+  .oneoff h3 { font-size: 17px; font-weight: 700; letter-spacing: -0.01em; }
+  .oneoff .arch { font-family: var(--mono); font-size: 11px; color: var(--text-faint); margin-top: 5px; letter-spacing: .02em; }
+  .oneoff .price { margin: 0; min-height: 0; }
+  .oneoff .oo-desc { flex: 1; min-width: 240px; font-size: 13.5px; line-height: 1.55; color: var(--text-dim); }
+  .oneoff .oo-desc strong { color: var(--text); font-weight: 600; }
+  .oneoff .cta { padding: 11px 22px; white-space: nowrap; }
+  @media (max-width: 560px) { .oneoff .cta { width: 100%; } }
   .free-row {
     display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;
     font-size: 12.5px; color: var(--text-faint); margin: 22px auto 90px; text-align: center;
@@ -263,7 +277,7 @@
   <div class="tier">
     <h3>Async</h3>
     <div class="arch">single attention head</div>
-    <div class="price"><span class="amt" data-monthly="$4,000" data-annual="$3,600">$4,000</span><span class="per">/mo</span></div>
+    <div class="price"><span class="amt" data-monthly="$3,000" data-annual="$2,700">$3,000</span><span class="per">/mo</span></div>
     <div class="price-note">batch inference</div>
     <ul>
       <li><span class="tick">✓</span><span><strong>Slack Connect</strong> channel, rate-limited</span></li>
@@ -323,6 +337,16 @@
     <a class="cta" href="mailto:daniel.siegle@gmail.com?subject=Fractional%20CTO%2FCAIO">Contact sales (it's me)</a>
   </div>
 
+</div>
+
+<div class="oneoff">
+  <div class="oo-head">
+    <h3>Single forward pass</h3>
+    <div class="arch">no subscription · stateless</div>
+  </div>
+  <div class="price"><span class="amt">$750</span><span class="per">one-off</span></div>
+  <div class="oo-desc"><strong>90-minute deep-dive</strong> on your code, architecture or evals, plus a <strong>written follow-up</strong>. Credited toward Async if you subscribe within 30 days.</div>
+  <a class="cta" data-book href="mailto:daniel.siegle@gmail.com?subject=Single%20forward%20pass">Run one pass</a>
 </div>
 
 <div class="free-row">
