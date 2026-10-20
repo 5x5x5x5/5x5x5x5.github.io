@@ -183,7 +183,7 @@
     display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;
     font-size: 12.5px; color: var(--text-faint); margin: 22px auto 90px; text-align: center;
     border: 1px dashed var(--border-bright); border-radius: 12px; padding: 13px 22px;
-    max-width: 760px; background: rgba(19,19,29,0.5);
+    max-width: 920px; background: rgba(19,19,29,0.5);
   }
   .free-row .ft-label {
     font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase;
@@ -191,6 +191,8 @@
     padding: 3px 9px; border-radius: 999px;
   }
   .free-row code { font-family: var(--mono); font-size: 12px; color: var(--text-dim); }
+  .free-row code a { color: var(--accent-bright); text-decoration: none; border-bottom: 1px dotted var(--accent-bright); }
+  .free-row code a:hover { color: var(--text); border-bottom-color: var(--text); }
 
   /* QUOTES */
   .quotes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
@@ -351,7 +353,7 @@
 
 <div class="free-row">
   <span class="ft-label">Free tier</span>
-  <code>daniel.reply(email) → sampled at temperature 1.2 · no SLA · may hallucinate availability</code>
+  <code><a data-book href="mailto:daniel.siegle@gmail.com?subject=15-minute%20chat">daniel.chat(15 min)</a> → zero-shot, no commitment · <a href="mailto:daniel.siegle@gmail.com">daniel.reply(email)</a> → temperature 1.2, may hallucinate availability</code>
 </div>
 
 <section>
