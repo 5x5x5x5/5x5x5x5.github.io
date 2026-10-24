@@ -5,6 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>APL, out loud — a beginner's tutorial you can speak to</title>
 <meta name="description" content="A beginner APL tutorial with a live interpreter and voice input: say the names of the symbols, or describe what you want, and run it on the page.">
+<link rel="canonical" href="https://5x5x5x5.github.io/apl/">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://5x5x5x5.github.io/apl/">
+<meta property="og:title" content="APL, out loud — a beginner's tutorial you can speak to">
+<meta property="og:description" content="Learn APL with a live interpreter on the page. Say the symbol names or describe what you want, then run it — all the way to Conway's Game of Life in one line.">
+<meta property="og:image" content="https://5x5x5x5.github.io/images/og-apl.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="APL, out loud — the Game of Life in one line of APL">
+<meta name="twitter:card" content="summary_large_image">
 <style>
 @font-face {
   font-family: 'APLweb';
@@ -54,7 +64,7 @@ header.brand button {
 }
 
 /* article */
-main { max-width: 46rem; margin: 0 auto; padding: 1.5rem 1.25rem 30rem; }
+main { max-width: 46rem; margin: 0 auto; padding: 1.5rem 1.25rem calc(var(--dock-h, 12rem) + 3rem); }
 .callout {
   font-family: var(--sans); font-size: 0.9rem;
   border-left: 3px solid var(--ribbon);
@@ -136,6 +146,7 @@ td.apl { font-family: var(--apl-font); }
   background: var(--platen); color: var(--paper);
   font-family: var(--sans);
   border-top: 3px solid var(--ribbon);
+  --paper-dim: #A3A39C; /* AA contrast on the dark dock */
 }
 #dock .inner { max-width: 46rem; margin: 0 auto; padding: 0.6rem 1rem 0.75rem; }
 
@@ -195,7 +206,7 @@ td.apl { font-family: var(--apl-font); }
 #words-input { font-family: var(--sans); }
 #apl-input { font-family: var(--apl-font); font-size: 1.05rem; }
 #apl-input.prefix { border-color: var(--ribbon); }
-#words-input::placeholder { color: #7C7C78; }
+#words-input::placeholder, #apl-input::placeholder { color: #96968F; }
 
 .dock-btn {
   font-family: var(--sans); font-size: 0.8rem;
@@ -212,7 +223,7 @@ td.apl { font-family: var(--apl-font); }
 }
 #heard b { color: var(--paper); font-weight: normal; }
 #heard s { color: #FF8A7E; }
-#heard .quiet { color: #6A6A66; }
+#heard .quiet { color: #8C8C86; }
 
 .dock-tabs { display: flex; gap: 1rem; font-size: 0.75rem; }
 .dock-tabs button {
@@ -255,8 +266,10 @@ button:focus-visible, input:focus-visible {
 }
 @media (max-width: 560px) {
   .dock-row { flex-wrap: wrap; }
-  #words-input, #apl-input { flex-basis: 100%; order: 5; }
-  main { padding-bottom: 34rem; }
+  #words-input, #apl-input { flex-basis: 100%; order: -1; }
+  #log-body { max-height: 5rem; }
+  #keys.open { max-height: 6.6rem; overflow-y: auto; }
+  #heard:empty { display: none; }
 }
 
 </style>
@@ -276,7 +289,7 @@ This page has a live APL engine — every example below has a <b>Run</b> button,
 at the bottom converts plain words into APL (spoken or typed) and runs them.
 The engine is <a href="https://github.com/ngn/apl">ngn/apl</a>, adjusted so counting starts at 1
 (<code>⎕IO←1</code>, the Dyalog convention this tutorial uses); output spacing can differ slightly
-from Dyalog. Voice input works in Chrome, Edge and Safari, over https or localhost.
+from Dyalog, and a few edge cases differ too (<code>1÷0</code> gives <code>∞</code> here; Dyalog reports a DOMAIN ERROR). Voice input works in Chrome, Edge and Safari, over https or localhost.
 Claude mode (natural language → APL) needs your own Anthropic API key — press ⚙.
 </div>
 
@@ -294,7 +307,7 @@ Claude mode (natural language → APL) needs your own Anthropic API key — pres
 <p>That&#39;s it. No loop, no counter, no &quot;for each.&quot; You said what you meant — double these numbers — and the language handled the rest. This is called <strong>array programming</strong>, and it&#39;s APL&#39;s big idea. It turns out that an enormous amount of what programs do is really just &quot;do this to everything in the collection,&quot; and APL makes that the default instead of something you have to construct by hand.</p>
 <p>By the end of this tutorial you&#39;ll be able to read — genuinely read — a complete implementation of Conway&#39;s Game of Life written in a single line of APL. That sounds like a party trick, and it partly is. But getting there will teach you a way of thinking about computation that shows up everywhere in modern computing, from spreadsheets to the software behind AI.</p>
 <h2>Getting set up</h2>
-<p>You don&#39;t need to install anything. Go to <strong><a href="https://tryapl.org">tryapl.org</a></strong> — it&#39;s a free APL environment that runs in your browser, maintained by Dyalog, the company behind the main modern APL implementation.</p>
+<p>You don&#39;t need to install anything: every example on this page has a <strong>Run</strong> button, and the dark bar at the bottom is a live APL line you can type or speak into. When you want a fuller environment, <strong><a href="https://tryapl.org">tryapl.org</a></strong> is free and runs in your browser too — it&#39;s maintained by Dyalog, the company behind the main modern APL implementation.</p>
 <h3>How do you type these symbols?</h3>
 <p>Fair question — <code>⍴</code> and <code>⌽</code> are not on your keyboard. In APL&#39;s early days this was solved with hardware: dedicated keyboards and even special typewriter balls with the symbols engraved on them. Today the solution is much simpler: a <strong>prefix key</strong>. You type one ordinary key to say &quot;the next keystroke is an APL symbol,&quot; then an ordinary key for the symbol itself. The standard prefix is the backtick <code>`</code> (upper-left corner of most keyboards).</p>
 <p>The mappings are mnemonic wherever possible, which makes them easy to absorb:</p>
@@ -329,10 +342,10 @@ Claude mode (natural language → APL) needs your own Anthropic API key — pres
 <tr>
 <td><code>`=</code></td>
 <td><code>÷</code></td>
-<td>opposite of, er, nothing — it&#39;s just next door</td>
+<td>next door to <code>`-</code>, as <code>÷</code> sits next to <code>×</code></td>
 </tr>
 </tbody></table>
-<p>TryAPL supports this backtick scheme directly, and it also has a clickable <strong>language bar</strong> across the top with every symbol — hover over any of them to see its name and its keyboard shortcut. Use the language bar freely at first. The tutorial ahead needs only about twenty symbols, and the ones you use often will be in your fingers within a session or two.</p>
+<p>The APL line in this page&#39;s dock uses exactly this backtick scheme (try <code>`i</code> there now), and so does TryAPL. TryAPL and it also has a clickable <strong>language bar</strong> across the top with every symbol — hover over any of them to see its name and its keyboard shortcut. Use the language bar freely at first. The tutorial ahead needs only about twenty symbols, and the ones you use often will be in your fingers within a session or two.</p>
 <p>(If you later install APL on your own machine, Dyalog sets up the same kind of input system there, and there are plugins for popular code editors that do likewise. The typing problem is thoroughly solved; don&#39;t let it be the thing that puts you off.)</p>
 <p>In the examples below, the indented line is what you type, and the line under it is what APL prints back.</p>
 <h2>First steps: the calculator that grew</h2>
@@ -476,12 +489,22 @@ Claude mode (natural language → APL) needs your own Anthropic API key — pres
 </ul>
 <p><strong>Step 6: <code>1 ⍵ ∨.∧</code> — combine.</strong> In words: &quot;(everyone, where the sum is 3) OR (currently-alive cells, where the sum is 4).&quot; <code>∧</code> is AND, <code>∨</code> is OR, and the <code>.</code> stitches them into a combined operation that pairs <code>1</code> with the sum-is-3 mask and the original grid <code>⍵</code> with the sum-is-4 mask, then ORs the results. That&#39;s rules 1 and 2, in six characters.</p>
 <p><strong>Step 7: <code>↑</code> — unpack.</strong> The result is still wrapped up from step 1; <code>↑</code> unpacks it back into an ordinary grid.</p>
-<p>Try it on TryAPL with a &quot;glider,&quot; a small pattern famous for crawling diagonally across the grid:</p>
+<p>Try it with a &quot;glider,&quot; a small pattern famous for crawling diagonally across the grid:</p>
 <pre><code class="language-apl">      grid ← 5 5 ⍴ 0 0 0 0 0  0 0 1 0 0  0 0 0 1 0  0 1 1 1 0  0 0 0 0 0
       life grid
+0 0 0 0 0
+0 0 0 0 0
+0 1 0 1 0
+0 0 1 1 0
+0 0 1 0 0
       life life grid
+0 0 0 0 0
+0 0 0 0 0
+0 0 0 1 0
+0 1 0 1 0
+0 0 1 1 0
 </code></pre>
-<p>Run <code>life</code> on it a few times and watch the pattern walk.</p>
+<p>Run <code>life</code> on it a few times and watch the pattern walk — or press <strong>▶ run</strong> on the live grid above, which is this same function stepping a 12×12 world.</p>
 <p>Step back and notice what&#39;s <em>absent</em> from that one line: no loops, no row-and-column indexes, no <code>if</code> statements, no special handling for cells at the edge (rotation wraps around, so the grid is a torus — the left edge neighbors the right, like Pac-Man&#39;s screen). The program isn&#39;t instructions for updating a grid. It&#39;s a <em>description of what the next generation is</em>. That&#39;s the APL worldview: say what the answer is, in terms of transformations on whole structures, and let the machine sweat the details.</p>
 <h2>Why this matters beyond APL</h2>
 <p>APL never conquered the world, but its big idea did. The notion that you should operate on whole arrays at once — that <code>2 × prices</code> beats a loop — went on to shape an enormous amount of modern computing:</p>
@@ -525,7 +548,7 @@ browser's local storage. Don't embed a shared key if you host this page publicly
   <div id="keys"></div>
   <div class="inner">
     <div class="dock-row">
-      <button id="mic" aria-label="hold to speak">🎙</button>
+      <button id="mic" aria-label="voice input" aria-pressed="false" title="start or stop voice input">🎙</button>
       <div class="seg" role="group" aria-label="conversion mode">
         <button id="mode-names" type="button">Names</button>
         <button id="mode-claude" type="button">Claude</button>
@@ -557,13 +580,14 @@ browser's local storage. Don't embed a shared key if you host this page publicly
       <input id="set-key" type="password" autocomplete="off" placeholder="sk-ant-…">
     </label>
     <label>Model
-      <input id="set-model" type="text" autocomplete="off" placeholder="claude-sonnet-4-6">
+      <input id="set-model" type="text" autocomplete="off" placeholder="claude-opus-5-5">
     </label>
     <label>Endpoint
       <input id="set-endpoint" type="text" autocomplete="off" placeholder="https://api.anthropic.com">
     </label>
     <p class="fine">The key stays in this browser (local storage) and is sent only to the endpoint
-    above. Point the endpoint at your own proxy if you prefer not to keep a key in the browser.</p>
+    above. Point the endpoint at your own proxy if you prefer not to keep a key in the browser.
+    Replies are checked against the engine before they reach the APL line.</p>
     <div class="row">
       <button id="settings-close" class="dock-btn ghost" type="button">Cancel</button>
       <button id="settings-save" class="dock-btn" type="button">Save</button>
@@ -1082,7 +1106,7 @@ window.APL = (function () {
     }
 
     Complex.prototype.toString = function() {
-      return "" + (('' + this.re).replace('Infinity', '∞').replace(/-/g, '¯')) + "J" + (('' + this.im).replace('Infinity', '∞').replace(/-/g, '¯'));
+      return "" + (ppNum(this.re).replace('Infinity', '∞').replace(/-/g, '¯')) + "J" + (ppNum(this.im).replace('Infinity', '∞').replace(/-/g, '¯'));
     };
 
     Complex.prototype.repr = function() {
@@ -3263,6 +3287,11 @@ window.APL = (function () {
       }
     }
   });
+  /* page patch: print non-integers to 10 significant digits, like Dyalog's default ⎕PP */
+  var ppNum = function(x) {
+    return (x % 1 === 0 || !isFinite(x)) ? '' + x : ('' + (+x.toPrecision(10))).replace(/e\+?/, 'E');
+  };
+
   format = function(a) {
     var bottom, box, c, cols, d, grid, i, j, k, left, nCols, nRows, r, result, right, rows, sa, step, t, x, _i, _j, _k, _l, _len, _len1, _len2, _m, _n, _o, _p, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
     if (typeof a === 'undefined') {
@@ -3272,7 +3301,7 @@ window.APL = (function () {
     } else if (typeof a === 'string') {
       return [a];
     } else if (typeof a === 'number') {
-      r = [('' + a).replace('Infinity', '∞').replace(/-/g, '¯')];
+      r = [ppNum(a).replace('Infinity', '∞').replace(/-/g, '¯')];
       r.align = 'right';
       return r;
     } else if (typeof a === 'function') {
@@ -5458,40 +5487,106 @@ PHRASES.sort(function (a, b) { return b.words.length - a.words.length; });
 var NUMWORD = { zero: 0, one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11, twelve: 12, thirteen: 13, fourteen: 14, fifteen: 15, sixteen: 16, seventeen: 17, eighteen: 18, nineteen: 19, twenty: 20, thirty: 30, forty: 40, fifty: 50, sixty: 60, seventy: 70, eighty: 80, ninety: 90 };
 
 /* ---------- spoken/typed words → APL ---------- */
+var BIG = { thousand: 1e3, million: 1e6, billion: 1e9 };
+function isNumWord(w) { return NUMWORD.hasOwnProperty(w) || w === 'hundred' || BIG.hasOwnProperty(w); }
+
+/* read one spoken number starting at words[i]: "twenty three", "two hundred and five",
+   "one thousand", "three point one four". Separate unit words stay separate numbers,
+   so "one two three" is three numbers. Returns null if words[i] doesn't start one. */
+function readNumber(words, i) {
+  var total = 0, cur = 0, j = i, last = null;
+  while (j < words.length) {
+    var w = words[j];
+    if (NUMWORD.hasOwnProperty(w)) {
+      var v = NUMWORD[w], kind = v < 10 ? 'unit' : v < 20 ? 'teen' : 'tens';
+      var fits = last === null || last === 'big' || (last === 'hundred' && cur % 100 === 0) ||
+        (last === 'tens' && kind === 'unit');
+      if (!fits) { break; }
+      cur += v; last = kind;
+    } else if (w === 'hundred' && last !== 'hundred' && cur < 100) {
+      cur = (cur || 1) * 100; last = 'hundred';
+    } else if (BIG.hasOwnProperty(w) && last !== 'big') {
+      total += (cur || 1) * BIG[w]; cur = 0; last = 'big';
+    } else if (w === 'and' && (last === 'hundred' || last === 'big') &&
+               j + 1 < words.length && NUMWORD.hasOwnProperty(words[j + 1])) {
+      /* "two hundred and five" — the and belongs to the number */
+    } else {
+      break;
+    }
+    j++;
+  }
+  if (j === i) { return null; }
+  var val = String(total + cur);
+  if (words[j] === 'point' && last !== 'big' && last !== 'hundred') {
+    var frac = '', k = j + 1;
+    while (k < words.length) {
+      if (NUMWORD.hasOwnProperty(words[k]) && NUMWORD[words[k]] < 10) { frac += NUMWORD[words[k]]; }
+      else if (/^[0-9]+$/.test(words[k])) { frac += words[k]; }
+      else { break; }
+      k++;
+    }
+    if (frac) { val += '.' + frac; j = k; }
+  }
+  return { v: val, n: j - i };
+}
+
+/* typed APL passes straight through: anything containing a glyph from the vocabulary */
+var GLYPHS = VOCAB.map(function (v) { return v.g || ''; }).join('') + '⍝⍬⌿⍀?|!○⍟⍕⍎⍨⍣⌷≡∪∩⍪';
+function isAPLWord(w) {
+  if (/^[-+*\/\\=<>~,;()\[\]{}|!?]+$/.test(w)) { return true; }
+  for (var i = 0; i < w.length; i++) { if (w.charCodeAt(i) > 127 && GLYPHS.indexOf(w[i]) >= 0) { return true; } }
+  return false;
+}
+
 function convertWords(text) {
-  var words = text.toLowerCase().replace(/[.,!?]/g, ' ').split(/\s+/).filter(Boolean);
+  var words = [];
+  text.split(/\s+/).filter(Boolean).forEach(function (w) {
+    if (isAPLWord(w.replace(/[,.!?]+$/, ''))) { words.push(w.replace(/[.!?]+$/, '')); return; }
+    w.replace(/(\d),(?=\d{3}\b)/g, '$1')         /* 1,000 → 1000 */
+      .replace(/[,!?]|\.(?!\d)/g, ' ')             /* keep the point in 3.14 */
+      .split(' ').filter(Boolean).forEach(function (x) { words.push(x); });
+  });
+  var lw = words.map(function (x) { return x.toLowerCase(); });
   var toks = [], i = 0;
   outer:
   while (i < words.length) {
+    var raw = words[i], w = raw.toLowerCase();
+    if (isAPLWord(raw)) { toks.push({ t: 'g', v: raw, src: raw }); i++; continue; }
     for (var p = 0; p < PHRASES.length; p++) {
       var ph = PHRASES[p], n = ph.words.length;
       if (n <= words.length - i) {
         var hit = true;
-        for (var k = 0; k < n; k++) { if (words[i + k] !== ph.words[k]) { hit = false; break; } }
+        for (var k = 0; k < n; k++) { if (words[i + k].toLowerCase() !== ph.words[k]) { hit = false; break; } }
         if (hit) { toks.push({ t: 'g', v: ph.out, src: ph.words.join(' ') }); i += n; continue outer; }
       }
     }
-    if (/^-?[0-9]+(\.[0-9]+)?$/.test(words[i])) { toks.push({ t: 'n', v: words[i], src: words[i] }); i++; continue; }
-    if (NUMWORD.hasOwnProperty(words[i])) {
-      var val = NUMWORD[words[i]], src = words[i]; i++;
-      if (val >= 20 && val % 10 === 0 && i < words.length && NUMWORD.hasOwnProperty(words[i]) && NUMWORD[words[i]] < 10) {
-        val += NUMWORD[words[i]]; src += ' ' + words[i]; i++;
-      }
-      if (i < words.length && words[i] === 'hundred') { val = (val || 1) * 100; src += ' hundred'; i++; }
-      toks.push({ t: 'n', v: String(val), src: src });
-      continue;
+    if (/^-?[0-9]+(\.[0-9]+)?$/.test(w)) { toks.push({ t: 'n', v: w.replace(/^-/, '¯'), src: raw }); i++; continue; }
+    if (isNumWord(w)) {
+      var num = readNumber(lw, i);
+      if (num) { toks.push({ t: 'n', v: num.v, src: words.slice(i, i + num.n).join(' ') }); i += num.n; continue; }
     }
-    if (words[i] === 'hundred') { toks.push({ t: 'n', v: '100', src: 'hundred' }); i++; continue; }
-    if (words[i] === 'point' || words[i] === 'a' || words[i] === 'the' || words[i] === 'of') { toks.push({ t: 'skip', src: words[i], quiet: words[i] !== 'point' }); i++; continue; }
-    if (/^[b-z]$/.test(words[i])) { toks.push({ t: 'n', v: words[i], src: words[i] }); i++; continue; }
-    toks.push({ t: 'skip', src: words[i] }); i++;
+    if (w === 'the' || w === 'of') { toks.push({ t: 'skip', src: raw, quiet: true }); i++; continue; }
+    if (/^[b-z]$/.test(w)) { toks.push({ t: 'n', v: w, src: raw }); i++; continue; }
+    toks.push({ t: 'skip', src: raw }); i++;
   }
-  var out = '', prevNum = false;
+  /* join, adding a space only where two names/numbers would otherwise fuse */
+  var out = '';
   toks.forEach(function (tk) {
-    if (tk.t === 'n') { out += (prevNum ? ' ' : '') + tk.v; prevNum = true; }
-    else if (tk.t === 'g') { out += tk.v; prevNum = false; }
+    if (tk.t === 'skip') { return; }
+    if (/[0-9A-Za-z_]$/.test(out) && /^[0-9A-Za-z_¯]/.test(tk.v)) { out += ' '; }
+    out += tk.v;
   });
   return { apl: out, toks: toks };
+}
+
+/* APL → spoken names, shown under a Claude reply so it reads back as words */
+function glossAPL(s) {
+  var parts = [], m, re = /¯?[0-9]+(\.[0-9]+)?|[A-Za-z_∆⍙][A-Za-z_0-9∆⍙]*|'[^']*'|∘\.|\S/g;
+  while ((m = re.exec(s))) {
+    var t = m[0], v = t === '∘.' ? { name: 'outer product' } : BYGLYPH[t];
+    parts.push(v ? v.name.split(' · ')[0] : t);
+  }
+  return parts.join(' ');
 }
 
 /* ---------- engine ---------- */
@@ -5659,58 +5754,130 @@ async function convertNow() {
 /* ---------- Claude mode ---------- */
 var SYS = 'You translate an English request into exactly one APL expression (or a short ⋄-separated sequence) for the ngn/apl interpreter, Dyalog conventions, ⎕IO=1. Output ONLY APL — no prose, no backticks, no explanation. Use ¯ for negative literals. Prefer simple beginner-readable expressions; prefer explicit dfns like {⍵[⍋⍵]} over tacit trains. Available: + - × ÷ * ⌈ ⌊ | = ≠ < ≤ ≥ > ∧ ∨ ~ ⍳ ⍴ , ⌽ ⊖ ⍉ ↑ ↓ ⊂ ⊃ ≢ ⍋ ⍒ ∊ ? ⌷ / \\ ⌿ ⍀ ¨ ∘. inner product f.g, dfns {⍺ ⍵}, assignment ←. Do not use ⎕ system names or ⍎ ⍕.\nExamples:\nthe numbers one through ten → ⍳10\nsum of 1 through 10 → +/⍳10\naverage of 3 1 4 1 5 → (+/3 1 4 1 5)÷≢3 1 4 1 5\na 3 by 3 multiplication table → (⍳3)∘.×⍳3\ndouble every number in 1 2 3 → 2×1 2 3\nsort 3 1 2 ascending → {⍵[⍋⍵]}3 1 2\nkeep numbers above 80 from 68 82 91 → {(⍵>80)/⍵}68 82 91';
 
+var DEFAULT_MODEL = 'claude-opus-5-5', DEFAULT_ENDPOINT = 'https://api.anthropic.com';
+/* models that take effort + server-side refusal fallback on the Claude API */
+var CURRENT_MODELS = ['claude-fable-5-1', 'claude-opus-5-5', 'claude-opus-5', 'claude-sonnet-5-5'];
+
+/* names the reader has assigned this session (a reply may use them) */
+function knownNames() {
+  var names = {};
+  replayLog.forEach(function (src) {
+    var re = /([A-Za-z_∆⍙][A-Za-z_0-9∆⍙]*)\s*(\[[^\]]*\]\s*)?←/g, m;
+    while ((m = re.exec(src))) { names[m[1]] = true; }
+  });
+  return names;
+}
+
+/* check a reply without running it: it must parse, and every name must be defined */
+function checkAPL(src) {
+  if (!engineOK) { return null; }
+  var names = knownNames();
+  try {
+    var ast = window.APL.parse(src);
+    try { window.APL.compileAST(ast); }
+    catch (e) {
+      var m = /^Symbol '([^']+)'/.exec(e.message || '');
+      if (!(e.name === 'VALUE ERROR' && m && names[m[1]])) { throw e; }
+    }
+    return null;
+  } catch (e) {
+    return String(e).split('\n')[0];
+  }
+}
+
+async function askClaude(key, model, endpoint, messages) {
+  var body = { model: model, max_tokens: 16000, system: SYS, messages: messages };
+  var headers = {
+    'content-type': 'application/json',
+    'x-api-key': key,
+    'anthropic-version': '2023-06-01',
+    'anthropic-dangerous-direct-browser-access': 'true'
+  };
+  if (CURRENT_MODELS.indexOf(model) >= 0) {
+    body.output_config = { effort: 'medium' };
+    if (endpoint === DEFAULT_ENDPOINT) {
+      body.fallbacks = 'default';
+      headers['anthropic-beta'] = 'server-side-fallback-2026-07-01';
+    }
+  }
+  var res = await fetch(endpoint + '/v1/messages', { method: 'POST', headers: headers, body: JSON.stringify(body) });
+  if (!res.ok) {
+    var msg = 'request failed (' + res.status + ')';
+    if (res.status === 401 || res.status === 403) { msg = 'API key rejected — check Settings ⚙'; }
+    if (res.status === 404) { msg = 'model not found — check the model name in Settings ⚙'; }
+    if (res.status === 429) { msg = 'rate limited — wait a moment and retry'; }
+    try { var j = await res.json(); if (j && j.error && j.error.message) { msg += ' · ' + j.error.message; } } catch (e2) {}
+    throw new Error(msg);
+  }
+  var data = await res.json();
+  if (data.stop_reason === 'refusal') { throw new Error('Claude declined this request — try rephrasing it'); }
+  if (data.stop_reason === 'max_tokens') { throw new Error('the reply was cut off — try a simpler request'); }
+  var reply = (data.content || []).filter(function (b) { return b.type === 'text'; })
+    .map(function (b) { return b.text; }).join('\n');
+  reply = reply.replace(/```[a-z]*\n?/g, '').replace(/```/g, '').trim();
+  return { reply: reply, content: data.content || [] };
+}
+
 async function claudeConvert(text) {
   var key = store.get('apl_key');
   if (!key) { openSettings('Add your Anthropic API key to use Claude mode.'); return; }
-  var model = store.get('apl_model') || 'claude-sonnet-4-6';
-  var endpoint = (store.get('apl_endpoint') || 'https://api.anthropic.com').replace(/\/$/, '');
+  var model = store.get('apl_model') || DEFAULT_MODEL;
+  var endpoint = (store.get('apl_endpoint') || DEFAULT_ENDPOINT).replace(/\/$/, '');
   var status = document.getElementById('heard');
   status.innerHTML = '<span class="quiet">asking Claude…</span>';
+  var messages = [{ role: 'user', content: text }];
   try {
-    var res = await fetch(endpoint + '/v1/messages', {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        'x-api-key': key,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({ model: model, max_tokens: 200, system: SYS, messages: [{ role: 'user', content: text }] })
-    });
-    if (!res.ok) {
-      var msg = 'request failed (' + res.status + ')';
-      if (res.status === 401 || res.status === 403) { msg = 'API key rejected — check Settings ⚙'; }
-      if (res.status === 404) { msg = 'model not found — check the model name in Settings ⚙'; }
-      if (res.status === 429) { msg = 'rate limited — wait a moment and retry'; }
-      try { var j = await res.json(); if (j && j.error && j.error.message) { msg += ' · ' + j.error.message; } } catch (e2) {}
-      status.innerHTML = '<s>' + esc(msg) + '</s>';
-      return;
+    var r = await askClaude(key, model, endpoint, messages);
+    var problem = checkAPL(r.reply);
+    if (problem) {
+      /* one corrective round: show Claude the engine's complaint */
+      status.innerHTML = '<span class="quiet">checking Claude’s answer…</span>';
+      messages.push({ role: 'assistant', content: r.content });
+      messages.push({ role: 'user', content: 'That does not run in ngn/apl: ' + problem +
+        '. Reply with only a corrected APL expression.' });
+      r = await askClaude(key, model, endpoint, messages);
+      problem = checkAPL(r.reply);
     }
-    var data = await res.json();
-    var reply = (data.content || []).filter(function (b) { return b.type === 'text'; })
-      .map(function (b) { return b.text; }).join('\n');
-    reply = reply.replace(/```[a-z]*\n?/g, '').replace(/```/g, '').trim();
-    status.innerHTML = '<b>' + esc(text) + '</b>';
-    setAPLLine(reply);
+    setAPLLine(r.reply);
+    status.innerHTML = '<b>' + esc(text) + '</b> → <span class="quiet">' + esc(glossAPL(r.reply)) + '</span>' +
+      (problem ? ' <s>' + esc(problem) + '</s>' : '');
   } catch (e) {
-    status.innerHTML = '<s>' + esc('network error — check the endpoint, your connection, or CORS') + '</s>';
+    var m = e instanceof TypeError ? 'network error — check the endpoint, your connection, or CORS' : e.message;
+    status.innerHTML = '<s>' + esc(m) + '</s>';
   }
 }
 
 /* ---------- settings ---------- */
+/* the page used to default to claude-sonnet-4-6 and saved it with the key; move those to the current default */
+if (store.get('apl_model') === 'claude-sonnet-4-6') { store.set('apl_model', DEFAULT_MODEL); }
+
+var settingsOpener = null;
 function openSettings(note) {
+  settingsOpener = document.activeElement;
   document.getElementById('settings-note').textContent = note || '';
   document.getElementById('set-key').value = store.get('apl_key') || '';
-  document.getElementById('set-model').value = store.get('apl_model') || 'claude-sonnet-4-6';
-  document.getElementById('set-endpoint').value = store.get('apl_endpoint') || 'https://api.anthropic.com';
+  document.getElementById('set-model').value = store.get('apl_model') || DEFAULT_MODEL;
+  document.getElementById('set-endpoint').value = store.get('apl_endpoint') || DEFAULT_ENDPOINT;
   document.getElementById('settings').classList.add('open');
   document.getElementById('set-key').focus();
 }
-function closeSettings() { document.getElementById('settings').classList.remove('open'); }
+function closeSettings() {
+  document.getElementById('settings').classList.remove('open');
+  if (settingsOpener && settingsOpener.focus) { settingsOpener.focus(); }
+  settingsOpener = null;
+}
+function settingsKeys(ev) {
+  if (ev.key === 'Escape') { ev.preventDefault(); closeSettings(); return; }
+  if (ev.key !== 'Tab') { return; }
+  var f = this.querySelectorAll('input, button');
+  var first = f[0], last = f[f.length - 1];
+  if (ev.shiftKey && document.activeElement === first) { ev.preventDefault(); last.focus(); }
+  else if (!ev.shiftKey && document.activeElement === last) { ev.preventDefault(); first.focus(); }
+}
 function saveSettings() {
   var ok = store.set('apl_key', document.getElementById('set-key').value.trim());
-  store.set('apl_model', document.getElementById('set-model').value.trim() || 'claude-sonnet-4-6');
-  store.set('apl_endpoint', document.getElementById('set-endpoint').value.trim() || 'https://api.anthropic.com');
+  store.set('apl_model', document.getElementById('set-model').value.trim() || DEFAULT_MODEL);
+  store.set('apl_endpoint', document.getElementById('set-endpoint').value.trim() || DEFAULT_ENDPOINT);
   if (!ok) { document.getElementById('settings-note').textContent = 'This preview blocks storage — settings will last only until reload.'; }
   closeSettings();
 }
@@ -5751,11 +5918,13 @@ function startMic() {
   rec.onend = function () { stopMic(); };
   listening = true;
   document.getElementById('mic').classList.add('live');
+  document.getElementById('mic').setAttribute('aria-pressed', 'true');
   rec.start();
 }
 function stopMic() {
   listening = false;
   document.getElementById('mic').classList.remove('live');
+  document.getElementById('mic').setAttribute('aria-pressed', 'false');
   if (rec) { try { rec.stop(); } catch (e) {} rec = null; }
 }
 
@@ -6011,6 +6180,13 @@ document.addEventListener('DOMContentLoaded', function () {
   document.getElementById('settings').addEventListener('click', function (ev) {
     if (ev.target === this) { closeSettings(); }
   });
+  document.getElementById('settings').addEventListener('keydown', settingsKeys);
+
+  /* keep the article clear of the fixed dock, whatever is open in it */
+  var dockEl = document.getElementById('dock');
+  function fitDock() { document.documentElement.style.setProperty('--dock-h', dockEl.offsetHeight + 'px'); }
+  fitDock();
+  if (window.ResizeObserver) { new ResizeObserver(fitDock).observe(dockEl); }
 });
 
 </script>
