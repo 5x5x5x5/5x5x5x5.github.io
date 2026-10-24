@@ -83,6 +83,8 @@ table { border-collapse: collapse; font-size: 0.92rem; width: 100%; }
 th, td { border: 1px solid #CFCFC6; padding: 0.35rem 0.6rem; text-align: left; vertical-align: top; }
 th { font-family: var(--sans); font-size: 0.8rem; background: var(--band); }
 td.apl { font-family: var(--apl-font); }
+#vocab-table { overflow-x: auto; }
+.run-btn:disabled { opacity: 0.6; cursor: progress; }
 
 /* run buttons + live output */
 .run-btn {
@@ -569,7 +571,7 @@ browser's local storage. Don't embed a shared key if you host this page publicly
   </div>
 </div>
 
-<script>
+<script id="apl-engine">
 window.APL = (function () {
   var module = { exports: null };
   var process = {
@@ -5384,45 +5386,45 @@ var store = {
 var VOCAB = [
   { g: '⍳', key: 'i', name: 'iota', say: ['iota'], hint: 'count to n; also index-of' },
   { g: '⍴', key: 'r', name: 'rho', say: ['rho', 'reshape', 'shape of', 'shape'], hint: 'shape of / reshape' },
-  { g: '⌽', key: 's', name: 'reverse · rotate', say: ['reverse', 'rotate'], hint: '⌽v reverses, k⌽v rotates' },
-  { g: '⊖', key: 'S', name: 'flip (first axis)', say: ['flip'], hint: 'reverse/rotate the rows' },
-  { g: '≢', key: 'c', name: 'tally', say: ['tally', 'count of', 'count'], hint: 'how many items' },
+  { g: '⌽', key: '%', name: 'reverse · rotate', say: ['reverse', 'rotate'], hint: '⌽v reverses, k⌽v rotates' },
+  { g: '⊖', key: '&', name: 'flip (first axis)', say: ['flip'], hint: 'reverse/rotate the rows' },
+  { g: '≢', key: '"', name: 'tally', say: ['tally', 'count of', 'count'], hint: 'how many items' },
   { g: '/', name: 'reduce · compress', say: ['reduce', 'over', 'slash'], hint: '+/ sums; mask/data filters' },
   { g: '\\', name: 'scan', say: ['scan', 'backslash'], hint: '+\\ running totals' },
-  { g: '∘', key: 'o', name: 'jot', say: [], hint: 'used in ∘. outer product' },
+  { g: '∘', key: 'j', name: 'jot', say: [], hint: 'used in ∘. outer product' },
   { name: 'outer product', say: ['outer product', 'jot dot', 'table of'], out: '∘.', hint: 'every-with-every, e.g. ∘.×' },
   { g: '⊂', key: 'z', name: 'enclose', say: ['enclose'], hint: 'box an array into a scalar' },
   { g: '⊃', key: 'x', name: 'pick', say: ['pick'], hint: 'k⊃v picks item k' },
-  { g: '↑', key: 'u', name: 'mix · take', say: ['mix', 'take'], hint: '↑nested mixes; k↑v takes' },
-  { g: '↓', key: 'd', name: 'drop', say: ['drop'], hint: 'k↓v drops first k' },
-  { g: '⍋', key: 'g', name: 'grade up', say: ['grade up', 'grade'], hint: 'ascending order permutation' },
-  { g: '⍒', key: 'G', name: 'grade down', say: ['grade down'], hint: 'descending order permutation' },
-  { g: '⌈', key: 'm', name: 'max · ceiling', say: ['max', 'maximum', 'ceiling'], hint: 'larger of two; round up' },
-  { g: '⌊', key: 'M', name: 'min · floor', say: ['min', 'minimum', 'floor'], hint: 'smaller of two; round down' },
+  { g: '↑', key: 'y', name: 'mix · take', say: ['mix', 'take'], hint: '↑nested mixes; k↑v takes' },
+  { g: '↓', key: 'u', name: 'drop', say: ['drop'], hint: 'k↓v drops first k' },
+  { g: '⍋', key: '$', name: 'grade up', say: ['grade up', 'grade'], hint: 'ascending order permutation' },
+  { g: '⍒', key: '#', name: 'grade down', say: ['grade down'], hint: 'descending order permutation' },
+  { g: '⌈', key: 's', name: 'max · ceiling', say: ['max', 'maximum', 'ceiling'], hint: 'larger of two; round up' },
+  { g: '⌊', key: 'd', name: 'min · floor', say: ['min', 'minimum', 'floor'], hint: 'smaller of two; round down' },
   { g: '+', name: 'plus', say: ['plus', 'add'], hint: '' },
   { g: '-', name: 'minus', say: ['minus', 'subtract'], hint: '' },
-  { g: '×', key: '-', name: 'times', say: ['times', 'multiplied by', 'multiply'], hint: 'on the same key as minus' },
+  { g: '×', key: '-', name: 'times', say: ['times', 'multiplied by', 'multiply'], hint: '' },
   { g: '÷', key: '=', name: 'divide', say: ['divided by', 'divide'], hint: 'next door to times' },
   { g: '*', name: 'power', say: ['to the power of', 'to the power', 'power'], hint: '' },
-  { g: '=', name: 'equals', say: ['equals', 'equal to'], hint: 'comparison — gives 1 or 0' },
-  { g: '≠', key: '~', name: 'not equal', say: ['not equal to', 'not equal'], hint: '' },
-  { g: '<', name: 'less than', say: ['less than'], hint: '' },
-  { g: '>', name: 'greater than', say: ['greater than'], hint: '' },
-  { g: '≤', key: '<', name: 'at most', say: ['at most', 'less than or equal to'], hint: '' },
-  { g: '≥', key: '>', name: 'at least', say: ['at least', 'greater than or equal to'], hint: '' },
-  { g: '∧', key: '&', name: 'and', say: ['and'], hint: '' },
-  { g: '∨', key: '|', name: 'or', say: ['or'], hint: '' },
-  { g: '~', name: 'not', say: ['not'], hint: '' },
+  { g: '=', key: '5', name: 'equals', say: ['equals', 'equal to'], hint: 'comparison — gives 1 or 0' },
+  { g: '≠', key: '8', name: 'not equal', say: ['not equal to', 'not equal'], hint: '' },
+  { g: '<', key: '3', name: 'less than', say: ['less than'], hint: '' },
+  { g: '>', key: '7', name: 'greater than', say: ['greater than'], hint: '' },
+  { g: '≤', key: '4', name: 'at most', say: ['at most', 'less than or equal to'], hint: '' },
+  { g: '≥', key: '6', name: 'at least', say: ['at least', 'greater than or equal to'], hint: '' },
+  { g: '∧', key: '0', name: 'and', say: ['and'], hint: '' },
+  { g: '∨', key: '9', name: 'or', say: ['or'], hint: '' },
+  { g: '~', key: 't', name: 'not', say: ['not'], hint: '' },
   { g: '¯', key: '2', name: 'high minus', say: ['negative', 'high minus'], hint: 'sign of a negative number' },
   { g: '←', key: '[', name: 'assign', say: ['assign', 'gets'], hint: 'name ← value' },
   { g: '⍵', key: 'w', name: 'omega', say: ['omega'], hint: 'right argument inside { }' },
   { g: '⍺', key: 'a', name: 'alpha', say: ['alpha'], hint: 'left argument inside { }' },
   { g: '¨', key: '1', name: 'each', say: ['each'], hint: 'apply to each item' },
-  { g: '⍉', key: 't', name: 'transpose', say: ['transpose'], hint: 'flip rows and columns' },
+  { g: '⍉', key: '^', name: 'transpose', say: ['transpose'], hint: 'flip rows and columns' },
   { g: '∊', key: 'e', name: 'member of', say: ['member of'], hint: '3∊v — is 3 in v?' },
   { g: ',', name: 'ravel · catenate', say: ['comma', 'ravel', 'catenate', 'joined with'], hint: 'flatten; join' },
-  { g: '⋄', key: 'j', name: 'diamond', say: ['diamond', 'then'], hint: 'statement separator' },
-  { g: '⎕', key: 'q', name: 'quad', say: ['quad'], hint: 'system name prefix' },
+  { g: '⋄', key: '`', name: 'diamond', say: ['diamond', 'then'], hint: 'statement separator' },
+  { g: '⎕', key: 'l', name: 'quad', say: ['quad'], hint: 'system name prefix' },
   { g: '{', name: 'open brace', say: ['left brace', 'open brace'], hint: 'start a function' },
   { g: '}', name: 'close brace', say: ['right brace', 'close brace'], hint: '' },
   { g: '(', name: 'open paren', say: ['left paren', 'open paren', 'open parenthesis'], hint: '' },
@@ -5497,10 +5499,110 @@ var ws = null, engineOK = false;
 try { ws = window.APL.ws(); engineOK = true; } catch (e) { /* engine failed to load */ }
 var demoWs = null;
 
+/* shared with the worker (injected via toString) */
+function errText(e) {
+  if (e && /ERROR$/.test(e.name || '')) { return String(e).split('\n')[0]; }
+  if (e instanceof RangeError || /call stack/i.test(String(e))) {
+    return 'LIMIT ERROR: recursion too deep or array too large';
+  }
+  return 'INTERNAL ERROR: ' + String(e && e.message || e).split('\n')[0];
+}
+function clipText(t) {
+  var MAXL = 300, MAXC = 20000, lines = t.split('\n'), cut = false;
+  if (lines.length > MAXL) { lines = lines.slice(0, MAXL); cut = true; }
+  t = lines.join('\n');
+  if (t.length > MAXC) { t = t.slice(0, MAXC); cut = true; }
+  return cut ? t + '\n… (output truncated)' : t;
+}
+function evalIn(wsFn, src) {
+  try { return { ok: true, text: clipText(self.APL.format(wsFn(src)).join('\n')) }; }
+  catch (e) { return { ok: false, text: errText(e) }; }
+}
+
+/* assignment is shy: `x←…`, `x[i]←…` or `⎕←…` as the last top-level statement prints nothing */
+var SHY = /^\s*([A-Za-z_∆⍙][A-Za-z_0-9∆⍙¯]*\s*(\[[^\]]*\]\s*)?|⎕\s*)←/;
+function lastStatement(src) {
+  var depth = 0, q = false, start = 0;
+  for (var i = 0; i < src.length; i++) {
+    var c = src[i];
+    if (q) { if (c === "'") { q = false; } continue; }
+    if (c === "'") { q = true; }
+    else if ('({['.indexOf(c) >= 0) { depth++; }
+    else if (')}]'.indexOf(c) >= 0) { depth--; }
+    else if (c === '⋄' && depth === 0) { start = i + 1; }
+    else if (c === '⍝') { break; }
+  }
+  return src.slice(start);
+}
+
 function runAPL(src) {
   if (!engineOK) { return { ok: false, text: 'engine failed to load' }; }
-  try { return { ok: true, text: window.APL.format(ws(src)).join('\n') }; }
-  catch (e) { return { ok: false, text: String(e).split('\n')[0] }; }
+  return evalIn(ws, src);
+}
+
+/* user code runs in a worker so a runaway expression can be stopped;
+   on timeout the worker is replaced and earlier assignments are replayed */
+var LIMIT_MS = 5000;
+var worker = null, jobId = 0, jobs = {}, chain = Promise.resolve(), replayLog = [];
+
+function makeWorker() {
+  var engine = document.getElementById('apl-engine').textContent;
+  var body = 'self.window = self;\n' + engine + '\n' + errText + '\n' + clipText + '\n' + evalIn + '\n' +
+    'var ws = self.APL.ws(), quad = [];\n' +
+    'self.__aplQuadOut = function (s) { quad.push(String(s).replace(/\\n$/, "")); };\n' +
+    'onmessage = function (ev) {\n' +
+    '  var m = ev.data;\n' +
+    '  if (m.replay) { m.replay.forEach(function (s) { try { ws(s); } catch (e) {} }); return; }\n' +
+    '  quad = []; var r = evalIn(ws, m.src); r.id = m.id; r.quad = quad; postMessage(r);\n' +
+    '};';
+  var url = URL.createObjectURL(new Blob([body], { type: 'text/javascript' }));
+  var w = new Worker(url);
+  URL.revokeObjectURL(url);
+  w.onmessage = function (ev) {
+    var r = ev.data, job = jobs[r.id];
+    if (!job) { return; }
+    delete jobs[r.id]; clearTimeout(job.timer);
+    job.resolve(r);
+  };
+  return w;
+}
+if (engineOK) { try { worker = makeWorker(); } catch (e) { worker = null; } }
+
+function runNow(src) {
+  if (!worker) {
+    var quad = [], prev = window.__aplQuadOut;
+    window.__aplQuadOut = function (s) { quad.push(String(s).replace(/\n$/, '')); };
+    var r0 = runAPL(src);
+    window.__aplQuadOut = prev; r0.quad = quad;
+    return Promise.resolve(r0);
+  }
+  return new Promise(function (resolve) {
+    var id = ++jobId;
+    jobs[id] = {
+      resolve: resolve,
+      timer: setTimeout(function () {
+        delete jobs[id];
+        worker.terminate();
+        worker = makeWorker();
+        if (replayLog.length) { worker.postMessage({ replay: replayLog.slice() }); }
+        resolve({ ok: false, quad: [], text: 'INTERRUPT: stopped after ' + (LIMIT_MS / 1000) +
+          ' s — the workspace was restarted and your earlier assignments replayed' });
+      }, LIMIT_MS)
+    };
+    worker.postMessage({ id: id, src: src });
+  });
+}
+
+/* serialised, async evaluation for everything the reader runs */
+function execAPL(src) {
+  var p = chain.then(function () { return runNow(src); }).then(function (r) {
+    (r.quad || []).forEach(function (q) { logEntry('⎕ output', { ok: true, text: q }); });
+    r.shy = r.ok && SHY.test(lastStatement(src));
+    if (r.ok && src.indexOf('←') >= 0) { replayLog.push(src); if (replayLog.length > 200) { replayLog.shift(); } }
+    return r;
+  });
+  chain = p.catch(function () {});
+  return p;
 }
 
 /* ---------- session log ---------- */
@@ -5509,8 +5611,8 @@ function logEntry(src, res) {
   logCount++;
   var d = document.createElement('div');
   d.className = 'log-entry';
-  d.innerHTML = '<div class="log-in">      ' + esc(src) + '</div>' +
-    '<div class="log-out' + (res.ok ? '' : ' log-err') + '">' + esc(res.text) + '</div>';
+  d.innerHTML = '<div class="log-in">      ' + esc(src) + '</div>' + (res.shy ? '' :
+    '<div class="log-out' + (res.ok ? '' : ' log-err') + '">' + esc(res.text) + '</div>');
   logBody.appendChild(d);
   logBody.scrollTop = logBody.scrollHeight;
   document.getElementById('log-toggle').textContent = 'session log (' + logCount + ')';
@@ -5662,11 +5764,12 @@ function prefixSetup(el) {
   var pending = false;
   el.addEventListener('keydown', function (ev) {
     if (pending) {
+      if (/^(Shift|Control|Alt|AltGraph|Meta|CapsLock)$/.test(ev.key)) { return; }
       if (ev.key.length === 1) {
         ev.preventDefault();
         var g = PREFIX[ev.key];
         pending = false; el.classList.remove('prefix');
-        if (g) { insertAt(el, g); } else if (ev.key === '`') { insertAt(el, '`'); }
+        if (g) { insertAt(el, g); }
         return;
       }
       pending = false; el.classList.remove('prefix');
@@ -5710,32 +5813,71 @@ function buildTable() {
 }
 
 /* ---------- tutorial code blocks: Run buttons ---------- */
+/* name → [{ b: block index, src }] for every `name ← …` line in the tutorial */
+var DEFS = {};
+function findDef(name, b) {
+  var best = null;
+  (DEFS[name] || []).forEach(function (d) { if (d.b < b && (!best || d.b > best.b)) { best = d; } });
+  return best;
+}
+/* run src; if it needs a name an earlier example defines, run that definition first and retry */
+async function runWithDeps(src, b, show, depth) {
+  var r = await execAPL(src);
+  var m = !r.ok && depth < 8 && /^VALUE ERROR: Symbol '([^']+)'/.exec(r.text);
+  var d = m && findDef(m[1], b);
+  if (d) {
+    var pre = await runWithDeps(d.src, d.b, show, depth + 1);
+    show(d.src, pre, 'from an earlier example');
+    if (pre.ok) { return runWithDeps(src, b, show, depth + 1); }
+  }
+  return r;
+}
+
 function enhanceBlocks() {
   var pres = document.querySelectorAll('#tutorial pre');
+  var blocks = [];
   pres.forEach(function (pre) {
     var code = pre.querySelector('code');
     if (!code) { return; }
     var lines = code.textContent.split('\n');
     var inputs = lines.filter(function (l) { return /^ {6}\S/.test(l); }).map(function (l) { return l.trim(); });
-    if (!inputs.length) { return; }
+    if (inputs.length) { blocks.push({ pre: pre, inputs: inputs }); }
+  });
+  blocks.forEach(function (blk, b) {
+    blk.inputs.forEach(function (src) {
+      var m = /^([A-Za-z_∆⍙][A-Za-z_0-9∆⍙]*)\s*←/.exec(src);
+      if (m) { (DEFS[m[1]] = DEFS[m[1]] || []).push({ b: b, src: src }); }
+    });
+  });
+  blocks.forEach(function (blk, b) {
+    var pre = blk.pre, inputs = blk.inputs;
     var btn = document.createElement('button');
     btn.type = 'button'; btn.className = 'run-btn'; btn.textContent = 'Run';
     btn.setAttribute('aria-label', 'run this example');
     var out = document.createElement('div');
     out.className = 'live-out'; out.hidden = true;
     pre.after(out); pre.appendChild(btn);
-    btn.addEventListener('click', function () {
-      out.hidden = false; out.innerHTML = '';
-      inputs.forEach(function (src) {
-        var r = runAPL(src);
+    function show(src, r, note) {
+      var s = document.createElement('div');
+      s.className = 'live-src'; s.textContent = '      ' + src + (note ? '   ⍝ ' + note : '');
+      out.appendChild(s);
+      if (!r.shy) {
         var d = document.createElement('div');
         d.className = r.ok ? '' : 'log-err';
         d.textContent = (r.text === '' ? '(no display)' : r.text);
-        var s = document.createElement('div');
-        s.className = 'live-src'; s.textContent = '      ' + src;
-        out.appendChild(s); out.appendChild(d);
-        logEntry(src, r);
-      });
+        out.appendChild(d);
+      }
+      logEntry(src, r);
+    }
+    btn.addEventListener('click', async function () {
+      if (btn.disabled) { return; }
+      btn.disabled = true; btn.textContent = '…';
+      out.hidden = false; out.innerHTML = '';
+      for (var k = 0; k < inputs.length; k++) {
+        var r = await runWithDeps(inputs[k], b, show, 0);
+        show(inputs[k], r);
+      }
+      btn.disabled = false; btn.textContent = 'Run';
     });
   });
 }
@@ -5823,10 +5965,13 @@ document.addEventListener('DOMContentLoaded', function () {
   });
   document.getElementById('convert').addEventListener('click', convertNow);
 
-  document.getElementById('apl-run').addEventListener('click', function () {
+  document.getElementById('apl-run').addEventListener('click', async function () {
     var src = document.getElementById('apl-input').value.trim();
-    if (!src) { return; }
-    var r = runAPL(src);
+    if (!src || this.disabled) { return; }
+    var btn = this;
+    btn.disabled = true; btn.textContent = 'Running…';
+    var r = await execAPL(src);
+    btn.disabled = false; btn.textContent = 'Run';
     logEntry(src, r);
     document.getElementById('log').classList.add('open');
     document.getElementById('log-toggle').setAttribute('aria-expanded', 'true');
