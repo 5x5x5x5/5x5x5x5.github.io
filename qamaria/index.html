@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1a1210">
+<title>Qamaria Quest</title>
+<meta name="description" content="Four friends, one Sunday, one coffee house. Pick a time without a server.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' fill='%231a1210'/><rect x='3' y='6' width='8' height='7' fill='%23f3e6cc'/><rect x='11' y='8' width='2' height='3' fill='%23f3e6cc'/><rect x='5' y='2' width='1' height='3' fill='%23e7b450'/><rect x='8' y='1' width='1' height='4' fill='%23e7b450'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1a1210;          /* dark roast                       */
+    --panel:#2b1a14;       /* back wall                        */
+    --edge:#4a2a1a;        /* wood, shadowed                   */
+    --wood:#6b3e26;
+    --gold:#e7b450;        /* saffron / dallah brass           */
+    --cream:#f3e6cc;       /* qishr with milk                  */
+    --muted:#b89f86;
+    --red:#d0543a;
+    --pixel:"Press Start 2P",ui-monospace,Menlo,monospace;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0; min-height:100dvh;
+    background:var(--bg); color:var(--cream);
+    font:15px/1.5 var(--mono);
+    padding:16px max(16px,env(safe-area-inset-right)) 32px max(16px,env(safe-area-inset-left));
+  }
+  main{max-width:600px; margin:0 auto}
+  [hidden]{display:none !important}
+  h1,h2,.px{font-family:var(--pixel); font-weight:normal; letter-spacing:.02em}
+  h1{font-size:clamp(16px,5vw,22px); margin:4px 0 6px; color:var(--gold); text-shadow:2px 2px 0 var(--edge)}
+  h2{font-size:12px; margin:0 0 12px; color:var(--gold)}
+  .sub{margin:0 0 14px; color:var(--muted); font-size:13px}
+  .sub b{color:var(--cream); font-weight:normal}
+  a{color:var(--gold)}
+  .box{
+    background:var(--panel); border:3px solid var(--edge);
+    box-shadow:inset 0 0 0 2px #1a1210, 4px 4px 0 #0e0907;
+    padding:14px; margin:0 0 14px;
+  }
+  button,.btn{
+    font:10px/1.2 var(--pixel); color:var(--bg); background:var(--gold);
+    border:0; padding:11px 12px; cursor:pointer; text-decoration:none; display:inline-block;
+    box-shadow:inset -3px -3px 0 #a87a2a, inset 3px 3px 0 #f6d590; min-height:40px;
+  }
+  button:active,.btn:active{box-shadow:inset 3px 3px 0 #a87a2a}
+  button.ghost{background:var(--edge); color:var(--cream); box-shadow:inset -3px -3px 0 #2e190f, inset 3px 3px 0 #7a4a30}
+  button:focus-visible,.btn:focus-visible,input:focus-visible,textarea:focus-visible,canvas:focus-visible{outline:3px solid var(--cream); outline-offset:2px}
+  .row{display:flex; flex-wrap:wrap; gap:8px}
+  .row > *{flex:1 1 auto}
+  input,textarea{
+    font:16px/1.3 var(--mono); color:var(--cream); background:var(--bg);
+    border:2px solid var(--edge); padding:10px; width:100%;
+  }
+  label{display:block; font-size:12px; color:var(--muted); margin:0 0 4px}
+  .names{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:0 0 14px}
+  .names i{display:inline-block; width:10px; height:10px; margin-right:6px; vertical-align:-1px}
+
+  /* --- game --- */
+  #stage{display:flex; justify-content:center; margin:0 0 10px}
+  #cv{image-rendering:pixelated; display:block; touch-action:manipulation; background:#33201a;
+      border:3px solid var(--edge); box-shadow:4px 4px 0 #0e0907}
+  #log{
+    min-height:5.2em; font-size:14px; margin:0 0 10px; position:relative;
+  }
+  #log::after{content:"▼"; position:absolute; right:10px; bottom:6px; font-size:9px; color:var(--gold); animation:blink 1s steps(2) infinite}
+  @keyframes blink{50%{opacity:0}}
+  #status{font:9px/1.7 var(--pixel); color:var(--muted); margin:0 0 10px}
+  #status b{color:var(--gold); font-weight:normal}
+  .party{display:flex; gap:6px; flex-wrap:wrap; margin:0 0 10px}
+  .party span{font-size:12px; padding:2px 8px; border:2px solid; background:var(--bg)}
+  .party span.out{opacity:.45; border-style:dashed}
+  #win{border-color:var(--gold); text-align:center}
+  #win .px{font-size:13px; line-height:1.8; color:var(--gold); margin:0 0 10px}
+  #win p{margin:0 0 12px}
+  .tip{font-size:12px; color:var(--muted)}
+  details summary{cursor:pointer; font:10px var(--pixel); color:var(--gold); padding:6px 0}
+  table{border-collapse:collapse; width:100%; font-size:13px; margin-top:8px}
+  th,td{border-bottom:1px solid var(--edge); padding:4px 6px; text-align:center}
+  th:first-child,td:first-child{text-align:left}
+  tr.best td{color:var(--gold)}
+  footer{margin-top:18px; font-size:12px; color:var(--muted); display:flex; flex-wrap:wrap; gap:6px 14px}
+  footer button{font-size:8px; min-height:32px; padding:8px 10px}
+
+  /* --- dialogs --- */
+  dialog{
+    background:var(--panel); color:var(--cream); border:3px solid var(--gold);
+    box-shadow:6px 6px 0 #0e0907; padding:18px; width:min(440px,calc(100vw - 32px));
+  }
+  dialog::backdrop{background:rgba(10,6,4,.75)}
+  .code{font:clamp(18px,7vw,26px)/1.4 var(--pixel); color:var(--gold); letter-spacing:.06em; text-align:center; margin:6px 0 12px; word-break:break-all}
+  .codes{list-style:none; padding:0; margin:0 0 12px; font-size:14px}
+  .codes li{display:flex; justify-content:space-between; gap:8px; border-bottom:1px solid var(--edge); padding:4px 0}
+  .codes code{font-family:var(--pixel); font-size:11px; color:var(--gold)}
+  #qr{display:block; margin:0 auto 12px; background:#fff; image-rendering:pixelated; max-width:100%}
+  .results{font-size:13px; margin:8px 0 0; padding-left:18px}
+  .sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
+  .pick{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+  .pick button{display:flex; flex-direction:column; align-items:center; gap:10px; padding:14px 8px; font-size:10px}
+  .pick canvas{image-rendering:pixelated; width:48px; height:66px}
+  .pick small{font:11px var(--mono); color:#5a3a1e}
+</style>
+</head>
+<body>
+<main>
+  <h1>QAMARIA QUEST</h1>
+  <p class="sub"><b>Sun Nov 1, 2026</b> · <a id="maplink" href="https://www.google.com/maps/search/?api=1&query=Qamaria+Yemeni+Coffee+2500+Meridian+Pkwy+Durham+NC+27713" target="_blank" rel="noopener">Qamaria Yemeni Coffee, 2500 Meridian Pkwy, Durham</a></p>
+
+  <!-- NEW PARTY -->
+  <section id="screen-new" hidden>
+    <form id="newform" class="box">
+      <h2>NEW PARTY</h2>
+      <p class="tip" style="margin-top:0">Name the four friends. Every vote travels between you as a 7-character password, by link, QR, text, voice, or napkin. No server stores anything.</p>
+      <div class="names" id="nameinputs"></div>
+      <button type="submit" style="width:100%">START ▶</button>
+    </form>
+    <p id="resume" hidden><button class="ghost" type="button" id="resumebtn">CONTINUE LAST PARTY</button></p>
+  </section>
+
+  <!-- CHARACTER SELECT -->
+  <section id="screen-pick" hidden>
+    <div class="box">
+      <h2>WHO ARE YOU?</h2>
+      <div class="pick" id="pick"></div>
+    </div>
+  </section>
+
+  <!-- GAME -->
+  <section id="screen-game" hidden>
+    <div id="stage"><canvas id="cv" tabindex="0" aria-label="Café floor. Twelve tables, one per hour from 9 AM to 8 PM. Use arrow keys to move, space to change your answer."></canvas></div>
+    <div id="log" class="box" aria-hidden="true"></div>
+    <div id="live" class="sr" aria-live="polite"></div>
+    <div class="party" id="party"></div>
+    <div id="status"></div>
+
+    <div id="win" class="box" hidden>
+      <div class="px" id="wintext"></div>
+      <p class="tip">Clocks fall back at 2 AM that morning. Phones adjust themselves; you get an extra hour of sleep.</p>
+      <div class="row">
+        <button id="ics">ADD TO CALENDAR</button>
+        <a class="btn" id="gcal" target="_blank" rel="noopener">GOOGLE CAL</a>
+        <a class="btn" id="dir" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=Qamaria+Yemeni+Coffee+2500+Meridian+Pkwy+Durham+NC+27713">DIRECTIONS</a>
+      </div>
+    </div>
+
+    <div class="row" style="margin:0 0 14px">
+      <button id="send">SEND LINK</button>
+      <button id="pw">PASSWORD</button>
+      <button id="cable">LINK CABLE</button>
+      <button id="enter" class="ghost">ENTER PASSWORD</button>
+    </div>
+
+    <details class="box">
+      <summary>SCOREBOARD</summary>
+      <table id="board"></table>
+    </details>
+
+    <footer>
+      <button class="ghost" id="howbtn">HOW TO PLAY</button>
+      <button class="ghost" id="sound" aria-pressed="false">SOUND: OFF</button>
+      <button class="ghost" id="switch">SWITCH PLAYER</button>
+      <button class="ghost" id="newparty">NEW PARTY</button>
+      <span>Sunday hours listed as 9 AM–10 PM; confirm before you go. Not affiliated with Qamaria.</span>
+    </footer>
+  </section>
+</main>
+
+<dialog id="dlg-pw">
+  <h2>PASSWORD</h2>
+  <div id="pwbody"></div>
+  <p class="tip">Read it aloud, text it, or write it on a napkin. A friend types it into ENTER PASSWORD. Typos are caught by the last character.</p>
+  <div class="row"><button id="pwcopy">COPY ALL</button><button class="ghost" data-close>CLOSE</button></div>
+</dialog>
+
+<dialog id="dlg-cable">
+  <h2>LINK CABLE</h2>
+  <canvas id="qr" width="1" height="1" aria-label="QR code of the party link"></canvas>
+  <p class="tip">Point another phone's camera at this. It opens the game with everything this phone knows merged into theirs.</p>
+  <div class="row"><button class="ghost" data-close>CLOSE</button></div>
+</dialog>
+
+<dialog id="dlg-enter">
+  <h2>ENTER PASSWORD</h2>
+  <form id="enterform">
+    <label for="codes">Codes or a party link, any order, any spacing</label>
+    <textarea id="codes" rows="3" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="2-K7Q2-0M"></textarea>
+    <ul class="results" id="results"></ul>
+    <div class="row" style="margin-top:12px"><button type="submit">MERGE</button><button type="button" class="ghost" data-close>CLOSE</button></div>
+  </form>
+</dialog>
+
+<dialog id="dlg-how">
+  <h2>HOW TO PLAY</h2>
+  <ol style="padding-left:20px; margin:0 0 12px; font-size:14px">
+    <li>Each table is an hour. Tap a table to cycle your answer: <b>☕ in</b> → <b>? maybe</b> → <b>out</b>.</li>
+    <li>Pass your state on: <b>SEND LINK</b> to the group chat, <b>LINK CABLE</b> phone-to-phone, or read your <b>PASSWORD</b> aloud.</li>
+    <li>Anything you receive merges in. Order doesn't matter; newer answers win.</li>
+    <li>When all four have answered and some hour has nobody out, the quest is won: the hour with the most ☕, earliest on ties.</li>
+  </ol>
+  <p class="tip">Keyboard: arrows or WASD move, space or Enter changes your answer.</p>
+  <div class="row"><button class="ghost" data-close>CLOSE</button></div>
+</dialog>
+
+<script src="qrcode.min.js"></script>
+<script>
+(() => {
+'use strict';
+
+// ===================================================================
+// Core: seat codes, merge, tally. Pure; exposed as window.QQ for tests.
+// ===================================================================
+const FIRST_HOUR = 9, SLOTS = 12;        // one-hour starts, 9 AM … 8 PM
+const SEATS = 4;
+const NO = 0, MAYBE = 1, YES = 2;
+const B32 = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';   // Crockford base32
+const CHK = B32 + '*~$=U';                          // Crockford mod-37 check symbols
+const MAXV = 3 ** SLOTS;                            // 531441 < 2^20: fits 4 base32 chars
+
+const toInt = d => d.reduceRight((n, x) => n * 3 + x, 0);
+const fromInt = n => Array.from({ length: SLOTS }, () => { const x = n % 3; n = (n - x) / 3; return x; });
+const checksum = (seat, v, ver) => CHK[((seat * 2 ** 20 + v) * 32 + ver) % 37];
+
+// seat(1) + vote(4) + version(1) + check(1)
+function encodeSeat(seat, ver, digits) {
+  const v = toInt(digits);
+  const vote = [15, 10, 5, 0].map(s => B32[(v >> s) & 31]).join('');
+  return String(seat + 1) + vote + B32[ver] + checksum(seat, v, ver);
+}
+const pretty = c => `${c[0]}-${c.slice(1, 5)}-${c.slice(5)}`;
+const normalize = s => s.toUpperCase().replace(/[IL]/g, '1').replace(/O/g, '0');
+
+function decodeSeat(raw) {
+  const c = normalize(raw).replace(/[^0-9A-Z*~$=]/g, '');
+  if (c.length !== 7) return null;
+  const seat = c.charCodeAt(0) - 49;
+  if (seat < 0 || seat >= SEATS) return null;
+  let v = 0;
+  for (const ch of c.slice(1, 5)) { const i = B32.indexOf(ch); if (i < 0) return null; v = v * 32 + i; }
+  const ver = B32.indexOf(c[5]);
+  if (v >= MAXV || ver < 0 || checksum(seat, v, ver) !== c[6]) return null;
+  return { seat, ver, digits: fromInt(v) };
+}
+
+// Pull candidate codes out of free text: "2-K7Q2-0M", "2k7q20m", one per line, whatever.
+function findCodes(text) {
+  const t = normalize(text);
+  return [...t.matchAll(/(?:^|[^0-9A-Z])([1-4])[\s-]*([0-9A-Z]{4})[\s-]*([0-9A-Z])\s*([0-9A-Z*~$=])/g)]
+    .map(m => m[1] + m[2] + m[3] + m[4]);
+}
+
+// Versions are a 5-bit counter compared with serial-number arithmetic, so it may wrap.
+const newer = (a, b) => { const d = (a - b + 32) % 32; return d > 0 && d < 16; };
+
+function mergeSeat(state, rec) {
+  const cur = state[rec.seat];
+  const take = () => { state[rec.seat] = { ver: rec.ver, digits: rec.digits.slice() }; };
+  if (!cur) { take(); return 'new'; }
+  if (cur.ver === rec.ver) {
+    const a = toInt(cur.digits), b = toInt(rec.digits);
+    if (a === b) return 'same';
+    if (b > a) { take(); return 'updated'; }   // same-version conflict: pick deterministically
+    return 'older';
+  }
+  if (newer(rec.ver, cur.ver)) { take(); return 'updated'; }
+  return 'older';
+}
+
+function tally(state) {
+  const voted = state.map((s, i) => (s ? i : -1)).filter(i => i >= 0);
+  const slots = Array.from({ length: SLOTS }, (_, i) => {
+    const c = [0, 0, 0];
+    for (const s of voted) c[state[s].digits[i]]++;
+    return { i, no: c[NO], maybe: c[MAYBE], yes: c[YES] };
+  });
+  const best = voted.length
+    ? [...slots].sort((a, b) => a.no - b.no || b.yes - a.yes || a.i - b.i)[0]
+    : null;
+  const settled = voted.length === SEATS && best.no === 0;
+  return { voted, slots, best, settled };
+}
+
+const hourShort = i => { const h = FIRST_HOUR + i; return (h % 12 || 12) + (h < 12 ? 'a' : 'p'); };
+const hourLong = i => { const h = FIRST_HOUR + i; return (h % 12 || 12) + ' ' + (h < 12 ? 'AM' : 'PM'); };
+
+function ics(slot, names) {
+  const pad = n => String(n).padStart(2, '0');
+  const h = FIRST_HOUR + slot;
+  const esc = s => s.replace(/[\\;,]/g, m => '\\' + m).replace(/\n/g, '\\n');
+  const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+/, '');
+  return [
+    'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//5x5x5x5//Qamaria Quest//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH',
+    'BEGIN:VTIMEZONE', 'TZID:America/New_York',
+    'BEGIN:DAYLIGHT', 'TZOFFSETFROM:-0500', 'TZOFFSETTO:-0400', 'TZNAME:EDT', 'DTSTART:19700308T020000', 'RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=2SU', 'END:DAYLIGHT',
+    'BEGIN:STANDARD', 'TZOFFSETFROM:-0400', 'TZOFFSETTO:-0500', 'TZNAME:EST', 'DTSTART:19701101T020000', 'RRULE:FREQ=YEARLY;BYMONTH=11;BYDAY=1SU', 'END:STANDARD',
+    'END:VTIMEZONE',
+    'BEGIN:VEVENT',
+    `UID:qamaria-20261101-${pad(h)}-${names.map(n => n.replace(/[^A-Za-z0-9]/g, '')).join('-')}@5x5x5x5.github.io`,
+    `DTSTAMP:${stamp}`,
+    `DTSTART;TZID=America/New_York:20261101T${pad(h)}0000`,
+    `DTEND;TZID=America/New_York:20261101T${pad(h + 1)}0000`,
+    'SUMMARY:Coffee at Qamaria',
+    `LOCATION:${esc('Qamaria Yemeni Coffee, 2500 Meridian Pkwy, Durham, NC 27713')}`,
+    `DESCRIPTION:${esc('Settled by Qamaria Quest: ' + names.join(', '))}`,
+    'END:VEVENT', 'END:VCALENDAR', ''
+  ].join('\r\n');
+}
+
+window.QQ = { encodeSeat, decodeSeat, findCodes, mergeSeat, tally, toInt, fromInt, newer, pretty, ics, SLOTS, SEATS };
+
+// ===================================================================
+// App state
+// ===================================================================
+const COLORS = ['#3fb6a8', '#e7b450', '#d35d8f', '#8cc152'];
+const HAIR = ['#2a1810', '#5a3a1e', '#141420', '#8a5a2a'];
+const SKIN = ['#c68a5e', '#8d5a3b', '#e0b48a', '#a86f48'];
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $ = id => document.getElementById(id);
+
+const store = {
+  get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* private mode */ } },
+};
+
+let names = null, key = null, me = null, cursor = 0;
+let state = [null, null, null, null];
+let bumpOnEdit = true;      // first edit after load or after sharing starts a new version
+let wasSettled = false;
+
+function parseHash() {
+  const out = { names: null, codes: [] };
+  for (const part of location.hash.slice(1).split('&')) {
+    const i = part.indexOf('='); if (i < 0) continue;
+    const k = part.slice(0, i), v = part.slice(i + 1);
+    try {
+      if (k === 'n') out.names = v.split(',').map(decodeURIComponent);
+      if (k === 's') out.codes = v.split('.');
+    } catch { /* malformed */ }
+  }
+  if (out.names && (out.names.length !== SEATS || out.names.some(n => !n.trim()))) out.names = null;
+  return out;
+}
+
+const codesOf = st => st.map((r, i) => r && encodeSeat(i, r.ver, r.digits)).filter(Boolean);
+const hashFor = () => '#n=' + names.map(encodeURIComponent).join(',') + (codesOf(state).length ? '&s=' + codesOf(state).join('.') : '');
+const linkFor = () => location.origin + location.pathname + hashFor();
+
+function persist() {
+  history.replaceState(null, '', hashFor());
+  store.set(key, { me, codes: codesOf(state) });
+  store.set('qamaria:last', hashFor());
+}
+
+function mergeCodes(codes) {
+  const res = [];
+  for (const c of codes) {
+    const rec = decodeSeat(c);
+    if (!rec) { res.push({ code: c, result: 'bad' }); continue; }
+    const mine = rec.seat === me && state[me];
+    if (mine && mine.ver === rec.ver && toInt(mine.digits) !== toInt(rec.digits)) {
+      // a stale copy of my own seat came back: I'm the authority, so out-version it
+      mine.ver = (mine.ver + 1) % 32; bumpOnEdit = false;
+      res.push({ code: c, seat: rec.seat, ver: rec.ver, result: 'older' });
+      continue;
+    }
+    res.push({ code: c, seat: rec.seat, ver: rec.ver, result: mergeSeat(state, rec) });
+  }
+  return res;
+}
+
+function show(id) {
+  for (const s of ['screen-new', 'screen-pick', 'screen-game']) $(s).hidden = s !== id;
+}
+
+function boot() {
+  const h = parseHash();
+  if (!h.names) return newScreen();
+  names = h.names;
+  key = 'qamaria:' + names.join('\u0001');
+  const saved = store.get(key) || {};
+  state = [null, null, null, null];
+  me = null;
+  mergeCodes(saved.codes || []);
+  me = Number.isInteger(saved.me) ? saved.me : null;
+  bumpOnEdit = true;
+  const got = mergeCodes(h.codes).filter(r => r.result === 'new' || r.result === 'updated');
+  persist();
+  if (me === null) return pickScreen();
+  startGame(got);
+}
+
+// ---------- screens ----------
+function newScreen() {
+  show('screen-new');
+  const wrap = $('nameinputs'); wrap.innerHTML = '';
+  for (let i = 0; i < SEATS; i++) {
+    const d = document.createElement('div');
+    d.innerHTML = `<label for="nm${i}"><i style="background:${COLORS[i]}"></i>Player ${i + 1}</label>
+      <input id="nm${i}" maxlength="12" required autocomplete="off" placeholder="Name">`;
+    wrap.append(d);
+  }
+  const last = store.get('qamaria:last');
+  $('resume').hidden = !last;
+  $('resumebtn').onclick = () => { location.hash = last; };
+}
+
+$('newform').addEventListener('submit', e => {
+  e.preventDefault();
+  const ns = [...Array(SEATS)].map((_, i) => $('nm' + i).value.trim());
+  if (new Set(ns.map(n => n.toLowerCase())).size !== SEATS) { alert('Names must be different.'); return; }
+  location.hash = '#n=' + ns.map(encodeURIComponent).join(',');
+});
+
+function pickScreen() {
+  show('screen-pick');
+  const p = $('pick'); p.innerHTML = '';
+  names.forEach((n, i) => {
+    const b = document.createElement('button'); b.type = 'button';
+    const c = document.createElement('canvas'); c.width = 8; c.height = 11;
+    drawPerson(c.getContext('2d'), 0, 0, i, false, 1);
+    const label = document.createElement('span'); label.textContent = n;
+    const note = document.createElement('small');
+    note.textContent = state[i] ? `answered (v${state[i].ver})` : 'not yet answered';
+    b.append(c, label, note);
+    b.style.background = COLORS[i];
+    b.onclick = () => { me = i; persist(); startGame([]); };
+    p.append(b);
+  });
+}
+
+// ===================================================================
+// Game
+// ===================================================================
+const W = 192, H = 232, TOP = 40, CW = 64, CH = 48;
+const cv = $('cv'), ctx = cv.getContext('2d');
+let k = 1;
+const cellXY = i => ({ x: (i % 3) * CW, y: TOP + Math.floor(i / 3) * CH });
+const tableC = i => { const { x, y } = cellXY(i); return { cx: x + 32, cy: y + 27 }; };
+
+function fit() {
+  const dpr = window.devicePixelRatio || 1;
+  const avail = Math.min($('stage').clientWidth || W, 576);
+  k = Math.max(1, Math.floor(avail * dpr / W));
+  cv.width = W * k; cv.height = H * k;
+  cv.style.width = (W * k / dpr) + 'px'; cv.style.height = (H * k / dpr) + 'px';
+}
+
+// --- sprites as strings; one char per pixel ---
+const FRONT = [
+  '..HHHH..', '.HHHHHH.', '.HSSSSH.', '.SESSES.', '..SSSS..',
+  '.CCCCCC.', 'CCCCCCCC', 'SCCCCCCS', '.CCCCCC.', '.PP..PP.', '.PP..PP.',
+];
+const BACK = [
+  '..HHHH..', '.HHHHHH.', '.HHHHHH.', '.HHHHHH.', '..HHHH..',
+  '.CCCCCC.', 'CCCCCCCC', 'SCCCCCCS', '.CCCCCC.', '.PP..PP.', '.PP..PP.',
+];
+const CAT = ['K....K..', 'KK..KK..', 'KYKKYK..', 'KKKKKK.K', '.KKKKKKK', '.K.K.K.K'];
+function sprite(c, x, y, rows, pal, flip = false) {
+  rows.forEach((row, r) => {
+    for (let i = 0; i < row.length; i++) {
+      const col = pal[row[flip ? row.length - 1 - i : i]];
+      if (col) { c.fillStyle = col; c.fillRect(x + i, y + r, 1, 1); }
+    }
+  });
+}
+function drawPerson(c, x, y, seat, back, alpha) {
+  c.globalAlpha = alpha;
+  sprite(c, x, y, back ? BACK : FRONT, { H: HAIR[seat], S: SKIN[seat], E: '#1a1010', C: COLORS[seat], P: '#2a2a3a' });
+  c.globalAlpha = 1;
+}
+
+// seat anchors around a table: N, W, E, S (top-left of an 8x11 sprite)
+const ANCHOR = [[-4, -19], [-22, -10], [14, -10], [-4, 1]];
+const CUP = [[-2, -4], [-8, -2], [5, -2], [-2, 1]];
+
+const cat = { x: 96, y: 120, tx: 96, ty: 120, wait: 60, flip: false, meow: 0 };
+let confetti = [];
+let t = 0;
+
+function rect(c, x, y, w, h, col) { c.fillStyle = col; c.fillRect(x, y, w, h); }
+
+function draw() {
+  t++;
+  ctx.setTransform(k, 0, 0, k, 0, 0);
+  ctx.imageSmoothingEnabled = false;
+  const T = tally(state);
+
+  // floor
+  for (let y = TOP; y < H; y += 8) for (let x = 0; x < W; x += 8)
+    rect(ctx, x, y, 8, 8, ((x + y) / 8) % 2 ? '#3a2418' : '#33201a');
+
+  // back wall, sign, counter
+  rect(ctx, 0, 0, W, TOP, '#2b1a14');
+  for (let x = 4; x < W; x += 12) rect(ctx, x, 3, 1, 22, '#331f17');
+  rect(ctx, 52, 4, 88, 16, '#1a1210'); rect(ctx, 53, 5, 86, 14, '#4a2a1a');
+  ctx.font = '8px "Press Start 2P", monospace'; ctx.textBaseline = 'top'; ctx.textAlign = 'center';
+  ctx.fillStyle = '#1a1210'; ctx.fillText('QAMARIA', 97, 9);
+  ctx.fillStyle = '#e7b450'; ctx.fillText('QAMARIA', 96, 8);
+  // lanterns
+  for (const lx of [24, 168]) {
+    const flick = RM ? 0 : (Math.sin(t / 7 + lx) > .6 ? 1 : 0);
+    rect(ctx, lx, 0, 1, 6, '#6b3e26');
+    rect(ctx, lx - 3, 6, 7, 9, '#a87a2a'); rect(ctx, lx - 2, 7, 5, 7, flick ? '#ffd27a' : '#f6c060');
+    ctx.globalAlpha = .08; rect(ctx, lx - 10, 2, 21, 20, '#ffd27a'); ctx.globalAlpha = 1;
+  }
+  rect(ctx, 0, 27, W, 3, '#8a5434'); rect(ctx, 0, 30, W, 10, '#6b3e26'); rect(ctx, 0, 38, W, 2, '#4a2a1a');
+  // dallah on the counter
+  rect(ctx, 150, 17, 6, 10, '#e7b450'); rect(ctx, 151, 14, 4, 3, '#e7b450'); rect(ctx, 152, 12, 2, 2, '#f6d590');
+  rect(ctx, 156, 18, 3, 2, '#e7b450'); rect(ctx, 158, 16, 2, 2, '#e7b450'); rect(ctx, 147, 19, 3, 5, '#a87a2a');
+  rect(ctx, 163, 23, 3, 4, '#f3e6cc'); rect(ctx, 168, 23, 3, 4, '#f3e6cc');
+  rect(ctx, 30, 21, 12, 6, '#3a3a44'); rect(ctx, 32, 17, 8, 4, '#55555f'); // grinder
+
+  // tables
+  for (let i = 0; i < SLOTS; i++) {
+    const { x, y } = cellXY(i), { cx, cy } = tableC(i), s = T.slots[i];
+    if (T.voted.length && s.no === 0) { ctx.globalAlpha = .06 + .05 * s.yes; rect(ctx, x, y, CW, CH, '#e7b450'); ctx.globalAlpha = 1; }
+    if (T.best && T.best.i === i && T.best.no === 0) {
+      const on = RM || Math.floor(t / 20) % 2;
+      if (on) { ctx.strokeStyle = '#e7b450'; ctx.lineWidth = 1; ctx.strokeRect(x + 1.5, y + 1.5, CW - 3, CH - 3); }
+    }
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#b89f86'; ctx.fillText(hourShort(i), x + 3, y + 3);
+
+    const seated = [0, 1, 2, 3].map(seat => (state[seat] ? state[seat].digits[i] : -1));
+    const drawSeat = seat => {
+      const [ax, ay] = ANCHOR[seat], v = seated[seat], px = cx + ax, py = cy + ay;
+      rect(ctx, px, py + 6, 8, 5, v === -1 ? '#3f2a20' : '#4a2a1a');   // chair
+      if (v === YES || v === MAYBE) {
+        const bob = !RM && v === YES && Math.floor((t + seat * 13 + i * 7) / 24) % 2 ? -1 : 0;
+        drawPerson(ctx, px, py + bob, seat, seat === 3, v === YES ? 1 : .45);
+        if (v === MAYBE) { ctx.fillStyle = COLORS[seat]; ctx.fillText('?', px + 1, py - 9 + (RM ? 0 : Math.round(Math.sin(t / 10 + seat)))); }
+      }
+    };
+    for (const seat of [0, 1, 2]) drawSeat(seat);
+    // table top
+    rect(ctx, cx - 11, cy - 5, 22, 10, '#4a2a1a'); rect(ctx, cx - 12, cy - 4, 24, 8, '#6b3e26');
+    rect(ctx, cx - 10, cy - 5, 20, 1, '#8a5434'); rect(ctx, cx - 9, cy + 5, 18, 2, 'rgba(0,0,0,.25)');
+    for (let seat = 0; seat < SEATS; seat++) if (seated[seat] === YES) {
+      const [ux, uy] = CUP[seat];
+      rect(ctx, cx + ux, cy + uy, 3, 3, '#f3e6cc'); rect(ctx, cx + ux + 3, cy + uy + 1, 1, 1, '#f3e6cc');
+      if (!RM) for (let p = 0; p < 2; p++) {
+        const ph = (t / 3 + p * 9 + seat * 5 + i * 3) % 18;
+        ctx.globalAlpha = 1 - ph / 18;
+        rect(ctx, cx + ux + 1 + Math.round(Math.sin((ph + seat) / 3)), cy + uy - 2 - Math.floor(ph / 2), 1, 1, '#f3e6cc');
+        ctx.globalAlpha = 1;
+      }
+    }
+    drawSeat(3);
+  }
+
+  // cursor: corner brackets in my color
+  if (me !== null) {
+    const { x, y } = cellXY(cursor), o = RM ? 1 : 1 + (Math.floor(t / 15) % 2), c = COLORS[me];
+    for (const [bx, by, dx, dy] of [[x + o, y + o, 1, 1], [x + CW - o - 1, y + o, -1, 1], [x + o, y + CH - o - 1, 1, -1], [x + CW - o - 1, y + CH - o - 1, -1, -1]]) {
+      rect(ctx, Math.min(bx, bx + dx * 5), by, 6, 1, c); rect(ctx, bx, Math.min(by, by + dy * 5), 1, 6, c);
+    }
+  }
+
+  // the café cat
+  if (!RM) {
+    if (cat.wait > 0) cat.wait--;
+    else {
+      const dx = cat.tx - cat.x, dy = cat.ty - cat.y;
+      if (Math.abs(dx) + Math.abs(dy) < 1) {
+        cat.wait = 120 + Math.random() * 300;
+        const j = Math.floor(Math.random() * SLOTS), { x, y } = cellXY(j);
+        cat.tx = x + (Math.random() < .5 ? 4 : 52); cat.ty = y + 36;
+      } else if (t % 2 === 0) {
+        cat.x += Math.sign(dx) * Math.min(1, Math.abs(dx)); cat.y += Math.sign(dy) * Math.min(1, Math.abs(dy));
+        if (dx) cat.flip = dx > 0;
+      }
+    }
+  }
+  sprite(ctx, Math.round(cat.x), Math.round(cat.y), CAT, { K: '#141014', Y: '#e7b450' }, cat.flip);
+  if (cat.meow > 0) { cat.meow--; ctx.fillStyle = '#f3e6cc'; ctx.textAlign = 'center'; ctx.fillText('mrrp', Math.round(cat.x) + 4, Math.round(cat.y) - 10); }
+
+  // confetti
+  for (const p of confetti) {
+    p.x += p.vx; p.y += p.vy; p.vy += .03; p.life--;
+    rect(ctx, Math.round(p.x), Math.round(p.y), 2, 2, p.c);
+  }
+  confetti = confetti.filter(p => p.life > 0 && p.y < H);
+
+  requestAnimationFrame(draw);
+}
+
+// --- dialogue box with typewriter ---
+let logTimer = null;
+function say(text) {
+  $('live').textContent = text;
+  const el = $('log');
+  clearInterval(logTimer);
+  if (RM) { el.textContent = text; return; }
+  let n = 0; el.textContent = '';
+  logTimer = setInterval(() => { n += 2; el.textContent = text.slice(0, n); if (n >= text.length) clearInterval(logTimer); }, 16);
+}
+
+// --- chiptune blips (off by default) ---
+let ac = null, soundOn = store.get('qamaria:sound') === true;
+function tone(f, at = 0, dur = .08, vol = .035) {
+  if (!soundOn) return;
+  try {
+    ac = ac || new AudioContext();
+    const o = ac.createOscillator(), g = ac.createGain(), t0 = ac.currentTime + at;
+    o.type = 'square'; o.frequency.value = f;
+    g.gain.setValueAtTime(vol, t0); g.gain.exponentialRampToValueAtTime(.0001, t0 + dur);
+    o.connect(g).connect(ac.destination); o.start(t0); o.stop(t0 + dur);
+  } catch { /* no audio */ }
+}
+const jingle = notes => notes.forEach((f, i) => tone(f, i * .09));
+function setSound(on, quiet) {
+  soundOn = on; store.set('qamaria:sound', on);
+  $('sound').textContent = 'SOUND: ' + (on ? 'ON' : 'OFF'); $('sound').setAttribute('aria-pressed', String(on));
+  if (on && !quiet) jingle([523, 784]);
+}
+
+// --- actions ---
+function cycle(i) {
+  let r = state[me];
+  if (!r) { r = state[me] = { ver: 0, digits: Array(SLOTS).fill(NO) }; bumpOnEdit = false; }
+  else if (bumpOnEdit) { r.ver = (r.ver + 1) % 32; bumpOnEdit = false; }
+  const next = { [NO]: YES, [YES]: MAYBE, [MAYBE]: NO }[r.digits[i]];
+  r.digits[i] = next;
+  persist();
+  if (next === YES) { jingle([660, 880]); say(`${hourLong(i)}: you pull up a chair and order a qishr. ☕`); }
+  else if (next === MAYBE) { tone(520); say(`${hourLong(i)}: maybe. You hover near the table.`); }
+  else { tone(196, 0, .12); say(`${hourLong(i)}: you're out. The chair is empty.`); }
+  refresh();
+}
+
+function exported() { bumpOnEdit = true; }
+
+function refresh() {
+  const T = tally(state);
+  // party chips
+  $('party').innerHTML = '';
+  names.forEach((n, i) => {
+    const s = document.createElement('span');
+    s.style.borderColor = COLORS[i]; s.style.color = COLORS[i];
+    s.className = state[i] ? '' : 'out';
+    s.textContent = (i === me ? '▶ ' : '') + n + (state[i] ? ` v${state[i].ver}` : ' …');
+    $('party').append(s);
+  });
+  // status line
+  const waiting = names.filter((_, i) => !state[i]);
+  let st = `PARTY <b>${T.voted.length}/4</b>`;
+  if (waiting.length) st += ` · WAITING ON ${waiting.map(esc).join(', ')}`;
+  if (T.best && !T.settled) {
+    const b = T.best;
+    st += ` · BEST SO FAR <b>${hourLong(b.i)}</b> (${b.yes} IN${b.maybe ? `, ${b.maybe} MAYBE` : ''}${b.no ? `, ${b.no} OUT` : ''})`;
+    if (!waiting.length && b.no) st += ' · NO HOUR WORKS FOR ALL FOUR YET';
+  }
+  $('status').innerHTML = st;
+  // scoreboard
+  const best = T.best && T.best.no === 0 ? T.best.i : -1;
+  const mark = v => ['·', '?', '☕'][v];
+  $('board').innerHTML = '<tr><th>Hour</th>' + names.map((n, i) => `<th style="color:${COLORS[i]}">${esc(n)}</th>`).join('') + '</tr>' +
+    T.slots.map(s => `<tr${s.i === best ? ' class="best"' : ''}><td>${hourLong(s.i)}</td>` +
+      names.map((_, p) => `<td>${state[p] ? mark(state[p].digits[s.i]) : '–'}</td>`).join('') + '</tr>').join('');
+  // victory
+  $('win').hidden = !T.settled;
+  if (T.settled) {
+    const i = T.best.i, h = FIRST_HOUR + i, pad = n => String(n).padStart(2, '0');
+    $('wintext').textContent = `QUEST COMPLETE! SUN NOV 1 · ${hourLong(i)}–${hourLong(i + 1)}`;
+    $('gcal').href = 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent('Coffee at Qamaria') +
+      `&dates=20261101T${pad(h)}0000/20261101T${pad(h + 1)}0000&ctz=America/New_York&location=` +
+      encodeURIComponent('Qamaria Yemeni Coffee, 2500 Meridian Pkwy, Durham, NC 27713') + '&details=' + encodeURIComponent('With ' + names.join(', '));
+    if (!wasSettled) celebrate(i);
+  }
+  wasSettled = T.settled;
+}
+
+function celebrate(i) {
+  jingle([523, 659, 784, 1047, 784, 1047]);
+  say(`Everyone can make ${hourLong(i)}. The barista starts four cups of qishr. Quest complete!`);
+  if (RM) return;
+  const { cx, cy } = tableC(i);
+  for (let n = 0; n < 60; n++) confetti.push({
+    x: cx, y: cy - 6, vx: (Math.random() - .5) * 2.4, vy: -Math.random() * 2.2 - .4,
+    life: 90 + Math.random() * 60, c: COLORS[n % 4],
+  });
+}
+
+const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+
+function reportMerge(res) {
+  const got = res.filter(r => r.result === 'new' || r.result === 'updated');
+  if (got.length) {
+    jingle([440, 554, 659]);
+    say(got.map(r => `${names[r.seat]} ${r.result === 'new' ? 'joined the party' : 'changed their answers'} (v${r.ver}).`).join(' '));
+  }
+  return got;
+}
+
+function startGame(got) {
+  show('screen-game');
+  fit();
+  wasSettled = tally(state).settled;
+  refresh();
+  if (!reportMerge(got).length) {
+    say(wasSettled
+      ? `Welcome back, ${names[me]}. It's settled: ${hourLong(tally(state).best.i)}.`
+      : `Welcome to Qamaria, ${names[me]}. Each table is an hour on Sunday. Tap every table you could make.`);
+  }
+  if (!started) { started = true; requestAnimationFrame(draw); }
+}
+let started = false;
+
+// --- input ---
+cv.addEventListener('pointerdown', e => {
+  if (me === null) return;
+  const r = cv.getBoundingClientRect();
+  const lx = (e.clientX - r.left) / r.width * W, ly = (e.clientY - r.top) / r.height * H;
+  if (ly < TOP) return;
+  const i = Math.floor((ly - TOP) / CH) * 3 + Math.min(2, Math.floor(lx / CW));
+  if (i < 0 || i >= SLOTS) return;
+  const { cx, cy } = tableC(i);
+  const onTable = Math.abs(lx - cx) < 24 && Math.abs(ly - cy) < 20;   // tables win over the cat
+  if (!onTable && Math.abs(lx - cat.x - 4) < 7 && Math.abs(ly - cat.y - 3) < 6) { cat.meow = 60; tone(880, 0, .05); tone(660, .06, .08); return; }
+  cursor = i; cycle(i);
+});
+cv.addEventListener('keydown', e => {
+  if (me === null) return;
+  const mv = { ArrowLeft: -1, a: -1, ArrowRight: 1, d: 1, ArrowUp: -3, w: -3, ArrowDown: 3, s: 3 }[e.key];
+  if (mv !== undefined) {
+    e.preventDefault();
+    const c = cursor + mv;
+    if (c >= 0 && c < SLOTS && !(Math.abs(mv) === 1 && Math.floor(c / 3) !== Math.floor(cursor / 3))) { cursor = c; tone(330, 0, .03, .02); }
+    const v = state[me] ? state[me].digits[cursor] : NO;
+    $('live').textContent = `${hourLong(cursor)}: ${['out', 'maybe', 'in'][v]}`;
+  } else if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); cycle(cursor); }
+});
+
+// --- dialogs ---
+document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => b.closest('dialog').close()));
+
+$('send').onclick = async () => {
+  const url = linkFor();
+  exported();
+  try {
+    if (navigator.share) { await navigator.share({ title: 'Qamaria Quest', text: 'Pick your hours for coffee at Qamaria, Sun Nov 1:', url }); return; }
+  } catch (err) { if (err && err.name === 'AbortError') return; }
+  try { await navigator.clipboard.writeText(url); say('Party link copied. Paste it in the group chat.'); }
+  catch { window.prompt('Copy this link:', url); }
+};
+
+$('pw').onclick = () => {
+  exported();
+  const mine = state[me];
+  const others = names.map((n, i) => state[i] && i !== me ? `<li><span>${esc(n)}</span><code>${pretty(encodeSeat(i, state[i].ver, state[i].digits))}</code></li>` : '').join('');
+  $('pwbody').innerHTML =
+    (mine ? `<div class="code">${pretty(encodeSeat(me, mine.ver, mine.digits))}</div>` : `<p>Answer at least one table first.</p>`) +
+    (others ? `<p class="tip" style="margin:0 0 4px">Also carrying:</p><ul class="codes">${others}</ul>` : '');
+  $('dlg-pw').showModal();
+};
+$('pwcopy').onclick = async () => {
+  const txt = 'Qamaria Quest\n' + names.map((n, i) => state[i] ? `${n}: ${pretty(encodeSeat(i, state[i].ver, state[i].digits))}` : '').filter(Boolean).join('\n') + '\n' + linkFor();
+  try { await navigator.clipboard.writeText(txt); $('pwcopy').textContent = 'COPIED'; setTimeout(() => { $('pwcopy').textContent = 'COPY ALL'; }, 1200); }
+  catch { window.prompt('Copy:', txt); }
+};
+
+$('cable').onclick = () => {
+  exported();
+  const q = qrcode(0, 'L'); q.addData(linkFor()); q.make();
+  const n = q.getModuleCount(), quiet = 4, px = Math.max(3, Math.floor(280 / (n + quiet * 2)));
+  const c = $('qr'), g = c.getContext('2d');
+  c.width = c.height = (n + quiet * 2) * px;
+  g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.fillStyle = '#000';
+  for (let r = 0; r < n; r++) for (let col = 0; col < n; col++) if (q.isDark(r, col)) g.fillRect((col + quiet) * px, (r + quiet) * px, px, px);
+  $('dlg-cable').showModal();
+  jingle([392, 523]);
+};
+
+$('enter').onclick = () => { $('codes').value = ''; $('results').innerHTML = ''; $('dlg-enter').showModal(); $('codes').focus(); };
+$('enterform').addEventListener('submit', e => {
+  e.preventDefault();
+  const raw = $('codes').value;
+  let codes;
+  const m = raw.match(/#n=([^&\s]*)(?:&s=([^\s]*))?/);
+  if (m) {
+    let ln = null; try { ln = m[1].split(',').map(decodeURIComponent); } catch { /* bad */ }
+    if (!ln || ln.join('\u0001') !== names.join('\u0001')) { $('results').innerHTML = '<li>That link is for a different party.</li>'; tone(150, 0, .2); return; }
+    codes = m[2] ? m[2].split('.') : [];
+  } else codes = findCodes(raw);
+  if (!codes.length) { $('results').innerHTML = '<li>No codes found. They look like 2-K7Q2-0M.</li>'; tone(150, 0, .2); return; }
+  const res = mergeCodes(codes);
+  persist();
+  const word = { new: 'joined ✓', updated: 'updated ✓', same: 'already had it', older: 'older than mine, ignored', bad: 'typo? check character fails ✗' };
+  $('results').innerHTML = res.map(r => `<li>${r.result === 'bad' ? esc(r.code) : esc(names[r.seat])}: ${word[r.result]}</li>`).join('');
+  if (reportMerge(res).length) refresh();
+  else if (res.some(r => r.result === 'bad')) tone(150, 0, .2);
+});
+
+$('howbtn').onclick = () => $('dlg-how').showModal();
+$('sound').onclick = () => setSound(!soundOn);
+$('switch').onclick = () => { me = null; persist(); pickScreen(); };
+$('newparty').onclick = () => { history.replaceState(null, '', location.pathname); newScreen(); };
+
+setSound(soundOn, true);
+$('ics').onclick = () => {
+  const T = tally(state);
+  if (!T.settled) return;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([ics(T.best.i, names)], { type: 'text/calendar' }));
+  a.download = 'qamaria-nov-1.ics';
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+};
+addEventListener('resize', () => { if (!$('screen-game').hidden) fit(); });
+addEventListener('hashchange', boot);
+boot();
+})();
+</script>
+</body>
+</html>
