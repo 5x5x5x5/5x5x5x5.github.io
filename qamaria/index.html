@@ -82,6 +82,7 @@
   #win .px{font-size:13px; line-height:1.8; color:var(--gold); margin:0 0 10px}
   #win p{margin:0 0 12px}
   .tip{font-size:12px; color:var(--muted)}
+  button:disabled{opacity:.5; cursor:default}
   details summary{cursor:pointer; font:10px var(--pixel); color:var(--gold); padding:6px 0}
   table{border-collapse:collapse; width:100%; font-size:13px; margin-top:8px}
   th,td{border-bottom:1px solid var(--edge); padding:4px 6px; text-align:center}
@@ -151,12 +152,18 @@
       </div>
     </div>
 
-    <div class="row" style="margin:0 0 14px">
-      <button id="send">SEND LINK</button>
-      <button id="pw">PASSWORD</button>
-      <button id="cable">LINK CABLE</button>
-      <button id="enter" class="ghost">ENTER PASSWORD</button>
-    </div>
+    <button id="send" style="width:100%; font-size:12px; min-height:52px">SEND</button>
+    <p class="tip" id="sendtip" style="margin:8px 0 14px"></p>
+
+    <details class="box" id="other">
+      <summary>NO SIGNAL? OTHER WAYS</summary>
+      <p class="tip">Same game, different wire. Show a QR code to a phone next to you, or read your password out loud.</p>
+      <div class="row">
+        <button id="cable">QR CODE</button>
+        <button id="pw">PASSWORD</button>
+        <button id="enter" class="ghost">TYPE A PASSWORD</button>
+      </div>
+    </details>
 
     <details class="box">
       <summary>SCOREBOARD</summary>
@@ -176,7 +183,7 @@
 <dialog id="dlg-pw">
   <h2>PASSWORD</h2>
   <div id="pwbody"></div>
-  <p class="tip">Read it aloud, text it, or write it on a napkin. A friend types it into ENTER PASSWORD. Typos are caught by the last character.</p>
+  <p class="tip">Read it aloud, text it, or write it on a napkin. A friend types it in under TYPE A PASSWORD. Typos are caught by the last character.</p>
   <div class="row"><button id="pwcopy">COPY ALL</button><button class="ghost" data-close>CLOSE</button></div>
 </dialog>
 
@@ -188,7 +195,7 @@
 </dialog>
 
 <dialog id="dlg-enter">
-  <h2>ENTER PASSWORD</h2>
+  <h2>TYPE A PASSWORD</h2>
   <form id="enterform">
     <label for="codes">Codes or a party link, any order, any spacing</label>
     <textarea id="codes" rows="3" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="2-K7Q2-0M"></textarea>
@@ -201,8 +208,8 @@
   <h2>HOW TO PLAY</h2>
   <ol style="padding-left:20px; margin:0 0 12px; font-size:14px">
     <li>Each table is an hour. Tap a table to cycle your answer: <b>☕ in</b> → <b>? maybe</b> → <b>out</b>.</li>
-    <li>Pass your state on: <b>SEND LINK</b> to the group chat, <b>LINK CABLE</b> phone-to-phone, or read your <b>PASSWORD</b> aloud.</li>
-    <li>Anything you receive merges in. Order doesn't matter; newer answers win.</li>
+    <li>Press <b>PASS TO …</b> and text the link to that friend (or the group chat). It carries everyone's answers so far.</li>
+    <li>Always open the newest link. Your phone remembers every link you've opened, so nothing gets lost.</li>
     <li>When all four have answered and some hour has nobody out, the quest is won: the hour with the most ☕, earliest on ties.</li>
   </ol>
   <p class="tip">Keyboard: arrows or WASD move, space or Enter changes your answer.</p>
@@ -645,9 +652,16 @@ function refresh() {
     const s = document.createElement('span');
     s.style.borderColor = COLORS[i]; s.style.color = COLORS[i];
     s.className = state[i] ? '' : 'out';
-    s.textContent = (i === me ? '▶ ' : '') + n + (state[i] ? ` v${state[i].ver}` : ' …');
+    s.textContent = (i === me ? '▶ ' : '') + n + (state[i] ? ' ✓' : ' …');
     $('party').append(s);
   });
+  // the one button
+  const nxt = nextUp();
+  $('send').textContent = !state[me] ? 'TAP YOUR HOURS FIRST' : nxt === null ? 'SEND RESULT TO GROUP' : `PASS TO ${names[nxt].toUpperCase()} ▶`;
+  $('send').disabled = !state[me];
+  $('sendtip').textContent = !state[me] ? 'Tap every table (hour) you could make. Tap again for maybe, again for out.'
+    : nxt === null ? 'Everyone has answered. Send it to the group so they see the result.'
+    : `Texts ${names[nxt]} a link with everyone's answers so far. Sending it to the group chat works too.`;
   // status line
   const waiting = names.filter((_, i) => !state[i]);
   let st = `PARTY <b>${T.voted.length}/4</b>`;
@@ -707,7 +721,7 @@ function startGame(got) {
   if (!reportMerge(got).length) {
     say(wasSettled
       ? `Welcome back, ${names[me]}. It's settled: ${hourLong(tally(state).best.i)}.`
-      : `Welcome to Qamaria, ${names[me]}. Each table is an hour on Sunday. Tap every table you could make.`);
+      : `Welcome to Qamaria, ${names[me]}. Each table is an hour on Sunday. Tap every table you could make, then pass it on.`);
   }
   if (!started) { started = true; requestAnimationFrame(draw); }
 }
@@ -741,13 +755,22 @@ cv.addEventListener('keydown', e => {
 // --- dialogs ---
 document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => b.closest('dialog').close()));
 
+// next friend who hasn't answered, going round the table from me
+function nextUp() {
+  for (let d = 1; d < SEATS; d++) { const i = (me + d) % SEATS; if (!state[i]) return i; }
+  return null;
+}
+
 $('send').onclick = async () => {
-  const url = linkFor();
+  const url = linkFor(), nxt = nextUp();
+  const text = nxt === null
+    ? `Coffee at Qamaria, Sun Nov 1: ${tally(state).settled ? 'settled at ' + hourLong(tally(state).best.i) : 'no hour works for all four yet'}.`
+    : `Your turn, ${names[nxt]}: tap the hours you can make for coffee at Qamaria, Sun Nov 1, then pass it on.`;
   exported();
   try {
-    if (navigator.share) { await navigator.share({ title: 'Qamaria Quest', text: 'Pick your hours for coffee at Qamaria, Sun Nov 1:', url }); return; }
+    if (navigator.share) { await navigator.share({ title: 'Qamaria Quest', text, url }); return; }
   } catch (err) { if (err && err.name === 'AbortError') return; }
-  try { await navigator.clipboard.writeText(url); say('Party link copied. Paste it in the group chat.'); }
+  try { await navigator.clipboard.writeText(text + ' ' + url); say(`Link copied. Paste it to ${nxt === null ? 'the group' : names[nxt]}.`); }
   catch { window.prompt('Copy this link:', url); }
 };
 
