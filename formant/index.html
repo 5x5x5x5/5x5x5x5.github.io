@@ -59,6 +59,11 @@
   .row{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
   .fine{font-size:12px; color:var(--muted); margin:14px 0 0}
   .fine a{color:var(--muted)}
+  select{font:15px/1.3 ui-sans-serif,system-ui,sans-serif; color:var(--ink); background:#120828; border:1px solid var(--edge);
+    border-radius:8px; padding:9px 10px; width:100%; min-height:44px}
+  fieldset.lang{display:block}
+  .inv{margin:8px 0 0; font-size:18px; color:var(--gold); letter-spacing:.06em}
+  .inv small{font:12px ui-sans-serif,system-ui,sans-serif; color:var(--muted); letter-spacing:0}
   .best{font:12px var(--ui); color:var(--gold); margin:10px 0 0; letter-spacing:.05em}
   .stats{display:grid; grid-template-columns:auto 1fr; gap:4px 14px; margin:10px 0 16px; font-size:14px}
   .stats dt{color:var(--muted)} .stats dd{margin:0}
@@ -88,6 +93,11 @@
       <legend>MODE</legend>
       <label><input type="radio" name="mode" value="sight" checked> Sight: glyphs show where to fly</label>
       <label><input type="radio" name="mode" value="ear"> Ear: hear the vowel, find it</label>
+    </fieldset>
+    <fieldset class="lang">
+      <legend>LANGUAGE</legend>
+      <select id="lang" aria-label="Vowel inventory"></select>
+      <p id="inv" class="inv ipa"></p>
     </fieldset>
     <fieldset>
       <legend>VOICE</legend>
@@ -142,15 +152,28 @@ const COARSE = matchMedia('(pointer: coarse)').matches;
 const IPA_FONT = '"Charis SIL","Doulos SIL","Gentium Plus","Noto Sans","DejaVu Sans",serif';
 const UI_FONT = 'Orbitron,ui-monospace,Menlo,monospace';
 const COL = {cyan:'#3ff0ff', mag:'#ff4fd8', gold:'#ffd166', red:'#ff3b5c', ink:'#ece9ff', muted:'#a39cd3', bg:'#07020f'};
-const BEST_KEY = 'formant-flyer-best', BEST_KEY_EAR = 'formant-flyer-best-ear', MODE_KEY = 'formant-flyer-mode';
+const BEST_KEY = 'formant-flyer-best', BEST_KEY_EAR = 'formant-flyer-best-ear', MODE_KEY = 'formant-flyer-mode', LANG_KEY = 'formant-flyer-lang';
 let MODE = 'sight';
 const EAR_CUE_LEAD = 1.25;   // seconds before arrival that an ear target sings
 const EAR_RAD_MUL = 1.25;    // ear mode is forgiving on position
 
 /* ---------- vowels ----------
-   [glyph, height row 0..6, backness 0..1, rounding (0 spread, 1 round, -1 either), F1, F2]
-   F1/F2 are approximate adult-male averages for cardinal-ish qualities. */
+   Chart position: height h in [0,1] (close..open), backness b in [0,1]
+   across the row. Rounding: 0 spread, 1 rounded, -1 either.
+   F1/F2(/F3) are approximate adult-male averages. */
 const HEIGHT = ['close','near-close','close-mid','mid','open-mid','near-open','open'];
+const chartDist = (ax, ah, bx, bh) => Math.hypot(ax - bx, (ah - bh)*.75);
+const frontness = (x, h) => { const l = .5*h; return 1 - (x - l)/(1 - l); };
+const defaultF3 = (x, h, r) => 2450 + 520*frontness(x, h)*(1 - h) - (r === 1 ? 260 : 0);
+function describe(h, b, r){
+  const height = HEIGHT[Math.round(h*6)];
+  const back = b <= .1 ? 'front' : b >= .9 ? 'back' : Math.abs(b - .5) <= .15 ? 'central' : b < .5 ? 'near-front' : 'near-back';
+  return `${height} ${back}${r === 1 ? ' rounded' : r === 0 ? ' unrounded' : ''}`;
+}
+function makeVowel(g, h, b, r, f1, f2, f3, name){
+  const x = .5*h + b*(1 - .5*h);
+  return {g, h, x, r, f1, f2, f3: f3 || defaultF3(x, h, r), name: name || describe(h, b, r)};
+}
 const VOWELS = [
   ['i',0,0,0,240,2400],  ['y',0,0,1,235,2100],  ['ɨ',0,.5,0,290,1800], ['ʉ',0,.5,1,290,1500], ['ɯ',0,1,0,300,1390], ['u',0,1,1,250,595],
   ['ɪ',1,.2,0,360,2050], ['ʏ',1,.2,1,360,1750], ['ʊ',1,.8,1,380,950],
@@ -159,56 +182,121 @@ const VOWELS = [
   ['ɛ',4,0,0,610,1900],  ['œ',4,0,1,585,1710],  ['ɜ',4,.5,0,560,1500], ['ɞ',4,.5,1,560,1350], ['ʌ',4,1,0,600,1170], ['ɔ',4,1,1,500,700],
   ['æ',5,0,0,750,1750],  ['ɐ',5,.5,-1,750,1350],
   ['a',6,0,0,850,1610],  ['ɶ',6,0,1,820,1530],  ['ɑ',6,1,0,750,940],  ['ɒ',6,1,1,700,760],
-].map(([gl,hi,b,r,f1,f2]) => {
-  const h = hi/6, x = .5*h + b*(1 - .5*h);
-  const back = b === 0 ? 'front' : b === 1 ? 'back' : b === .5 ? 'central' : b < .5 ? 'near-front' : 'near-back';
-  const name = gl === 'ə' ? 'mid central (schwa)'
-    : `${HEIGHT[hi]} ${back}${r === 1 ? ' rounded' : r === 0 ? ' unrounded' : ''}`;
-  return {g:gl, h, x, r, f1, f2, name};
-});
+].map(([gl,hi,b,r,f1,f2]) => makeVowel(gl, hi/6, b, r, f1, f2, 0, gl === 'ə' ? 'mid central (schwa)' : null));
 const BYG = Object.fromEntries(VOWELS.map(v => [v.g, v]));
-const SPREAD_SET = VOWELS.filter(v => v.r !== 1), ROUND_SET = VOWELS.filter(v => v.r !== 0);
 
-const chartDist = (ax, ah, bx, bh) => Math.hypot(ax - bx, (ah - bh)*.75);
-const frontness = (x, h) => { const l = .5*h; return 1 - (x - l)/(1 - l); };
+/* ---------- language runs ----------
+   Phonemic vowels placed at their typical realisation, with approximate
+   published formant averages. Length marks are labels only. Diphthongs
+   resolve endpoints in the language first, then on the cardinal chart. */
+const LANGS = {
+  ipa: {name:'IPA chart (all vowels)'},
+  es: {name:'Spanish', warm:'i a u', diph:[['a','i'],['a','u'],['e','i'],['o','i']], v:[
+    ['i',0,0,0,290,2200], ['e',.45,.05,0,460,1850], ['a',1,.5,0,700,1350], ['o',.45,1,1,470,900], ['u',0,1,1,320,800]]},
+  ja: {name:'Japanese', warm:'i a ɯ', diph:[['a','i'],['o','i']], v:[
+    ['i',0,0,0,300,2300], ['e',.45,.05,0,470,1950], ['a',.95,.45,0,750,1250], ['o',.45,.95,1,480,850],
+    ['ɯ',.05,.8,0,350,1300,0,'close back compressed']]},
+  it: {name:'Italian', warm:'i a u', diph:[['a','i'],['a','u'],['o','i']], v:[
+    ['i',0,0,0,280,2250], ['e',1/3,0,0,390,2100], ['ɛ',2/3,0,0,560,1850], ['a',1,.5,0,760,1350],
+    ['ɔ',2/3,1,1,560,950], ['o',1/3,1,1,400,800], ['u',0,1,1,300,750]]},
+  fr: {name:'French (oral vowels)', warm:'i a u y', diph:[], v:[
+    ['i',0,0,0,280,2250], ['y',0,0,1,250,1850], ['u',0,1,1,300,750], ['e',1/3,0,0,360,2200], ['ø',1/3,0,1,370,1650],
+    ['o',1/3,1,1,380,800], ['ɛ',2/3,0,0,520,1900], ['œ',2/3,0,1,500,1500], ['ɔ',2/3,1,1,520,950], ['a',1,.2,0,700,1450],
+    ['ə',.5,.5,-1,480,1500,0,'mid central (schwa, often rounded)']]},
+  de: {name:'German', warm:'i a u', diph:[['a','ɪ'],['a','ʊ'],['ɔ','ʏ']], v:[
+    ['i',0,0,0,270,2300], ['ɪ',1/6,.2,0,370,1950], ['y',0,0,1,270,1750], ['ʏ',1/6,.2,1,370,1550], ['u',0,1,1,290,700],
+    ['ʊ',1/6,.8,1,380,950], ['e',1/3,0,0,340,2200], ['ɛ',2/3,0,0,530,1800], ['ø',1/3,0,1,340,1500], ['œ',2/3,0,1,520,1450],
+    ['o',1/3,1,1,350,750], ['ɔ',2/3,1,1,550,1000], ['a',1,.5,0,720,1300], ['ə',.5,.5,-1,470,1500,0,'mid central (schwa)'],
+    ['ɐ',5/6,.5,-1,610,1350,0,'near-open central (vocalised r)']]},
+  'en-us': {name:'English (General American)', warm:'i ɑ u æ', diph:[['e','ɪ'],['o','ʊ'],['a','ɪ'],['a','ʊ'],['ɔ','ɪ']], v:[
+    ['i',0,0,0,270,2290], ['ɪ',1/6,.2,0,390,1990], ['ɛ',.55,.05,0,530,1840], ['æ',5/6,.05,0,660,1720], ['ɑ',1,1,0,730,1090],
+    ['ɔ',.65,1,1,570,840], ['ʌ',.6,.75,0,640,1190], ['ʊ',1/6,.8,1,440,1020], ['u',0,.9,1,300,870],
+    ['ɝ',.45,.5,-1,490,1350,1690,'mid central rhotic (r-coloured)']]},
+  'en-gb': {name:'English (Southern British)', warm:'iː ɑː ɔː', diph:[['e','ɪ'],['a','ɪ'],['ɔ','ɪ'],['ə','ʊ'],['a','ʊ'],['ɪ','ə'],['e','ə'],['ʊ','ə']], v:[
+    ['iː',0,.05,0,280,2250], ['ɪ',1/6,.25,0,380,1900], ['e',.5,.05,0,510,1750], ['æ',.9,.25,0,690,1550], ['ʌ',.8,.55,0,620,1220],
+    ['ɑː',1,.9,0,650,1050], ['ɒ',.85,1,1,560,880], ['ɔː',.4,1,1,420,700], ['ʊ',.2,.65,1,400,1250,0,'near-close near-back rounded (fronting)'],
+    ['uː',0,.55,1,300,1500,0,'close central rounded (fronted GOOSE)'], ['ɜː',2/3,.5,0,500,1400], ['ə',.5,.5,-1,500,1450,0,'mid central (schwa)']]},
+  tr: {name:'Turkish', warm:'i a u', diph:[], v:[
+    ['i',0,0,0,290,2250], ['y',0,0,1,290,1750], ['ɯ',0,.8,0,350,1450], ['u',0,1,1,310,800],
+    ['e',.4,0,0,430,2000], ['ø',.4,0,1,420,1600], ['a',1,.6,0,680,1350], ['o',.4,1,1,450,850]]},
+};
+let LANG = 'ipa';
+
+/* The ship's sound field: the run's vowels, plus cardinal vowels that are
+   not near any of them, so gaps between sparse inventories still sound. */
+let FIELD = null;
+function setField(list){
+  const extra = VOWELS.filter(c => !list.some(v => chartDist(v.x, v.h, c.x, c.h) < .14));
+  const all = list.concat(extra);
+  FIELD = {list, all, U: all.filter(v => v.r !== 1), R: all.filter(v => v.r !== 0)};
+}
+setField(VOWELS);
 
 // Inverse-distance weighting: exact at every vowel, smooth in between.
 function idw(set, x, h){
-  let ws = 0, a = 0, b = 0;
+  let ws = 0, a = 0, b = 0, c = 0;
   for (const v of set){
     const dx = v.x - x, dy = (v.h - h)*.75, d2 = dx*dx + dy*dy + 1e-5, w = 1/(d2*d2);
-    ws += w; a += w*v.f1; b += w*v.f2;
+    ws += w; a += w*v.f1; b += w*v.f2; c += w*v.f3;
   }
-  return [a/ws, b/ws];
+  return [a/ws, b/ws, c/ws];
 }
 function formants(x, h, lip){
-  const [u1, u2] = idw(SPREAD_SET, x, h), [r1, r2] = idw(ROUND_SET, x, h);
-  const f1 = u1 + (r1 - u1)*lip, f2 = u2 + (r2 - u2)*lip;
-  const f3 = Math.max(f2 + 450, 2450 + 520*frontness(x, h)*(1 - h) - 260*lip);
-  return [f1, f2, f3];
+  const u = idw(FIELD.U, x, h), r = idw(FIELD.R, x, h);
+  const f1 = u[0] + (r[0] - u[0])*lip, f2 = u[1] + (r[1] - u[1])*lip, f3 = u[2] + (r[2] - u[2])*lip;
+  return [f1, f2, Math.max(f2 + 300, f3)];
 }
+// Prefer the run's own vowels; fall back to the cardinal chart in the gaps.
 function nearestVowel(x, h, lip){
   const rr = lip > .5 ? 1 : 0;
-  let best = null, bd = .11;
-  for (const v of VOWELS){
-    if (v.r !== -1 && v.r !== rr) continue;
-    const d = chartDist(x, h, v.x, v.h);
-    if (d < bd){ bd = d; best = v; }
-  }
-  return best;
+  const find = (list, lim) => {
+    let best = null, bd = lim;
+    for (const v of list){
+      if (v.r !== -1 && v.r !== rr) continue;
+      const d = chartDist(x, h, v.x, v.h);
+      if (d < bd){ bd = d; best = v; }
+    }
+    return best;
+  };
+  return find(FIELD.list, .11) || find(VOWELS, .11);
 }
 const clampChart = p => { p.h = Math.min(1, Math.max(0, p.h)); p.x = Math.min(1, Math.max(.5*p.h, p.x)); };
 
 /* ---------- stages ---------- */
-const STAGES = [
+const IPA_STAGES = [
   {name:'Cardinal Corners', add:'i a u ɑ',                  need:10, p:.42, v:6.5,  mine:0,   diph:0},
   {name:'Mid Line',         add:'e o ɛ ɔ ə',                need:14, p:.50, v:7.5,  mine:.12, diph:0},
   {name:'Lip Flip',         add:'y ø œ ɯ ɤ ʌ ɒ',            need:18, p:.55, v:8.5,  mine:.15, diph:.08},
   {name:'Centralize',       add:'ɨ ʉ ɘ ɵ ɜ ɞ ɐ ɪ ʏ ʊ æ ɶ',  need:22, p:.58, v:9.5,  mine:.18, diph:.10},
   {name:'Full Trapezoid',   add:'',                         need:Infinity, p:.62, v:10.5, mine:.20, diph:.10},
 ];
-const POOLS = STAGES.map((_, i) => STAGES.slice(0, i + 1).flatMap(s => s.add.split(' ').filter(Boolean)).map(gl => BYG[gl]));
-const DIPHS = [['a','ɪ'],['a','ʊ'],['ɔ','ɪ'],['e','ɪ'],['o','ʊ'],['ɪ','ə'],['ʊ','ə'],['e','ə']];
+const IPA_DIPHS = [['a','ɪ'],['a','ʊ'],['ɔ','ɪ'],['e','ɪ'],['o','ʊ'],['ɪ','ə'],['ʊ','ə'],['e','ə']];
+
+// A run = stages with vowel-object pools, a diphthong list, and the sound field list.
+function buildRun(code){
+  const L = LANGS[code];
+  if (!L.v){
+    const stages = IPA_STAGES.map(s => ({...s, add: s.add.split(' ').filter(Boolean).map(gl => BYG[gl])}));
+    return finishRun(stages, VOWELS, IPA_DIPHS.map(([a, b]) => [BYG[a], BYG[b], a + b]));
+  }
+  const list = L.v.map(([g, h, b, r, f1, f2, f3, name]) => makeVowel(g, h, b, r, f1, f2, f3, name));
+  const by = Object.fromEntries(list.map(v => [v.g, v]));
+  const bare = g => by[g] || by[g + 'ː'] || BYG[g];
+  const warm = L.warm.split(' ').map(g => by[g]);
+  const rest = list.filter(v => !warm.includes(v));
+  const hasD = L.diph.length ? .1 : 0;
+  const stages = [
+    {name:'Warm-up',        add:warm, need:8, p:.45, v:6.5, mine:0, diph:0},
+    {name:'Full Inventory', add:rest, need:Math.max(14, 2*list.length), p:.52, v:8, mine:.12, diph:hasD},
+    {name:'Native Speed',   add:[],   need:Infinity, p:.6, v:10, mine:.18, diph:hasD},
+  ];
+  return finishRun(stages, list, L.diph.map(([a, b]) => [bare(a), bare(b), a + b]));
+}
+function finishRun(stages, list, diphs){
+  const pools = stages.map((_, i) => stages.slice(0, i + 1).flatMap(s => s.add));
+  return {stages, pools, diphs, list, by: Object.fromEntries(list.map(v => [v.g, v]))};
+}
+let RUN = buildRun('ipa');
 const COMBO_MARKS = ['ˑ','ː','ʰ','ʷ','ʲ','ˠ','ˤ'];
 const RAD = .085;            // capture radius, chart units
 const CHARGE_T = .26;        // seconds of matched hold to shatter
@@ -345,7 +433,7 @@ const sfx = {
 function playCue(v, tGame, dur = .5){
   if (!useAC) return;
   const t = Math.max(ac.currentTime, tGame + clock.base);
-  const [f1, f2, f3] = formants(v.x, v.h, v.r === 1 ? 1 : 0);
+  const {f1, f2, f3} = v;
   cue.set(f1*voiceMul, f2*voiceMul, f3*voiceMul, t, .002);
   cue.pitch(165*f0Mul, t, .002);
   const gn = cueBus.gain;
@@ -422,9 +510,9 @@ function newStar(any){
   return {x:-1.6 + rnd()*4.2, h:-1.6 + rnd()*4.2, z: any ? Z0 + rnd()*ZF*1.3 : ZF*1.3};
 }
 
-const bestKey = m => m === 'ear' ? BEST_KEY_EAR : BEST_KEY;
-function readBest(m = MODE){ try { return +localStorage.getItem(bestKey(m)) || 0; } catch { return 0; } }
-function writeBest(v){ try { localStorage.setItem(bestKey(MODE), String(v)); } catch {} }
+const bestKey = (m, l) => l === 'ipa' ? (m === 'ear' ? BEST_KEY_EAR : BEST_KEY) : `formant-flyer-best-${m}-${l}`;
+function readBest(m = MODE, l = LANG){ try { return +localStorage.getItem(bestKey(m, l)) || 0; } catch { return 0; } }
+function writeBest(v){ try { localStorage.setItem(bestKey(MODE, LANG), String(v)); } catch {} }
 
 function newGame(){
   S = {
@@ -432,7 +520,7 @@ function newGame(){
     objs:[], parts:[], trail:[], texts:[], groups:{}, gid:0,
     ship:{x:.55, h:.45, lip:0, lipT:0}, stats:{}, shake:0, flash:0, flashCol:COL.red,
     over:false, paused:false, speedUp:0, densUp:0, diphUntil:-1, lastG:null, nextLife:30,
-    banner:null, kNext:0, best:readBest(), newSet:new Set(STAGES[0].add.split(' ')),
+    banner:null, kNext:0, best:readBest(), newSet:new Set(RUN.stages[0].add.map(v => v.g)),
     ear: MODE === 'ear' && useAC, conf:{},
   };
   const st = stageP();
@@ -440,13 +528,13 @@ function newGame(){
   showBanner();
 }
 const stageP = () => {
-  const st = STAGES[S.stage];
+  const st = RUN.stages[S.stage];
   return {...st, v: st.v + S.speedUp, p: Math.min(.78, st.p + S.densUp)};
 };
 function showBanner(){
-  const st = STAGES[S.stage];
+  const st = RUN.stages[S.stage];
   S.banner = {t: clock.now(), title:`STAGE ${S.stage + 1} · ${st.name.toUpperCase()}`,
-    sub: st.add ? 'new: ' + st.add : 'every vowel · endless'};
+    sub: st.add.length ? 'new: ' + st.add.map(v => v.g).join(' ') : 'every vowel · endless'};
 }
 
 /* ---------- spawning (arrivals land on beats) ---------- */
@@ -467,7 +555,7 @@ function spawnBeat(t, st){
   if (st.mine && rnd() < st.mine) spawnMine(t + BEAT/2, st.v);
 }
 function spawnTarget(t, v){
-  const pool = POOLS[S.stage];
+  const pool = RUN.pools[S.stage];
   for (let tries = 0; tries < 8; tries++){
     // Weight toward vowels the player keeps missing and freshly introduced ones.
     const ws = pool.map(p => 1 + 2*((S.stats[p.g] || {}).miss || 0) + (S.newSet.has(p.g) ? 1.5 : 0));
@@ -492,8 +580,9 @@ function spawnMine(t, v){
   }
 }
 function spawnDiph(t, v){
-  const [a, b] = DIPHS[Math.floor(rnd()*DIPHS.length)], A = BYG[a], B = BYG[b], n = 6, id = ++S.gid;
-  S.groups[id] = {label:a + b, got:0, n, A, B, start:t};
+  if (!RUN.diphs.length) return;
+  const [A, B, label] = RUN.diphs[Math.floor(rnd()*RUN.diphs.length)], n = 6, id = ++S.gid;
+  S.groups[id] = {label, got:0, n, A, B, start:t};
   for (let i = 0; i < n; i++){
     const u = i/(n - 1);
     S.objs.push({type:'d', gid:id, idx:i, v, x:A.x + (B.x - A.x)*u, h:A.h + (B.h - A.h)*u, arr:t + i*BEAT/3, done:false});
@@ -522,7 +611,7 @@ const stat = gl => S.stats[gl] || (S.stats[gl] = {hit:0, miss:0});
 
 function capture(o, now){
   o.done = o.dead = true;
-  const v = BYG[o.g], [px, py, k] = proj(o.x, o.h, Z0 + Math.max(0, o.arr - now)*o.v);
+  const v = RUN.by[o.g], [px, py, k] = proj(o.x, o.h, Z0 + Math.max(0, o.arr - now)*o.v);
   S.combo++; S.maxCombo = Math.max(S.maxCombo, S.combo); S.hits++; S.stageHits++; stat(o.g).hit++;
   const early = o.arr - now > .15 ? 50 : 0, pts = ((S.ear ? 150 : 100) + early)*mult();
   S.score += pts;
@@ -533,11 +622,12 @@ function capture(o, now){
   sfx.chime(S.combo);
   S.newSet.delete(o.g);
   if (S.hits >= S.nextLife){ S.nextLife += 30; if (S.breaths < 5){ S.breaths++; addText(W - 90, 60, '+breath', COL.cyan, 13, UI_FONT); } }
-  if (S.stageHits >= STAGES[S.stage].need && S.stage < STAGES.length - 1){
+  const STG = RUN.stages;
+  if (S.stageHits >= STG[S.stage].need && S.stage < STG.length - 1){
     S.stage++; S.stageHits = 0;
-    STAGES[S.stage].add.split(' ').filter(Boolean).forEach(gl => S.newSet.add(gl));
+    STG[S.stage].add.forEach(v => S.newSet.add(v.g));
     showBanner(); sfx.fanfare();
-  } else if (S.stage === STAGES.length - 1 && S.stageHits % 12 === 0){
+  } else if (S.stage === STG.length - 1 && S.stageHits % 12 === 0){
     S.speedUp += .4; S.densUp += .015;
   }
 }
@@ -555,7 +645,7 @@ function miss(o){
     S.parts.push({kind:'ghost', shape:o.r, col:roundCol(o.r), x:px, y:py, r:RAD*sc*.8, t:0, life:1.4});
     const nv = nearestVowel(S.ship.x, S.ship.h, S.ship.lip);
     if (nv && nv.g !== o.g){ const k = o.g + '>' + nv.g; S.conf[k] = (S.conf[k] || 0) + 1; }
-    playCue(BYG[o.g], clock.now() + .25, .45);
+    playCue(RUN.by[o.g], clock.now() + .25, .45);
   }
   sfx.miss(); hurt();
 }
@@ -918,9 +1008,9 @@ function hud(now){
     else { g.strokeStyle = 'rgba(163,156,211,.5)'; g.lineWidth = 1.5; g.stroke(); }
   }
   // stage progress
-  const st = STAGES[S.stage], bw = Math.min(180, W*.3), bx = W/2 - bw/2, by = top + 2;
+  const st = RUN.stages[S.stage], bw = Math.min(180, W*.3), bx = W/2 - bw/2, by = top + 2;
   g.textAlign = 'center'; g.font = `700 10px ${UI_FONT}`; g.fillStyle = COL.muted;
-  g.fillText(`${S.ear ? 'EAR · ' : ''}${S.stage + 1} · ${st.name.toUpperCase()}`, W/2, by);
+  g.fillText(`${S.ear ? 'EAR · ' : ''}${LANG !== 'ipa' ? LANG.toUpperCase() + ' · ' : ''}${S.stage + 1} · ${st.name.toUpperCase()}`, W/2, by);
   g.fillStyle = 'rgba(163,156,211,.25)'; g.fillRect(bx, by + 16, bw, 3);
   const prog = isFinite(st.need) ? S.stageHits/st.need : (S.stageHits % 12)/12;
   g.fillStyle = COL.gold; g.fillRect(bx, by + 16, bw*prog, 3);
@@ -973,7 +1063,7 @@ function frame(){
   bg(now);
   drawStars(playing || !S ? pdt : 0, vel);
   tunnel(now, vel);
-  chartFrame(S ? POOLS[S.stage] : VOWELS);
+  chartFrame(S ? RUN.pools[S.stage] : RUN.list);
   if (S){ drawMarkers(now); drawObjects(now); drawShip(now); drawParts(); }
   g.restore();
   if (S) hud(now);
@@ -982,6 +1072,14 @@ function frame(){
 
 /* ---------- flow ---------- */
 const show = (id, on) => { $(id).hidden = !on; };
+function selectLang(code){
+  LANG = LANGS[code] ? code : 'ipa';
+  RUN = buildRun(LANG); setField(RUN.list);
+  const d = RUN.diphs.map(x => x[2]).join(' ');
+  $('#inv').innerHTML = RUN.list.map(v => v.g).join(' ') +
+    `<br><small>${RUN.list.length} vowels${d && LANG !== 'ipa' ? ' · diphthongs ' : ''}</small>` + (d && LANG !== 'ipa' ? `<small class="ipa"> ${d}</small>` : '');
+  refreshBest();
+}
 function refreshBest(){
   const b = readBest('sight'), e = readBest('ear');
   $('#bestLine').textContent = [b && `BEST ${b}`, e && `EAR BEST ${e}`].filter(Boolean).join(' · ');
@@ -991,7 +1089,8 @@ async function start(){
   const high = document.querySelector('input[name=voice]:checked').value === 'high';
   f0Mul = high ? 2 : 1; voiceMul = high ? 1.16 : 1;
   MODE = document.querySelector('input[name=mode]:checked').value;
-  try { localStorage.setItem(MODE_KEY, MODE); } catch {}
+  selectLang($('#lang').value);
+  try { localStorage.setItem(MODE_KEY, MODE); localStorage.setItem(LANG_KEY, LANG); } catch {}
   await initAudio();
   if (document.activeElement) document.activeElement.blur();
   newGame();
@@ -1021,13 +1120,13 @@ function gameOver(){
   const nem = Object.entries(S.stats).sort((a, b) => b[1].miss - a[1].miss)[0];
   const rows = [
     ['Mode', S.ear ? 'Ear' : 'Sight'], ['Score', S.score + (S.score >= best && S.score > 0 ? '  ★ new best' : '')], ['Best', best],
-    ['Stage', `${S.stage + 1} · ${STAGES[S.stage].name}`], ['Vowels sung', S.hits], ['Accuracy', acc + '%'],
+    ['Language', LANGS[LANG].name], ['Stage', `${S.stage + 1} · ${RUN.stages[S.stage].name}`], ['Vowels sung', S.hits], ['Accuracy', acc + '%'],
     ['Max combo', S.maxCombo], ['Diphthongs', S.diphs],
   ];
   const conf = Object.entries(S.conf).sort((a, b) => b[1] - a[1])[0];
   if (conf){ const [want, got] = conf[0].split('>');
     rows.push(['Confusion', `heard <span class="ipa">[${want}]</span>, flew to <span class="ipa">[${got}]</span> (${conf[1]}×)`]); }
-  if (nem && nem[1].miss > 0) rows.push(['Nemesis', `<span class="ipa">[${nem[0]}]</span> ${BYG[nem[0]].name} (missed ${nem[1].miss}×)`]);
+  if (nem && nem[1].miss > 0) rows.push(['Nemesis', `<span class="ipa">[${nem[0]}]</span> ${RUN.by[nem[0]].name} (missed ${nem[1].miss}×)`]);
   $('#stats').innerHTML = rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
   show('#over', true); show('#dock', false); $('#lipBtn').hidden = true;
   document.body.classList.remove('playing');
@@ -1099,8 +1198,17 @@ const endDrag = e => { if (drag && drag.id === e.pointerId) drag = null; };
 cvs.addEventListener('pointerup', endDrag);
 cvs.addEventListener('pointercancel', endDrag);
 
-try { const m = localStorage.getItem(MODE_KEY); if (m === 'ear') document.querySelector('input[name=mode][value=ear]').checked = true; } catch {}
-refreshBest();
+$('#lang').innerHTML = Object.entries(LANGS).map(([k, L]) => `<option value="${k}">${L.name}</option>`).join('');
+let savedLang = 'ipa';
+try {
+  const m = localStorage.getItem(MODE_KEY); if (m === 'ear') document.querySelector('input[name=mode][value=ear]').checked = true;
+  savedLang = localStorage.getItem(LANG_KEY) || 'ipa';
+} catch {}
+$('#lang').value = LANGS[savedLang] ? savedLang : 'ipa';
+$('#lang').addEventListener('change', e => selectLang(e.target.value));
+document.querySelectorAll('input[name=mode]').forEach(r => r.addEventListener('change', () => { MODE = r.value; refreshBest(); }));
+MODE = document.querySelector('input[name=mode]:checked').value;
+selectLang($('#lang').value);
 requestAnimationFrame(frame);
 </script>
 </body>
