@@ -81,8 +81,14 @@
       <li><b>Move</b>: mouse, drag, or arrows/WASD. Left–right is front–back, up–down is close–open.</li>
       <li><b>Lips</b>: <kbd>Space</kbd>, click, or the <b>LIPS</b> button toggles spread ⇄ rounded.</li>
       <li>Park on a target's landing ring until it shatters. <span class="c">Cyan ellipse</span> = spread, <span class="m">magenta circle</span> = rounded, <span class="y">gold diamond</span> = either.</li>
+      <li><b>Ear mode</b>: a <b>?</b> sings its vowel once (the ship ducks). Fly to that vowel before it lands; misses show where it was and sing it again.</li>
       <li>Dodge <span class="ipa r">ʔ</span> glottal-stop mines. Trace gold ring trails to sing diphthongs.</li>
     </ul>
+    <fieldset>
+      <legend>MODE</legend>
+      <label><input type="radio" name="mode" value="sight" checked> Sight: glyphs show where to fly</label>
+      <label><input type="radio" name="mode" value="ear"> Ear: hear the vowel, find it</label>
+    </fieldset>
     <fieldset>
       <legend>VOICE</legend>
       <label><input type="radio" name="voice" value="low" checked> Low (≈110 Hz)</label>
@@ -104,7 +110,7 @@
 
 <div id="over" class="overlay" hidden>
   <div class="card">
-    <h2>[ɡeɪm oʊvɚ]</h2>
+    <h2 class="ipa">[ɡeɪm oʊvɚ]</h2>
     <dl class="stats" id="stats"></dl>
     <div class="row"><button id="again">FLY AGAIN ▸</button><button id="toMenu" class="ghost">MENU</button></div>
   </div>
@@ -136,7 +142,10 @@ const COARSE = matchMedia('(pointer: coarse)').matches;
 const IPA_FONT = '"Charis SIL","Doulos SIL","Gentium Plus","Noto Sans","DejaVu Sans",serif';
 const UI_FONT = 'Orbitron,ui-monospace,Menlo,monospace';
 const COL = {cyan:'#3ff0ff', mag:'#ff4fd8', gold:'#ffd166', red:'#ff3b5c', ink:'#ece9ff', muted:'#a39cd3', bg:'#07020f'};
-const BEST_KEY = 'formant-flyer-best';
+const BEST_KEY = 'formant-flyer-best', BEST_KEY_EAR = 'formant-flyer-best-ear', MODE_KEY = 'formant-flyer-mode';
+let MODE = 'sight';
+const EAR_CUE_LEAD = 1.25;   // seconds before arrival that an ear target sings
+const EAR_RAD_MUL = 1.25;    // ear mode is forgiving on position
 
 /* ---------- vowels ----------
    [glyph, height row 0..6, backness 0..1, rounding (0 spread, 1 round, -1 either), F1, F2]
@@ -212,7 +221,7 @@ const VOICE_LINE = [110, 110, 130.81, 123.47];      // A2 A2 C3 B2 (voice f0, lo
 const BASS_MULT = [1,1,2,1,1.5,1,2,1.5];
 const CHIME = [440, 523.25, 587.33, 659.25, 783.99, 880, 1046.5, 1174.66];
 
-let ac = null, useAC = false, master, musBus, sfxBus, voiceBus, voice, NOISE, muted = false;
+let ac = null, useAC = false, master, musBus, sfxBus, voiceBus, voice, cueBus, cue, NOISE, muted = false;
 const mus = {on:false, next:0, step:0};
 let voiceMul = 1, f0Mul = 1;
 
@@ -276,6 +285,8 @@ async function initAudio(){
     sfxBus = ac.createGain(); sfxBus.gain.value = .8; sfxBus.connect(master);
     voiceBus = ac.createGain(); voiceBus.gain.value = 0; voiceBus.connect(master);
     voice = buildVoice(ac, voiceBus);
+    cueBus = ac.createGain(); cueBus.gain.value = 0; cueBus.connect(master);
+    cue = buildVoice(ac, cueBus);
   }
   try {
     await Promise.race([ac.resume(), new Promise(r => setTimeout(r, 600))]);
@@ -329,6 +340,20 @@ const sfx = {
   lips(r){ if (!useAC) return; tone('triangle', r ? 520 : 780, ac.currentTime, .05, .05, sfxBus); },
   fanfare(){ if (!useAC) return; const t = ac.currentTime; [0,4,7,12].forEach((s, i) => tone('square', 440*2**(s/12), t + i*.07, .18, .07, sfxBus)); },
 };
+// Ear-mode cue: a second synth voice sings the target vowel a fifth above
+// the ship while the ship's own voice ducks, so the two never blur.
+function playCue(v, tGame, dur = .5){
+  if (!useAC) return;
+  const t = Math.max(ac.currentTime, tGame + clock.base);
+  const [f1, f2, f3] = formants(v.x, v.h, v.r === 1 ? 1 : 0);
+  cue.set(f1*voiceMul, f2*voiceMul, f3*voiceMul, t, .002);
+  cue.pitch(165*f0Mul, t, .002);
+  const gn = cueBus.gain;
+  gn.setValueAtTime(0, t); gn.linearRampToValueAtTime(.6, t + .03);
+  gn.setValueAtTime(.6, t + dur - .08); gn.linearRampToValueAtTime(0, t + dur);
+  voiceBus.gain.setTargetAtTime(.08, t, .015);
+  voiceBus.gain.setTargetAtTime(.5, t + dur, .05);
+}
 function setMuted(m){
   muted = m; $('#mBtn').textContent = m ? '♪̸' : '♪'; $('#mBtn').setAttribute('aria-label', m ? 'Unmute' : 'Mute');
   if (ac) master.gain.setTargetAtTime(m ? 0 : .9, ac.currentTime, .02);
@@ -397,8 +422,9 @@ function newStar(any){
   return {x:-1.6 + rnd()*4.2, h:-1.6 + rnd()*4.2, z: any ? Z0 + rnd()*ZF*1.3 : ZF*1.3};
 }
 
-function readBest(){ try { return +localStorage.getItem(BEST_KEY) || 0; } catch { return 0; } }
-function writeBest(v){ try { localStorage.setItem(BEST_KEY, String(v)); } catch {} }
+const bestKey = m => m === 'ear' ? BEST_KEY_EAR : BEST_KEY;
+function readBest(m = MODE){ try { return +localStorage.getItem(bestKey(m)) || 0; } catch { return 0; } }
+function writeBest(v){ try { localStorage.setItem(bestKey(MODE), String(v)); } catch {} }
 
 function newGame(){
   S = {
@@ -407,6 +433,7 @@ function newGame(){
     ship:{x:.55, h:.45, lip:0, lipT:0}, stats:{}, shake:0, flash:0, flashCol:COL.red,
     over:false, paused:false, speedUp:0, densUp:0, diphUntil:-1, lastG:null, nextLife:30,
     banner:null, kNext:0, best:readBest(), newSet:new Set(STAGES[0].add.split(' ')),
+    ear: MODE === 'ear' && useAC, conf:{},
   };
   const st = stageP();
   S.kNext = Math.ceil(((ZF - Z0)/st.v + 1.2)/BEAT);
@@ -433,8 +460,10 @@ function spawnTick(now){
 }
 function spawnBeat(t, st){
   if (t < S.diphUntil) return;
+  // Ear mode: targets only on even beats so cues (~0.5 s) never overlap.
+  if (S.ear && Math.round(t/BEAT) % 2) { if (st.mine && rnd() < st.mine) spawnMine(t, st.v); return; }
   if (st.diph && rnd() < st.diph){ spawnDiph(t, st.v); S.diphUntil = t + 2*BEAT + .01; return; }
-  if (rnd() < st.p) spawnTarget(t, st.v);
+  if (rnd() < (S.ear ? Math.min(.9, st.p*1.7) : st.p)) spawnTarget(t, st.v);
   if (st.mine && rnd() < st.mine) spawnMine(t + BEAT/2, st.v);
 }
 function spawnTarget(t, v){
@@ -449,6 +478,7 @@ function spawnTarget(t, v){
     if (clash) continue;
     S.lastG = pick.g;
     S.objs.push({type:'t', g:pick.g, v, x:pick.x, h:pick.h, r:pick.r, arr:t, charge:0, wrong:0, done:false});
+    if (S.ear) playCue(pick, t - EAR_CUE_LEAD);
     return;
   }
 }
@@ -494,7 +524,7 @@ function capture(o, now){
   o.done = o.dead = true;
   const v = BYG[o.g], [px, py, k] = proj(o.x, o.h, Z0 + Math.max(0, o.arr - now)*o.v);
   S.combo++; S.maxCombo = Math.max(S.maxCombo, S.combo); S.hits++; S.stageHits++; stat(o.g).hit++;
-  const early = o.arr - now > .15 ? 50 : 0, pts = (100 + early)*mult();
+  const early = o.arr - now > .15 ? 50 : 0, pts = ((S.ear ? 150 : 100) + early)*mult();
   S.score += pts;
   shatter(px, py, o.g, roundCol(o.r), sc*.11*k);
   addText(px, py - sc*.07, `[${o.g}]`, roundCol(o.r), 26);
@@ -520,6 +550,13 @@ function miss(o){
   o.done = o.dead = true; S.misses++; stat(o.g).miss++;
   const [px, py] = proj(o.x, o.h, Z0);
   addText(px, py - 20, `missed [${o.g}]`, COL.red, 18);
+  if (S.ear){
+    // Reveal where it was and sing it again; log what the player went for.
+    S.parts.push({kind:'ghost', shape:o.r, col:roundCol(o.r), x:px, y:py, r:RAD*sc*.8, t:0, life:1.4});
+    const nv = nearestVowel(S.ship.x, S.ship.h, S.ship.lip);
+    if (nv && nv.g !== o.g){ const k = o.g + '>' + nv.g; S.conf[k] = (S.conf[k] || 0) + 1; }
+    playCue(BYG[o.g], clock.now() + .25, .45);
+  }
   sfx.miss(); hurt();
 }
 function mineHit(o){
@@ -572,7 +609,7 @@ function update(dt, now){
     const tta = o.arr - now, d = chartDist(sh.x, sh.h, o.x, o.h);
     if (o.type === 't'){
       if (tta < .6){
-        const posOK = d < RAD, lipOK = o.r === -1 || (o.r === 1) === (sh.lip > .5);
+        const posOK = d < RAD*(S.ear ? EAR_RAD_MUL : 1), lipOK = o.r === -1 || (o.r === 1) === (sh.lip > .5);
         if (posOK && lipOK) o.charge += dt/CHARGE_T;
         else o.charge = Math.max(0, o.charge - dt*.6);
         o.wrong = posOK && !lipOK ? .25 : Math.max(0, o.wrong - dt);
@@ -707,7 +744,21 @@ function drawMarkers(now){
   for (const o of S.objs){
     if (o.done) continue;
     const tta = o.arr - now, [px, py] = proj(o.x, o.h, Z0);
-    if (o.type === 't'){
+    if (o.type === 't' && S.ear){
+      // No landing ring: only timing, centred on the ship.
+      if (tta > 2.4) continue;
+      const [sx, sy] = proj(S.ship.x, S.ship.h, Z0), a = Math.max(.15, Math.min(1, 1 - tta/2.4));
+      g.globalAlpha = a*.6; g.strokeStyle = '#fff'; g.lineWidth = 1.5;
+      g.beginPath(); g.arc(sx, sy, r*(1.2 + Math.max(0, tta)*1.1), 0, Math.PI*2); g.stroke();
+      if (o.charge > 0){
+        g.globalAlpha = 1; g.beginPath(); g.arc(sx, sy, r*1.6, -Math.PI/2, -Math.PI/2 + o.charge*Math.PI*2);
+        g.strokeStyle = COL.gold; g.lineWidth = 4; g.stroke();
+      }
+      if (o.wrong > 0 && Math.floor(now*10) % 2 === 0){
+        g.globalAlpha = 1; g.font = `700 11px ${UI_FONT}`; g.fillStyle = roundCol(o.r); g.textAlign = 'center'; g.textBaseline = 'middle';
+        g.fillText(o.r === 1 ? 'ROUND LIPS' : 'SPREAD LIPS', sx, sy + r*2.1);
+      }
+    } else if (o.type === 't'){
       const col = roundCol(o.r), a = Math.max(.15, Math.min(1, 1 - tta/2.4));
       g.globalAlpha = a;
       markerShape(px, py, r, o.r); g.strokeStyle = col; g.lineWidth = 2; g.stroke();
@@ -741,8 +792,19 @@ function drawObjects(now){
   const list = S.objs.filter(o => !o.done || o.type === 'm')
     .map(o => ({o, z: Z0 + (o.arr - now)*o.v})).filter(e => e.z > Z0*.55).sort((a, b) => b.z - a.z);
   for (const {o, z} of list){
-    const [px, py, k] = proj(o.x, o.h, z), fade = Math.min(1, (ZF - z)/2.5);
-    if (o.type === 't'){
+    const ear = S.ear && o.type === 't';
+    // Ear targets fly down the ship's own lane so their path gives nothing away.
+    const [px, py, k] = ear ? proj(S.ship.x, S.ship.h, z) : proj(o.x, o.h, z), fade = Math.min(1, (ZF - z)/2.5);
+    if (ear){
+      const size = sc*.11*k, d = size*2, spr = sprite('?', '#ffffff');
+      const sing = o.arr - now < EAR_CUE_LEAD && o.arr - now > EAR_CUE_LEAD - .5;
+      g.globalAlpha = fade*(sing ? 1 : .75);
+      const pul = sing ? 1 + .15*Math.sin(now*40) : 1;
+      g.drawImage(spr, px - d*pul/2, py - d*pul/2, d*pul, d*pul);
+      if (sing){ g.globalAlpha = .6; g.strokeStyle = COL.gold; g.lineWidth = 2;
+        for (let i = 1; i <= 3; i++){ g.beginPath(); g.arc(px, py, size*(.6 + i*.25 + (now*2 % .25)), -.6, .6); g.stroke();
+          g.beginPath(); g.arc(px, py, size*(.6 + i*.25 + (now*2 % .25)), Math.PI - .6, Math.PI + .6); g.stroke(); } }
+    } else if (o.type === 't'){
       const size = sc*.11*k, spr = sprite(o.g, roundCol(o.r)), d = size*2;
       if (z > Z0 + .2){
         const [mx, my] = proj(o.x, o.h, Z0);
@@ -820,6 +882,9 @@ function drawParts(){
       g.drawImage(p.spr, p.sx, p.sy, p.cell, p.cell, -p.d/2, -p.d/2, p.d, p.d); g.restore();
     } else if (p.kind === 'spark'){
       g.globalAlpha = a; g.fillStyle = p.col; g.beginPath(); g.arc(p.x, p.y, 1 + 2.5*a, 0, Math.PI*2); g.fill();
+    } else if (p.kind === 'ghost'){
+      g.globalAlpha = Math.min(1, a*1.6); markerShape(p.x, p.y, p.r, p.shape);
+      g.strokeStyle = p.col; g.lineWidth = 2.5; g.setLineDash([5, 4]); g.stroke(); g.setLineDash([]);
     } else {
       g.globalAlpha = a; g.strokeStyle = p.col; g.lineWidth = 3*a + .5;
       g.beginPath(); g.arc(p.x, p.y, p.r + (1 - a)*p.r*2.2, 0, Math.PI*2); g.stroke();
@@ -855,7 +920,7 @@ function hud(now){
   // stage progress
   const st = STAGES[S.stage], bw = Math.min(180, W*.3), bx = W/2 - bw/2, by = top + 2;
   g.textAlign = 'center'; g.font = `700 10px ${UI_FONT}`; g.fillStyle = COL.muted;
-  g.fillText(`${S.stage + 1} · ${st.name.toUpperCase()}`, W/2, by);
+  g.fillText(`${S.ear ? 'EAR · ' : ''}${S.stage + 1} · ${st.name.toUpperCase()}`, W/2, by);
   g.fillStyle = 'rgba(163,156,211,.25)'; g.fillRect(bx, by + 16, bw, 3);
   const prog = isFinite(st.need) ? S.stageHits/st.need : (S.stageHits % 12)/12;
   g.fillStyle = COL.gold; g.fillRect(bx, by + 16, bw*prog, 3);
@@ -917,11 +982,16 @@ function frame(){
 
 /* ---------- flow ---------- */
 const show = (id, on) => { $(id).hidden = !on; };
-function refreshBest(){ const b = readBest(); $('#bestLine').textContent = b ? `BEST ${b}` : ''; }
+function refreshBest(){
+  const b = readBest('sight'), e = readBest('ear');
+  $('#bestLine').textContent = [b && `BEST ${b}`, e && `EAR BEST ${e}`].filter(Boolean).join(' · ');
+}
 
 async function start(){
   const high = document.querySelector('input[name=voice]:checked').value === 'high';
   f0Mul = high ? 2 : 1; voiceMul = high ? 1.16 : 1;
+  MODE = document.querySelector('input[name=mode]:checked').value;
+  try { localStorage.setItem(MODE_KEY, MODE); } catch {}
   await initAudio();
   if (document.activeElement) document.activeElement.blur();
   newGame();
@@ -930,7 +1000,8 @@ async function start(){
   if (useAC){
     mus.on = true; mus.step = 0; mus.next = clock.base;
     voice.level.gain.cancelScheduledValues(ac.currentTime); voice.level.gain.setValueAtTime(1, ac.currentTime);
-    voiceBus.gain.setTargetAtTime(.5, ac.currentTime, .1);
+    voiceBus.gain.cancelScheduledValues(ac.currentTime); cueBus.gain.cancelScheduledValues(ac.currentTime);
+    cueBus.gain.setValueAtTime(0, ac.currentTime); voiceBus.gain.setTargetAtTime(.5, ac.currentTime, .1);
   }
   show('#menu', false); show('#over', false); show('#pause', false); show('#dock', true);
   $('#lipBtn').hidden = !COARSE; $('#lipBtn').classList.remove('round');
@@ -939,7 +1010,9 @@ async function start(){
 }
 function stopSound(){
   mus.on = false;
-  if (useAC) voiceBus.gain.setTargetAtTime(0, ac.currentTime, .08);
+  if (!useAC) return;
+  const t = ac.currentTime;
+  for (const gn of [voiceBus.gain, cueBus.gain]){ gn.cancelScheduledValues(t); gn.setTargetAtTime(0, t, .08); }
 }
 function gameOver(){
   S.over = true; stopSound();
@@ -947,10 +1020,13 @@ function gameOver(){
   const acc = S.hits + S.misses ? Math.round(100*S.hits/(S.hits + S.misses)) : 0;
   const nem = Object.entries(S.stats).sort((a, b) => b[1].miss - a[1].miss)[0];
   const rows = [
-    ['Score', S.score + (S.score >= best && S.score > 0 ? '  ★ new best' : '')], ['Best', best],
+    ['Mode', S.ear ? 'Ear' : 'Sight'], ['Score', S.score + (S.score >= best && S.score > 0 ? '  ★ new best' : '')], ['Best', best],
     ['Stage', `${S.stage + 1} · ${STAGES[S.stage].name}`], ['Vowels sung', S.hits], ['Accuracy', acc + '%'],
     ['Max combo', S.maxCombo], ['Diphthongs', S.diphs],
   ];
+  const conf = Object.entries(S.conf).sort((a, b) => b[1] - a[1])[0];
+  if (conf){ const [want, got] = conf[0].split('>');
+    rows.push(['Confusion', `heard <span class="ipa">[${want}]</span>, flew to <span class="ipa">[${got}]</span> (${conf[1]}×)`]); }
   if (nem && nem[1].miss > 0) rows.push(['Nemesis', `<span class="ipa">[${nem[0]}]</span> ${BYG[nem[0]].name} (missed ${nem[1].miss}×)`]);
   $('#stats').innerHTML = rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
   show('#over', true); show('#dock', false); $('#lipBtn').hidden = true;
@@ -1023,6 +1099,7 @@ const endDrag = e => { if (drag && drag.id === e.pointerId) drag = null; };
 cvs.addEventListener('pointerup', endDrag);
 cvs.addEventListener('pointercancel', endDrag);
 
+try { const m = localStorage.getItem(MODE_KEY); if (m === 'ear') document.querySelector('input[name=mode][value=ear]').checked = true; } catch {}
 refreshBest();
 requestAnimationFrame(frame);
 </script>
