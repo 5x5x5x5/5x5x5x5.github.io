@@ -87,12 +87,14 @@
       <li><b>Lips</b>: <kbd>Space</kbd>, click, or the <b>LIPS</b> button toggles spread ⇄ rounded.</li>
       <li>Park on a target's landing ring until it shatters. <span class="c">Cyan ellipse</span> = spread, <span class="m">magenta circle</span> = rounded, <span class="y">gold diamond</span> = either.</li>
       <li><b>Ear mode</b>: a <b>?</b> sings its vowel once (the ship ducks). Fly to that vowel before it lands; misses show where it was and sing it again.</li>
+      <li><b>Consonants</b>: place across, manner down; <kbd>Space</kbd> toggles <b>voicing</b>. Clear a whole row or column for a bonus; sweep the <span class="ipa y">ʘ ǀ ǁ ǃ ǂ</span> click trail. Dodge <span class="ipa r">‖</span> pauses.</li>
       <li>Dodge <span class="ipa r">ʔ</span> glottal-stop mines. Trace gold ring trails to sing diphthongs.</li>
     </ul>
     <fieldset>
       <legend>MODE</legend>
       <label><input type="radio" name="mode" value="sight" checked> Sight: glyphs show where to fly</label>
       <label><input type="radio" name="mode" value="ear"> Ear: hear the vowel, find it</label>
+      <label><input type="radio" name="mode" value="cons"> Consonants: the pulmonic chart</label>
     </fieldset>
     <fieldset class="lang">
       <legend>LANGUAGE</legend>
@@ -297,6 +299,144 @@ function finishRun(stages, list, diphs){
   return {stages, pools, diphs, list, by: Object.fromEntries(list.map(v => [v.g, v]))};
 }
 let RUN = buildRun('ipa');
+
+/* ---------- consonant chart (pulmonic) ----------
+   Columns = place, rows = manner. Voiceless sits left in a cell, voiced
+   right, as on the IPA chart. Sonorants are voiced only. Dental /
+   alveolar / postalveolar share one wide cell on the official chart; here
+   t d n r ɾ ɬ ɮ ɹ l sit in the alveolar column. */
+const PLACES = ['bilabial','labiodental','dental','alveolar','postalveolar','retroflex','palatal','velar','uvular','pharyngeal','glottal'];
+const PLACE_TAG = ['BILAB','LAB-DENT','DENT','ALV','POST-ALV','RETRO','PAL','VEL','UVUL','PHAR','GLOT'];
+const PLACE_PL = ['bilabials','labiodentals','dentals','alveolars','postalveolars','retroflexes','palatals','velars','uvulars','pharyngeals','glottals'];
+const MANNERS = ['plosive','nasal','trill','tap or flap','fricative','lateral fricative','approximant','lateral approximant'];
+const MANNER_TAG = ['PLOSIVE','NASAL','TRILL','TAP/FLAP','FRICATIVE','LAT. FRIC.','APPROX.','LAT. APPROX.'];
+const MANNER_PL = ['plosives','nasals','trills','taps','fricatives','lateral fricatives','approximants','lateral approximants'];
+const NC = 11, NM = 8, CW = 1/NC, CH = 1/NM;
+// Cells the IPA chart shades as judged impossible, as `${manner},${place}`.
+const IMPOSSIBLE = new Set(['0,9','1,9','1,10','2,7','2,10','3,7','3,10','5,0','5,1','5,9','5,10','7,0','7,1','7,9','7,10']);
+const CONS = [
+  ['p',0,0,0],['b',0,0,1],['t',3,0,0],['d',3,0,1],['ʈ',5,0,0],['ɖ',5,0,1],['c',6,0,0],['ɟ',6,0,1],
+  ['k',7,0,0],['ɡ',7,0,1],['q',8,0,0],['ɢ',8,0,1],['ʔ',10,0,0],
+  ['m',0,1,1],['ɱ',1,1,1],['n',3,1,1],['ɳ',5,1,1],['ɲ',6,1,1],['ŋ',7,1,1],['ɴ',8,1,1],
+  ['ʙ',0,2,1],['r',3,2,1],['ʀ',8,2,1],
+  ['ⱱ',1,3,1],['ɾ',3,3,1],['ɽ',5,3,1],
+  ['ɸ',0,4,0],['β',0,4,1],['f',1,4,0],['v',1,4,1],['θ',2,4,0],['ð',2,4,1],['s',3,4,0],['z',3,4,1],
+  ['ʃ',4,4,0],['ʒ',4,4,1],['ʂ',5,4,0],['ʐ',5,4,1],['ç',6,4,0],['ʝ',6,4,1],['x',7,4,0],['ɣ',7,4,1],
+  ['χ',8,4,0],['ʁ',8,4,1],['ħ',9,4,0],['ʕ',9,4,1],['h',10,4,0],['ɦ',10,4,1],
+  ['ɬ',3,5,0],['ɮ',3,5,1],
+  ['ʋ',1,6,1],['ɹ',3,6,1],['ɻ',5,6,1],['j',6,6,1],['ɰ',7,6,1],
+  ['l',3,7,1],['ɭ',5,7,1],['ʎ',6,7,1],['ʟ',7,7,1],
+].map(([g, c, m, r]) => {
+  const x = (c + .5)*CW, h = (m + .5)*CH;
+  const name = g === 'ʔ' ? 'voiceless glottal plosive (glottal stop)' : `${r ? 'voiced' : 'voiceless'} ${PLACES[c]} ${MANNERS[m]}`;
+  return {g, c, m, r, x, h, dx: x + (r ? .25 : -.25)*CW, name};
+});
+const CONS_STAGES = [
+  {name:'Familiar Stops',   add:'p b t d k ɡ m n',                          need:12, p:.45, v:6.5,  mine:0,   diph:0},
+  {name:'Hiss & Buzz',      add:'f v s z ʃ ʒ θ ð h ŋ',                      need:16, p:.50, v:7.5,  mine:.10, diph:0},
+  {name:'Liquids & Glides', add:'l r ɾ ɹ j ʔ x ɣ ɬ',                        need:18, p:.55, v:8.5,  mine:.14, diph:.06},
+  {name:'Deep Chart',       add:'ʈ ɖ ɳ ʂ ʐ ɻ ɭ ɽ c ɟ ɲ ç ʝ ʎ q ɢ ɴ χ ʁ ʀ', need:24, p:.58, v:9.5,  mine:.16, diph:.08},
+  {name:'Full Pulmonic',    add:'ɸ β ɱ ⱱ ʙ ɮ ʋ ɰ ʟ ħ ʕ ɦ',                  need:Infinity, p:.62, v:10.5, mine:.18, diph:.08},
+];
+// Click trail bonus: non-pulmonic, so they sweep across a row as gold rings.
+const CLICKS = [['ʘ',0,'bilabial click'],['ǀ',2,'dental click'],['ǁ',3,'alveolar lateral click'],['ǃ',4,'(post)alveolar click'],['ǂ',5,'palatoalveolar click']];
+function buildConsRun(){
+  const by = Object.fromEntries(CONS.map(k => [k.g, k]));
+  const stages = CONS_STAGES.map(s => ({...s, add: s.add.split(' ').map(g => by[g])}));
+  return finishRun(stages, CONS, []);
+}
+const cellOf = (x, h) => [Math.min(NC - 1, Math.max(0, Math.floor(x*NC))), Math.min(NM - 1, Math.max(0, Math.floor(h*NM)))];
+const clamp01 = v => Math.min(1, Math.max(0, v));
+
+/* ---------- boards ----------
+   Everything chart-specific: shape, capture test, labels, engine sound. */
+const VOWEL_BOARD = {
+  id:'vowel', corners:[[0,0],[1,0],[1,1],[.5,1]], clash:.22, mineClear:.2, glyph:.11, mineSize:.09, arc:1.5,
+  btn:'LIPS', hint: r => r === 1 ? 'ROUND LIPS' : 'SPREAD LIPS', mine:{g:'ʔ', text:'ʔ glottal stop!'},
+  clamp: p => clampChart(p),
+  posOK: (sh, o) => chartDist(sh.x, sh.h, o.x, o.h) < RAD*(S.ear ? EAR_RAD_MUL : 1),
+  mineHit: (sh, o) => chartDist(sh.x, sh.h, o.x, o.h) < .075,
+  ringHit: (sh, o) => chartDist(sh.x, sh.h, o.x, o.h) < .09,
+  randPoint(){ const h = rnd(); return {h, x:.5*h + rnd()*(1 - .5*h)}; },
+  label(sh){ const v = nearestVowel(sh.x, sh.h, sh.lip); return v ? {g:v.g, name:v.name} : null; },
+  readout(sh){
+    const v = this.label(sh), [f1, f2] = formants(sh.x, sh.h, sh.lip);
+    return [v ? v.name : 'between vowels', `F1 ${Math.round(f1*voiceMul)} · F2 ${Math.round(f2*voiceMul)} Hz · ${sh.lip > .5 ? 'ROUNDED' : 'SPREAD'}`];
+  },
+  frame: pool => chartFrame(pool),
+  marker: (x, y, r, kind) => markerShape(x, y, r, kind),
+  sound(sh){
+    const [f1, f2, f3] = formants(sh.x, sh.h, sh.lip);
+    voice.set(f1*voiceMul, f2*voiceMul, f3*voiceMul, ac.currentTime);
+    setEngine(1, 0, 1000, 1, 0);
+  },
+};
+const CONS_BOARD = {
+  id:'cons', corners:[[0,0],[1,0],[1,1],[0,1]], clash:.05, mineClear:.12, glyph:.075, mineSize:.065, arc:.95,
+  btn:'VOICE', hint: r => r === 1 ? 'VOICE ON' : 'VOICE OFF', mine:{g:'‖', text:'‖ pause!'},
+  clamp: p => { p.x = clamp01(p.x); p.h = clamp01(p.h); },
+  posOK: (sh, o) => Math.abs(sh.x - o.x) < CW*.62 && Math.abs(sh.h - o.h) < CH*.62,
+  mineHit: (sh, o) => Math.abs(sh.x - o.x) < CW*.5 && Math.abs(sh.h - o.h) < CH*.5,
+  ringHit: (sh, o) => Math.abs(sh.x - o.x) < CW*.75 && Math.abs(sh.h - o.h) < CH*.75,
+  randPoint: () => ({x:(Math.floor(rnd()*NC) + .5)*CW, h:(Math.floor(rnd()*NM) + .5)*CH}),
+  label(sh){
+    const [c, m] = cellOf(sh.x, sh.h), vd = sh.lip > .5 ? 1 : 0;
+    const k = CONS.find(q => q.c === c && q.m === m && q.r === vd);
+    if (k) return {g:k.g, name:k.name};
+    return {g:null, name:`${vd ? 'voiced' : 'voiceless'} ${PLACES[c]} ${MANNERS[m]}` +
+      (IMPOSSIBLE.has(m + ',' + c) ? ' (judged impossible)' : ' (no IPA letter)')};
+  },
+  readout(sh){
+    const [c, m] = cellOf(sh.x, sh.h);
+    return [this.label(sh).name, `${sh.lip > .5 ? 'VOICED' : 'VOICELESS'} · ${PLACE_TAG[c]} · ${MANNER_TAG[m]}`];
+  },
+  frame: pool => consFrame(pool),
+  marker: (x, y, r) => cellShape(x, y, r),
+  sound: sh => consSound(sh),
+};
+let BOARD = VOWEL_BOARD;
+
+/* ---------- consonant engine sound ----------
+   The ship's voice becomes a manner-driven source: voice bar for
+   obstruents, hum for nasals, AM buzz for trills, place-tuned noise for
+   fricatives, a burst per eighth note on the plosive row, a dip per eighth
+   note on the tap row. */
+const FRIC = [[1300,.5],[7000,.8],[6500,.7],[5500,2.5],[3200,2],[2600,2],[3800,2],[1600,3],[1100,3],[900,1.5],[1800,.4]];
+const FRIC_G = [.5,.5,.45,1,1,.9,.8,.8,.8,.6,.35];
+const APPROX_F = [[300,800,2200],[300,1000,2200],[320,1500,2500],[350,1300,1700],[330,1600,2100],[350,1300,1550],
+  [260,2200,3000],[320,1300,2400],[400,1100,2400],[600,1100,2400],[500,1500,2500]];
+const NAS_F2 = [900,1000,1300,1500,1600,1500,2000,1900,1700,1500,1500];
+const CONS_AMT = [.22,.9,.7,.9,.35,.35,.9,.9];
+function consFormants(c, m){
+  if (m === 1) return [250, NAS_F2[c], 2500];
+  if (m === 6) return APPROX_F[c];
+  if (m === 7) return [360, Math.max(1000, APPROX_F[c][1]*.9), 2600];
+  if (m === 2 || m === 3) return [450, 1400, c === 3 ? 1900 : 2500];
+  return [250, 1100, 2500];
+}
+function consSound(sh){
+  const [c, m] = cellOf(sh.x, sh.h), v = sh.lip, F = consFormants(c, m);
+  voice.set(F[0]*voiceMul, F[1]*voiceMul, F[2]*voiceMul, ac.currentTime, .03);
+  let fric = 0, [fq, q] = FRIC[c];
+  if (m === 4) fric = FRIC_G[c]*(1 - .35*v);
+  else if (m === 5){ fric = .7*(1 - .35*v); fq = 4200; q = 1.2; }
+  else if (m !== 0){ fric = (1 - v)*.2; fq = 1500; q = .5; }   // voiceless sonorant: breathy
+  setEngine(CONS_AMT[m]*v, fric, fq, q, m === 2 ? .45 : 0);
+}
+function consStep(t){
+  const [c, m] = cellOf(S.ship.x, S.ship.h), v = S.ship.lip;
+  if (m === 0){
+    noiseHit(t, .03, .55, 'bandpass', FRIC[c][0], voice.level, 1.2);
+    if (v > .5) tone('sine', 120, t, .05, .25, voice.level, 60);
+  } else if (m === 3 && v > .5){
+    voice.amt.gain.setValueAtTime(0, t); voice.amt.gain.setTargetAtTime(CONS_AMT[3]*v, t + .03, .01);
+  }
+}
+function setEngine(amt, fric, fq, q, trill){
+  const t = ac.currentTime, tc = .03;
+  voice.amt.gain.setTargetAtTime(amt*(1 - trill), t, tc); eng.lfo.gain.setTargetAtTime(amt*trill, t, tc);
+  eng.fric.gain.setTargetAtTime(fric, t, tc); eng.bp.frequency.setTargetAtTime(fq, t, tc); eng.bp.Q.setTargetAtTime(q, t, tc);
+}
 const COMBO_MARKS = ['ˑ','ː','ʰ','ʷ','ʲ','ˠ','ˤ'];
 const RAD = .085;            // capture radius, chart units
 const CHARGE_T = .26;        // seconds of matched hold to shatter
@@ -309,7 +449,7 @@ const VOICE_LINE = [110, 110, 130.81, 123.47];      // A2 A2 C3 B2 (voice f0, lo
 const BASS_MULT = [1,1,2,1,1.5,1,2,1.5];
 const CHIME = [440, 523.25, 587.33, 659.25, 783.99, 880, 1046.5, 1174.66];
 
-let ac = null, useAC = false, master, musBus, sfxBus, voiceBus, voice, cueBus, cue, NOISE, muted = false;
+let ac = null, useAC = false, master, musBus, sfxBus, voiceBus, voice, cueBus, cue, NOISE, muted = false, eng = null;
 const mus = {on:false, next:0, step:0};
 let voiceMul = 1, f0Mul = 1;
 
@@ -343,11 +483,12 @@ function buildVoice(ctx, out){
   });
   const norm = ctx.createGain(); sum.connect(norm);
   const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 5500;
-  const level = ctx.createGain(); level.gain.value = 1;
-  norm.connect(lp).connect(level).connect(out);
+  const amt = ctx.createGain(); amt.gain.value = 1;     // engine amount (consonant mode)
+  const level = ctx.createGain(); level.gain.value = 1;   // hard cut (glottal-stop mine)
+  norm.connect(lp).connect(amt).connect(level).connect(out);
   osc.start(); vib.start(); ns.start();
   return {
-    level,
+    level, amt,
     set(f1, f2, f3, t, tc = .025){
       [f1, f2, f3].forEach((f, i) => {
         const {a, b, bw} = forms[i];
@@ -375,6 +516,15 @@ async function initAudio(){
     voice = buildVoice(ac, voiceBus);
     cueBus = ac.createGain(); cueBus.gain.value = 0; cueBus.connect(master);
     cue = buildVoice(ac, cueBus);
+    // consonant engine: place-tuned noise and a trill LFO, both inside the ship voice's cut
+    const ns = ac.createBufferSource(); ns.buffer = NOISE; ns.loop = true;
+    const bp = ac.createBiquadFilter(); bp.type = 'bandpass';
+    const fric = ac.createGain(); fric.gain.value = 0;
+    ns.connect(bp).connect(fric).connect(voice.level); ns.start();
+    const lo = ac.createOscillator(); lo.frequency.value = 26;
+    const lfo = ac.createGain(); lfo.gain.value = 0;
+    lo.connect(lfo).connect(voice.amt.gain); lo.start();
+    eng = {bp, fric, lfo};
   }
   try {
     await Promise.race([ac.resume(), new Promise(r => setTimeout(r, 600))]);
@@ -413,6 +563,7 @@ function scheduleMusic(){
     if (i === 2 || i === 6){ noiseHit(t, .14, .28, 'bandpass', 1900, musBus, .8); tone('triangle', 190, t, .1, .12, musBus, 120); }
     bassNote(CHORD_ROOTS[bar]*BASS_MULT[i], t);
     if (i === 0) voice.pitch(VOICE_LINE[bar]*f0Mul, t);
+    if (S && S.cons && !S.over) consStep(t);
     mus.step++; mus.next += STEP;
   }
 }
@@ -426,6 +577,13 @@ const sfx = {
     voice.level.gain.cancelScheduledValues(t); voice.level.gain.setValueAtTime(0, t); voice.level.gain.setTargetAtTime(1, t + .35, .05); },
   blip(i){ if (!useAC) return; tone('square', 660*2**(i/6), ac.currentTime, .07, .07, sfxBus); },
   lips(r){ if (!useAC) return; tone('triangle', r ? 520 : 780, ac.currentTime, .05, .05, sfxBus); },
+  click(i){ if (!useAC) return; const t = ac.currentTime;
+    noiseHit(t, .012, .6, 'bandpass', [900,2600,1800,1400,3200][i], sfxBus, 4);
+    tone('sine', [700,2000,1500,1100,2600][i], t, .03, .3, sfxBus, 200); },
+  cons(k){ if (!useAC) return; const t = ac.currentTime, [fq, q] = FRIC[k.c];
+    if (k.m === 0) noiseHit(t, .05, .5, 'bandpass', fq, sfxBus, 1.2);
+    else if (k.m === 4 || k.m === 5) noiseHit(t, .25, .3, 'bandpass', k.m === 5 ? 4200 : fq, sfxBus, q);
+    else if (k.m === 1) tone('sine', 140, t, .35, .25, sfxBus); },
   fanfare(){ if (!useAC) return; const t = ac.currentTime; [0,4,7,12].forEach((s, i) => tone('square', 440*2**(s/12), t + i*.07, .18, .07, sfxBus)); },
 };
 // Ear-mode cue: a second synth voice sings the target vowel a fifth above
@@ -457,14 +615,14 @@ const clock = {
 };
 
 /* ---------- canvas & projection ---------- */
-let W = 0, H = 0, DPR = 1, cx = 0, cy = 0, sc = 1;
+let W = 0, H = 0, DPR = 1, cx = 0, cy = 0, sc = 1, scBase = 1, zoom = 1, pan = 0;
 const sway = {x:0, y:0};
 function resize(){
   DPR = Math.min(2, window.devicePixelRatio || 1);
   W = innerWidth; H = innerHeight;
   cvs.width = Math.round(W*DPR); cvs.height = Math.round(H*DPR);
   g.setTransform(DPR, 0, 0, DPR, 0, 0);
-  sc = Math.min(W*.84, H*.6/.75);
+  scBase = Math.min(W*.84, H*.6/.75); sc = scBase*zoom;
   cx = W/2; cy = H*.53;
 }
 addEventListener('resize', resize);
@@ -474,9 +632,9 @@ resize();
 // leaves the near plane fixed, so the pointer mapping stays exact.
 function proj(x, h, z){
   const k = Z0/z, m = 1 - k;
-  return [cx + (x - .5)*sc*k + sway.x*m, cy + (h - .5)*.75*sc*k + sway.y*m, k];
+  return [cx + (x - .5 - pan)*sc*k + sway.x*m, cy + (h - .5)*.75*sc*k + sway.y*m, k];
 }
-function unproj(px, py){ return {x:(px - cx)/sc + .5, h:(py - cy)/(.75*sc) + .5}; }
+function unproj(px, py){ return {x:(px - cx)/sc + .5 + pan, h:(py - cy)/(.75*sc) + .5}; }
 
 /* ---------- glyph sprites (pre-rendered glow) ---------- */
 const sprites = new Map();
@@ -510,7 +668,7 @@ function newStar(any){
   return {x:-1.6 + rnd()*4.2, h:-1.6 + rnd()*4.2, z: any ? Z0 + rnd()*ZF*1.3 : ZF*1.3};
 }
 
-const bestKey = (m, l) => l === 'ipa' ? (m === 'ear' ? BEST_KEY_EAR : BEST_KEY) : `formant-flyer-best-${m}-${l}`;
+const bestKey = (m, l) => m === 'cons' ? 'formant-flyer-best-cons' : l === 'ipa' ? (m === 'ear' ? BEST_KEY_EAR : BEST_KEY) : `formant-flyer-best-${m}-${l}`;
 function readBest(m = MODE, l = LANG){ try { return +localStorage.getItem(bestKey(m, l)) || 0; } catch { return 0; } }
 function writeBest(v){ try { localStorage.setItem(bestKey(MODE, LANG), String(v)); } catch {} }
 
@@ -521,7 +679,7 @@ function newGame(){
     ship:{x:.55, h:.45, lip:0, lipT:0}, stats:{}, shake:0, flash:0, flashCol:COL.red,
     over:false, paused:false, speedUp:0, densUp:0, diphUntil:-1, lastG:null, nextLife:30,
     banner:null, kNext:0, best:readBest(), newSet:new Set(RUN.stages[0].add.map(v => v.g)),
-    ear: MODE === 'ear' && useAC, conf:{},
+    ear: MODE === 'ear' && useAC, cons: MODE === 'cons', conf:{}, lines:{}, clears:0,
   };
   const st = stageP();
   S.kNext = Math.ceil(((ZF - Z0)/st.v + 1.2)/BEAT);
@@ -534,7 +692,7 @@ const stageP = () => {
 function showBanner(){
   const st = RUN.stages[S.stage];
   S.banner = {t: clock.now(), title:`STAGE ${S.stage + 1} · ${st.name.toUpperCase()}`,
-    sub: st.add.length ? 'new: ' + st.add.map(v => v.g).join(' ') : 'every vowel · endless'};
+    sub: st.add.length ? 'new: ' + st.add.map(v => v.g).join(' ') : `every ${S.cons ? 'consonant' : 'vowel'} · endless`};
 }
 
 /* ---------- spawning (arrivals land on beats) ---------- */
@@ -550,7 +708,7 @@ function spawnBeat(t, st){
   if (t < S.diphUntil) return;
   // Ear mode: targets only on even beats so cues (~0.5 s) never overlap.
   if (S.ear && Math.round(t/BEAT) % 2) { if (st.mine && rnd() < st.mine) spawnMine(t, st.v); return; }
-  if (st.diph && rnd() < st.diph){ spawnDiph(t, st.v); S.diphUntil = t + 2*BEAT + .01; return; }
+  if (st.diph && rnd() < st.diph){ if (S.cons) spawnClicks(t, st.v); else spawnDiph(t, st.v); S.diphUntil = t + (S.cons ? 2.5 : 2)*BEAT + .01; return; }
   if (rnd() < (S.ear ? Math.min(.9, st.p*1.7) : st.p)) spawnTarget(t, st.v);
   if (st.mine && rnd() < st.mine) spawnMine(t + BEAT/2, st.v);
 }
@@ -562,18 +720,18 @@ function spawnTarget(t, v){
     let r = rnd()*ws.reduce((a, b) => a + b, 0), pick = pool[0];
     for (let i = 0; i < pool.length; i++){ r -= ws[i]; if (r <= 0){ pick = pool[i]; break; } }
     if (pick.g === S.lastG) continue;
-    const clash = S.objs.some(o => o.type === 't' && !o.done && Math.abs(o.arr - t) < .75 && chartDist(o.x, o.h, pick.x, pick.h) < .22);
+    const clash = S.objs.some(o => o.type === 't' && !o.done && Math.abs(o.arr - t) < .75 && chartDist(o.x, o.h, pick.x, pick.h) < BOARD.clash);
     if (clash) continue;
     S.lastG = pick.g;
-    S.objs.push({type:'t', g:pick.g, v, x:pick.x, h:pick.h, r:pick.r, arr:t, charge:0, wrong:0, done:false});
+    S.objs.push({type:'t', g:pick.g, v, x:pick.x, h:pick.h, dx:pick.dx, c:pick.c, m:pick.m, r:pick.r, arr:t, charge:0, wrong:0, done:false});
     if (S.ear) playCue(pick, t - EAR_CUE_LEAD);
     return;
   }
 }
 function spawnMine(t, v){
   for (let tries = 0; tries < 10; tries++){
-    const p = rnd() < .35 ? {x:S.ship.x, h:S.ship.h} : (() => { const h = rnd(); return {h, x:.5*h + rnd()*(1 - .5*h)}; })();
-    const bad = S.objs.some(o => o.type !== 'm' && Math.abs(o.arr - t) < 1.2*BEAT && chartDist(o.x, o.h, p.x, p.h) < .2);
+    const p = rnd() < .35 ? {x:S.ship.x, h:S.ship.h} : BOARD.randPoint();
+    const bad = S.objs.some(o => o.type !== 'm' && Math.abs(o.arr - t) < 1.2*BEAT && chartDist(o.x, o.h, p.x, p.h) < BOARD.mineClear);
     if (bad) continue;
     S.objs.push({type:'m', v, x:p.x, h:p.h, arr:t, done:false});
     return;
@@ -587,6 +745,12 @@ function spawnDiph(t, v){
     const u = i/(n - 1);
     S.objs.push({type:'d', gid:id, idx:i, v, x:A.x + (B.x - A.x)*u, h:A.h + (B.h - A.h)*u, arr:t + i*BEAT/3, done:false});
   }
+}
+function spawnClicks(t, v){
+  const h = (Math.floor(rnd()*NM) + .5)*CH, id = ++S.gid;
+  const pts = CLICKS.map(([gl, c, name]) => ({gl, name, x:(c + .5)*CW, h}));
+  S.groups[id] = {label:'clicks', kind:'click', got:0, n:pts.length, A:pts[0], B:pts[pts.length - 1], start:t};
+  pts.forEach((p, i) => S.objs.push({type:'d', gid:id, idx:i, glyph:p.gl, gname:p.name, v, x:p.x, h:p.h, arr:t + i*BEAT/2, done:false}));
 }
 
 /* ---------- events ---------- */
@@ -611,11 +775,12 @@ const stat = gl => S.stats[gl] || (S.stats[gl] = {hit:0, miss:0});
 
 function capture(o, now){
   o.done = o.dead = true;
-  const v = RUN.by[o.g], [px, py, k] = proj(o.x, o.h, Z0 + Math.max(0, o.arr - now)*o.v);
+  const v = RUN.by[o.g], [px, py, k] = proj(o.dx ?? o.x, o.h, Z0 + Math.max(0, o.arr - now)*o.v);
   S.combo++; S.maxCombo = Math.max(S.maxCombo, S.combo); S.hits++; S.stageHits++; stat(o.g).hit++;
   const early = o.arr - now > .15 ? 50 : 0, pts = ((S.ear ? 150 : 100) + early)*mult();
   S.score += pts;
-  shatter(px, py, o.g, roundCol(o.r), sc*.11*k);
+  shatter(px, py, o.g, roundCol(o.r), sc*BOARD.glyph*k);
+  if (S.cons){ consFx(v, px, py); lineClear(v); }
   addText(px, py - sc*.07, `[${o.g}]`, roundCol(o.r), 26);
   addText(px, py - sc*.07 + 24, v.name, COL.ink, 12, UI_FONT);
   addText(px, py + sc*.06, `+${pts}`, COL.gold, 14, UI_FONT, .8);
@@ -629,6 +794,32 @@ function capture(o, now){
     showBanner(); sfx.fanfare();
   } else if (S.stage === STG.length - 1 && S.stageHits % 12 === 0){
     S.speedUp += .4; S.densUp += .015;
+  }
+}
+// Manner-specific flourish: plosives kick, fricatives hiss, nasals ripple.
+function consFx(k, px, py){
+  const col = roundCol(k.r);
+  sfx.cons(k);
+  if (k.m === 0 || k.m === 2) S.shake = Math.max(S.shake, RM ? 0 : k.m === 0 ? .22 : .12);
+  else if (k.m === 4 || k.m === 5) for (let i = 0; i < 26; i++){
+    const a = rnd()*Math.PI*2, sp = 380 + rnd()*380;
+    S.parts.push({kind:'streak', col, x:px, y:py, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp, t:0, life:.35 + rnd()*.2});
+  }
+  else if (k.m === 1) for (let i = 0; i < 3; i++) S.parts.push({kind:'ring', col, x:px, y:py, r:sc*.03, t:-i*.12, life:.7});
+}
+// Capturing every pool consonant of a row (manner) or column (place) pays out.
+function lineClear(k){
+  const pool = RUN.pools[S.stage];
+  for (const [kind, key, names] of [['m', k.m, MANNER_PL], ['c', k.c, PLACE_PL]]){
+    const need = pool.filter(q => q[kind] === key);
+    if (need.length < 2) continue;
+    const set = (S.lines[kind + key] ||= new Set()); set.add(k.g);
+    if (!need.every(q => set.has(q.g))) continue;
+    set.clear(); S.clears++;
+    const pts = 150*need.length*mult(); S.score += pts;
+    addText(W/2, H*.36, `${names[key].toUpperCase()} CLEARED!`, COL.gold, W < 420 ? 16 : 22, UI_FONT, 1.6);
+    addText(W/2, H*.36 + 26, `+${pts}`, COL.gold, 15, UI_FONT, 1.4);
+    S.flash = Math.max(S.flash, .3); S.flashCol = COL.gold; sfx.fanfare();
   }
 }
 function hurt(){
@@ -651,16 +842,24 @@ function miss(o){
 }
 function mineHit(o){
   const [px, py] = proj(o.x, o.h, Z0);
-  addText(px, py - 24, 'ʔ glottal stop!', COL.red, 20);
+  addText(px, py - 24, BOARD.mine.text, COL.red, 20);
   S.shake = RM ? 0 : .5; sfx.mine(); hurt();
   for (let i = 0; i < 20; i++){ const a = rnd()*Math.PI*2, sp = 100 + rnd()*300;
     S.parts.push({kind:'spark', col:COL.red, x:px, y:py, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp, t:0, life:.5}); }
 }
 function ringPass(o, hit){
   const gr = S.groups[o.gid], [px, py] = proj(o.x, o.h, Z0);
-  if (hit){ gr.got++; sfx.blip(o.idx); S.parts.push({kind:'ring', col:COL.gold, x:px, y:py, r:sc*.03, t:0, life:.35}); }
+  if (hit){
+    gr.got++; S.parts.push({kind:'ring', col:COL.gold, x:px, y:py, r:sc*.03, t:0, life:.35});
+    if (gr.kind === 'click'){ sfx.click(o.idx); addText(px, py - 20, o.glyph, COL.gold, 22); addText(px, py + 4, o.gname, COL.ink, 10, UI_FONT, .9); }
+    else sfx.blip(o.idx);
+  }
   if (o.idx === gr.n - 1){
-    if (gr.got === gr.n){
+    if (gr.got === gr.n && gr.kind === 'click'){
+      const pts = 600*mult(); S.score += pts; S.diphs++;
+      addText(px, py - 44, 'click bonus!', COL.gold, 22, UI_FONT);
+      addText(px, py - 18, `+${pts}`, COL.gold, 14, UI_FONT, .8);
+    } else if (gr.got === gr.n){
       const pts = 400*mult(); S.score += pts; S.diphs++;
       addText(px, py - 30, `[${gr.label}] diphthong!`, COL.gold, 24);
       addText(px, py - 4, `+${pts}`, COL.gold, 14, UI_FONT, .8);
@@ -684,22 +883,18 @@ function update(dt, now){
   const sh = S.ship;
   const kx = (keys.has('r') ? 1 : 0) - (keys.has('l') ? 1 : 0), kh = (keys.has('d') ? 1 : 0) - (keys.has('u') ? 1 : 0);
   if (kx || kh){ sh.x += kx*1.3*dt; sh.h += kh*1.3/.75*dt; }
-  clampChart(sh);
+  BOARD.clamp(sh);
   sh.lip += (sh.lipT - sh.lip)*Math.min(1, dt*14);
-
-  if (useAC){
-    const [f1, f2, f3] = formants(sh.x, sh.h, sh.lip);
-    voice.set(f1*voiceMul, f2*voiceMul, f3*voiceMul, ac.currentTime);
-  }
+  if (useAC) BOARD.sound(sh);
   scheduleMusic();
   spawnTick(now);
 
   for (const o of S.objs){
     if (o.done) continue;
-    const tta = o.arr - now, d = chartDist(sh.x, sh.h, o.x, o.h);
+    const tta = o.arr - now;
     if (o.type === 't'){
       if (tta < .6){
-        const posOK = d < RAD*(S.ear ? EAR_RAD_MUL : 1), lipOK = o.r === -1 || (o.r === 1) === (sh.lip > .5);
+        const posOK = BOARD.posOK(sh, o), lipOK = o.r === -1 || (o.r === 1) === (sh.lip > .5);
         if (posOK && lipOK) o.charge += dt/CHARGE_T;
         else o.charge = Math.max(0, o.charge - dt*.6);
         o.wrong = posOK && !lipOK ? .25 : Math.max(0, o.wrong - dt);
@@ -709,8 +904,8 @@ function update(dt, now){
       }
     } else if (tta <= 0){
       o.done = true;
-      if (o.type === 'm'){ if (d < .075){ mineHit(o); if (S.over) return; } }
-      else ringPass(o, d < .09);
+      if (o.type === 'm'){ if (BOARD.mineHit(sh, o)){ mineHit(o); if (S.over) return; } }
+      else ringPass(o, BOARD.ringHit(sh, o));
     }
   }
   S.objs = S.objs.filter(o => !o.dead && o.arr - now > -.12);
@@ -723,7 +918,7 @@ function update(dt, now){
 
   for (const p of S.parts){
     p.t += dt;
-    if (p.kind !== 'ring'){ p.x += p.vx*dt; p.y += p.vy*dt; p.vx *= .985; p.vy = p.vy*.985 + 260*dt; }
+    if (p.kind !== 'ring' && p.kind !== 'ghost'){ p.x += p.vx*dt; p.y += p.vy*dt; p.vx *= .985; p.vy = p.vy*.985 + 260*dt; }
     if (p.kind === 'shard') p.rot += p.vr*dt;
   }
   S.parts = S.parts.filter(p => p.t < p.life);
@@ -767,10 +962,9 @@ function drawStars(dt, vel){
     g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1); g.stroke();
   }
 }
-const CORNERS = [[0,0],[1,0],[1,1],[.5,1]];
 function trapPath(z){
   g.beginPath();
-  CORNERS.forEach(([x, h], i) => { const [px, py] = proj(x, h, z); i ? g.lineTo(px, py) : g.moveTo(px, py); });
+  BOARD.corners.forEach(([x, h], i) => { const [px, py] = proj(x, h, z); i ? g.lineTo(px, py) : g.moveTo(px, py); });
   g.closePath();
 }
 function tunnel(now, vel){
@@ -785,7 +979,7 @@ function tunnel(now, vel){
     g.strokeStyle = `hsla(${hue},100%,62%,${a*.35})`; g.lineWidth = 6*(Z0/z) + 1; g.stroke();
     g.strokeStyle = `hsla(${hue},100%,72%,${a})`; g.lineWidth = 1.2; g.stroke();
   }
-  for (const [x, h] of CORNERS){
+  for (const [x, h] of BOARD.corners){
     const [ax, ay] = proj(x, h, Z0), [bx, by] = proj(x, h, ZF);
     const lg = g.createLinearGradient(ax, ay, bx, by);
     lg.addColorStop(0, 'rgba(63,240,255,.55)'); lg.addColorStop(1, 'rgba(255,79,216,0)');
@@ -823,6 +1017,41 @@ function chartFrame(pool){
   }
   g.globalAlpha = 1;
 }
+function consFrame(pool){
+  trapPath(Z0);
+  g.fillStyle = 'rgba(12,5,30,.62)'; g.fill();   // dense grid: keep the sun from washing out glyphs
+  g.strokeStyle = 'rgba(63,240,255,.18)'; g.lineWidth = 7; g.stroke();
+  g.strokeStyle = 'rgba(210,225,255,.65)'; g.lineWidth = 1.6; g.stroke();
+  g.fillStyle = 'rgba(163,156,211,.13)';
+  for (const key of IMPOSSIBLE){
+    const [m, c] = key.split(',').map(Number), [x0, y0] = proj(c*CW, m*CH, Z0), [x1, y1] = proj((c + 1)*CW, (m + 1)*CH, Z0);
+    g.fillRect(x0, y0, x1 - x0, y1 - y0);
+  }
+  g.strokeStyle = 'rgba(210,225,255,.15)'; g.lineWidth = 1;
+  for (let c = 1; c < NC; c++) line(c*CW, 0, c*CW, 1);
+  for (let m = 1; m < NM; m++) line(0, m*CH, 1, m*CH);
+  const fs = Math.max(7, Math.min(10, sc*CW*.13));
+  g.font = `700 ${fs}px ${UI_FONT}`; g.fillStyle = 'rgba(163,156,211,.8)'; g.textAlign = 'center'; g.textBaseline = 'bottom';
+  for (let c = 0; c < NC; c++){ const [px, py] = proj((c + .5)*CW, 0, Z0); g.fillText(PLACE_TAG[c], px, py - 6); }
+  const [lx] = proj(0, 0, Z0);
+  if (lx > 96){
+    g.textAlign = 'right'; g.textBaseline = 'middle';
+    for (let m = 0; m < NM; m++){ const [px, py] = proj(0, (m + .5)*CH, Z0); g.fillText(MANNER_TAG[m], px - 8, py); }
+  }
+  // whole chart faintly, the current pool brighter
+  const inPool = new Set(pool.map(k => k.g)), gs = Math.max(11, sc*CW*.32);
+  g.font = `700 ${gs}px ${IPA_FONT}`; g.textAlign = 'center'; g.textBaseline = 'middle';
+  for (const k of CONS){
+    const [px, py] = proj(k.dx, k.h, Z0);
+    g.globalAlpha = inPool.has(k.g) ? .34 : .1; g.fillStyle = roundCol(k.r); g.fillText(k.g, px, py);
+  }
+  g.globalAlpha = 1;
+}
+function cellShape(x, y, r){
+  const s = r/(RAD*sc*.8), w = CW*sc*.47*s, h = CH*.75*sc*.47*s;
+  g.beginPath();
+  if (g.roundRect) g.roundRect(x - w, y - h, 2*w, 2*h, Math.min(w, h)*.25); else g.rect(x - w, y - h, 2*w, 2*h);
+}
 function markerShape(x, y, r, kind){
   g.beginPath();
   if (kind === 0) g.ellipse(x, y, r*1.35, r*.78, 0, 0, Math.PI*2);
@@ -846,24 +1075,25 @@ function drawMarkers(now){
       }
       if (o.wrong > 0 && Math.floor(now*10) % 2 === 0){
         g.globalAlpha = 1; g.font = `700 11px ${UI_FONT}`; g.fillStyle = roundCol(o.r); g.textAlign = 'center'; g.textBaseline = 'middle';
-        g.fillText(o.r === 1 ? 'ROUND LIPS' : 'SPREAD LIPS', sx, sy + r*2.1);
+        g.fillText(BOARD.hint(o.r), sx, sy + r*2.1);
       }
     } else if (o.type === 't'){
       const col = roundCol(o.r), a = Math.max(.15, Math.min(1, 1 - tta/2.4));
       g.globalAlpha = a;
-      markerShape(px, py, r, o.r); g.strokeStyle = col; g.lineWidth = 2; g.stroke();
-      if (tta > 0){ g.globalAlpha = a*.35; markerShape(px, py, r*(1 + tta*.9), o.r); g.lineWidth = 1; g.stroke(); }
+      BOARD.marker(px, py, r, o.r); g.strokeStyle = col; g.lineWidth = 2; g.stroke();
+      if (tta > 0){ g.globalAlpha = a*.35; BOARD.marker(px, py, r*(1 + tta*.9), o.r); g.lineWidth = 1; g.stroke(); }
       if (o.charge > 0){
-        g.globalAlpha = 1; g.beginPath(); g.arc(px, py, r*1.5, -Math.PI/2, -Math.PI/2 + o.charge*Math.PI*2);
+        g.globalAlpha = 1; g.beginPath(); g.arc(px, py, r*BOARD.arc, -Math.PI/2, -Math.PI/2 + o.charge*Math.PI*2);
         g.strokeStyle = '#fff'; g.lineWidth = 4; g.stroke();
       }
       if (o.wrong > 0 && Math.floor(now*10) % 2 === 0){
         g.globalAlpha = 1; g.font = `700 11px ${UI_FONT}`; g.fillStyle = col; g.textAlign = 'center'; g.textBaseline = 'middle';
-        g.fillText(o.r === 1 ? 'ROUND LIPS' : 'SPREAD LIPS', px, py + r*1.9);
+        g.fillText(BOARD.hint(o.r), px, py + r*1.9);
       }
     } else if (o.type === 'm' && tta < 1.3){
       g.globalAlpha = Math.min(1, 1.3 - tta)*.8;
-      g.setLineDash([3, 4]); g.beginPath(); g.arc(px, py, .075*sc, 0, Math.PI*2);
+      g.setLineDash([3, 4]);
+      if (S.cons) cellShape(px, py, r*.95); else { g.beginPath(); g.arc(px, py, .075*sc, 0, Math.PI*2); }
       g.strokeStyle = COL.red; g.lineWidth = 1.5; g.stroke(); g.setLineDash([]);
     }
   }
@@ -884,7 +1114,7 @@ function drawObjects(now){
   for (const {o, z} of list){
     const ear = S.ear && o.type === 't';
     // Ear targets fly down the ship's own lane so their path gives nothing away.
-    const [px, py, k] = ear ? proj(S.ship.x, S.ship.h, z) : proj(o.x, o.h, z), fade = Math.min(1, (ZF - z)/2.5);
+    const [px, py, k] = ear ? proj(S.ship.x, S.ship.h, z) : proj(o.dx ?? o.x, o.h, z), fade = Math.min(1, (ZF - z)/2.5);
     if (ear){
       const size = sc*.11*k, d = size*2, spr = sprite('?', '#ffffff');
       const sing = o.arr - now < EAR_CUE_LEAD && o.arr - now > EAR_CUE_LEAD - .5;
@@ -895,7 +1125,7 @@ function drawObjects(now){
         for (let i = 1; i <= 3; i++){ g.beginPath(); g.arc(px, py, size*(.6 + i*.25 + (now*2 % .25)), -.6, .6); g.stroke();
           g.beginPath(); g.arc(px, py, size*(.6 + i*.25 + (now*2 % .25)), Math.PI - .6, Math.PI + .6); g.stroke(); } }
     } else if (o.type === 't'){
-      const size = sc*.11*k, spr = sprite(o.g, roundCol(o.r)), d = size*2;
+      const size = sc*BOARD.glyph*k, spr = sprite(o.g, roundCol(o.r)), d = size*2;
       if (z > Z0 + .2){
         const [mx, my] = proj(o.x, o.h, Z0);
         g.globalAlpha = .12*fade; g.strokeStyle = roundCol(o.r); g.lineWidth = 1;
@@ -905,7 +1135,7 @@ function drawObjects(now){
       if (o.charge > 0){ g.globalAlpha = o.charge*.7; g.globalCompositeOperation = 'lighter';
         g.drawImage(spr, px - d*.55, py - d*.55, d*1.1, d*1.1); g.globalCompositeOperation = 'source-over'; }
     } else if (o.type === 'm'){
-      const size = sc*.09*k, d = size*2, spr = sprite('ʔ', COL.red), a = o.done ? Math.max(0, 1 + (o.arr - now)*8) : fade;
+      const size = sc*BOARD.mineSize*k, d = size*2, spr = sprite(BOARD.mine.g, COL.red), a = o.done ? Math.max(0, 1 + (o.arr - now)*8) : fade;
       g.globalAlpha = a;
       g.save(); g.translate(px, py); g.rotate(now*2.5);
       g.strokeStyle = COL.red; g.lineWidth = Math.max(1, 2*k); g.beginPath();
@@ -918,7 +1148,10 @@ function drawObjects(now){
       g.beginPath(); g.arc(px, py, r, 0, Math.PI*2);
       g.strokeStyle = 'rgba(255,209,102,.35)'; g.lineWidth = r*.5; g.stroke();
       g.strokeStyle = COL.gold; g.lineWidth = Math.max(1, r*.18); g.stroke();
-      if (o.idx === 0){
+      if (o.glyph){
+        const sz = r*1.5, spr = sprite(o.glyph, COL.gold);
+        g.drawImage(spr, px - sz, py - sz, sz*2, sz*2);
+      } else if (o.idx === 0){
         const gr = S.groups[o.gid];
         if (gr){ g.font = `700 ${Math.max(10, sc*.05*k)}px ${IPA_FONT}`; g.fillStyle = COL.gold; g.textAlign = 'center'; g.textBaseline = 'bottom';
           g.fillText(`[${gr.label}]`, px, py - r*1.4); }
@@ -957,17 +1190,21 @@ function drawShip(now){
     g.moveTo(px + dx*(rx + 5), py + dy*(ry + 5)); g.lineTo(px + dx*(rx + 12), py + dy*(ry + 12));
   }
   g.stroke();
-  const nv = nearestVowel(sh.x, sh.h, sh.lip);
+  const L = BOARD.label(sh);
   g.font = `700 ${Math.round(R*1.1)}px ${IPA_FONT}`; g.textAlign = 'center'; g.textBaseline = 'bottom';
   g.fillStyle = '#fff'; g.shadowColor = col; g.shadowBlur = 10;
-  g.fillText(nv ? `[${nv.g}]` : '[·]', px, py - ry - 14);
+  g.fillText(L && L.g ? `[${L.g}]` : '[·]', px, py - ry - 14);
   g.shadowBlur = 0;
 }
 function drawParts(){
   g.globalCompositeOperation = 'lighter';
   for (const p of S.parts){
+    if (p.t < 0) continue;
     const a = 1 - p.t/p.life;
-    if (p.kind === 'shard'){
+    if (p.kind === 'streak'){
+      g.globalAlpha = a; g.strokeStyle = p.col; g.lineWidth = 1.5;
+      g.beginPath(); g.moveTo(p.x, p.y); g.lineTo(p.x - p.vx*.04, p.y - p.vy*.04); g.stroke();
+    } else if (p.kind === 'shard'){
       g.globalAlpha = a; g.save(); g.translate(p.x, p.y); g.rotate(p.rot);
       g.drawImage(p.spr, p.sx, p.sy, p.cell, p.cell, -p.d/2, -p.d/2, p.d, p.d); g.restore();
     } else if (p.kind === 'spark'){
@@ -1010,18 +1247,17 @@ function hud(now){
   // stage progress
   const st = RUN.stages[S.stage], bw = Math.min(180, W*.3), bx = W/2 - bw/2, by = top + 2;
   g.textAlign = 'center'; g.font = `700 10px ${UI_FONT}`; g.fillStyle = COL.muted;
-  g.fillText(`${S.ear ? 'EAR · ' : ''}${LANG !== 'ipa' ? LANG.toUpperCase() + ' · ' : ''}${S.stage + 1} · ${st.name.toUpperCase()}`, W/2, by);
+  g.fillText(`${S.cons ? 'CONS · ' : ''}${S.ear ? 'EAR · ' : ''}${!S.cons && LANG !== 'ipa' ? LANG.toUpperCase() + ' · ' : ''}${S.stage + 1} · ${st.name.toUpperCase()}`, W/2, by);
   g.fillStyle = 'rgba(163,156,211,.25)'; g.fillRect(bx, by + 16, bw, 3);
   const prog = isFinite(st.need) ? S.stageHits/st.need : (S.stageHits % 12)/12;
   g.fillStyle = COL.gold; g.fillRect(bx, by + 16, bw*prog, 3);
   // current vowel readout
-  const sh = S.ship, nv = nearestVowel(sh.x, sh.h, sh.lip), [f1, f2] = formants(sh.x, sh.h, sh.lip);
-  const yb = H - Math.max(16, 16) - (COARSE ? 0 : 0);
+  const [l1, l2] = BOARD.readout(S.ship), yb = H - 16;
   g.textBaseline = 'bottom';
   g.font = `700 ${W < 420 ? 11 : 13}px ${UI_FONT}`; g.fillStyle = COL.ink;
-  g.fillText(nv ? nv.name : 'between vowels', W/2, yb - 18);
+  g.fillText(l1, W/2, yb - 18, W - 32);
   g.font = `700 10px ${UI_FONT}`; g.fillStyle = COL.muted;
-  g.fillText(`F1 ${Math.round(f1*voiceMul)} · F2 ${Math.round(f2*voiceMul)} Hz · ${sh.lip > .5 ? 'ROUNDED' : 'SPREAD'}`, W/2, yb);
+  g.fillText(l2, W/2, yb, W - 32);
   // banner
   if (S.banner){
     const age = now - S.banner.t;
@@ -1053,6 +1289,12 @@ function frame(){
       update(dt, now);
     }
   }
+  // Phones zoom into the consonant grid and pan with the ship.
+  const zT = S && S.cons && COARSE ? Math.min(2.2, Math.max(1, 56*NC/scBase)) : 1;
+  zoom += (zT - zoom)*Math.min(1, pdt*4); sc = scBase*zoom;
+  const maxPan = Math.max(0, .5 - (W/2 - 12)/sc);
+  const pT = S ? Math.min(maxPan, Math.max(-maxPan, S.ship.x - .5)) : 0;
+  pan += (pT - pan)*Math.min(1, pdt*5);
   // sway the vanishing point against the ship for parallax
   const tx = S ? -(S.ship.x - .6)*sc*.35 : Math.sin(now*.4)*sc*.08;
   const ty = S ? -(S.ship.h - .5)*sc*.25 : Math.cos(now*.3)*sc*.05;
@@ -1063,7 +1305,7 @@ function frame(){
   bg(now);
   drawStars(playing || !S ? pdt : 0, vel);
   tunnel(now, vel);
-  chartFrame(S ? RUN.pools[S.stage] : RUN.list);
+  BOARD.frame(S ? RUN.pools[S.stage] : RUN.list);
   if (S){ drawMarkers(now); drawObjects(now); drawShip(now); drawParts(); }
   g.restore();
   if (S) hud(now);
@@ -1081,15 +1323,26 @@ function selectLang(code){
   refreshBest();
 }
 function refreshBest(){
+  if (MODE === 'cons'){ const c = readBest('cons'); $('#bestLine').textContent = c ? `CONSONANT BEST ${c}` : ''; return; }
   const b = readBest('sight'), e = readBest('ear');
   $('#bestLine').textContent = [b && `BEST ${b}`, e && `EAR BEST ${e}`].filter(Boolean).join(' · ');
+}
+// Menu reflects the mode: consonants ignore the language picker.
+function applyMode(){
+  const cons = MODE === 'cons';
+  $('#lang').disabled = cons;
+  if (cons){
+    BOARD = CONS_BOARD; RUN = buildConsRun();
+    $('#inv').innerHTML = `${CONS.length} pulmonic consonants<br><small>click bonus </small><small class="ipa">${CLICKS.map(c => c[0]).join(' ')}</small>`;
+    refreshBest();
+  } else { BOARD = VOWEL_BOARD; selectLang($('#lang').value); }
 }
 
 async function start(){
   const high = document.querySelector('input[name=voice]:checked').value === 'high';
   f0Mul = high ? 2 : 1; voiceMul = high ? 1.16 : 1;
   MODE = document.querySelector('input[name=mode]:checked').value;
-  selectLang($('#lang').value);
+  applyMode();
   try { localStorage.setItem(MODE_KEY, MODE); localStorage.setItem(LANG_KEY, LANG); } catch {}
   await initAudio();
   if (document.activeElement) document.activeElement.blur();
@@ -1103,7 +1356,7 @@ async function start(){
     cueBus.gain.setValueAtTime(0, ac.currentTime); voiceBus.gain.setTargetAtTime(.5, ac.currentTime, .1);
   }
   show('#menu', false); show('#over', false); show('#pause', false); show('#dock', true);
-  $('#lipBtn').hidden = !COARSE; $('#lipBtn').classList.remove('round');
+  $('#lipBtn').hidden = !COARSE; $('#lipBtn').classList.remove('round'); $('#lipBtn').textContent = BOARD.btn;
   document.body.classList.add('playing');
   cvs.focus && cvs.focus({preventScroll:true});
 }
@@ -1119,10 +1372,12 @@ function gameOver(){
   const acc = S.hits + S.misses ? Math.round(100*S.hits/(S.hits + S.misses)) : 0;
   const nem = Object.entries(S.stats).sort((a, b) => b[1].miss - a[1].miss)[0];
   const rows = [
-    ['Mode', S.ear ? 'Ear' : 'Sight'], ['Score', S.score + (S.score >= best && S.score > 0 ? '  ★ new best' : '')], ['Best', best],
-    ['Language', LANGS[LANG].name], ['Stage', `${S.stage + 1} · ${RUN.stages[S.stage].name}`], ['Vowels sung', S.hits], ['Accuracy', acc + '%'],
-    ['Max combo', S.maxCombo], ['Diphthongs', S.diphs],
+    ['Mode', S.cons ? 'Consonants' : S.ear ? 'Ear' : 'Sight'], ['Score', S.score + (S.score >= best && S.score > 0 ? '  ★ new best' : '')], ['Best', best],
+    S.cons ? ['Chart', 'Pulmonic consonants'] : ['Language', LANGS[LANG].name], ['Stage', `${S.stage + 1} · ${RUN.stages[S.stage].name}`],
+    [S.cons ? 'Consonants hit' : 'Vowels sung', S.hits], ['Accuracy', acc + '%'], ['Max combo', S.maxCombo],
+    S.cons ? ['Click bonuses', S.diphs] : ['Diphthongs', S.diphs],
   ];
+  if (S.cons) rows.push(['Row/column clears', S.clears]);
   const conf = Object.entries(S.conf).sort((a, b) => b[1] - a[1])[0];
   if (conf){ const [want, got] = conf[0].split('>');
     rows.push(['Confusion', `heard <span class="ipa">[${want}]</span>, flew to <span class="ipa">[${got}]</span> (${conf[1]}×)`]); }
@@ -1201,14 +1456,14 @@ cvs.addEventListener('pointercancel', endDrag);
 $('#lang').innerHTML = Object.entries(LANGS).map(([k, L]) => `<option value="${k}">${L.name}</option>`).join('');
 let savedLang = 'ipa';
 try {
-  const m = localStorage.getItem(MODE_KEY); if (m === 'ear') document.querySelector('input[name=mode][value=ear]').checked = true;
+  const m = localStorage.getItem(MODE_KEY); if (m === 'ear' || m === 'cons') document.querySelector(`input[name=mode][value=${m}]`).checked = true;
   savedLang = localStorage.getItem(LANG_KEY) || 'ipa';
 } catch {}
 $('#lang').value = LANGS[savedLang] ? savedLang : 'ipa';
 $('#lang').addEventListener('change', e => selectLang(e.target.value));
-document.querySelectorAll('input[name=mode]').forEach(r => r.addEventListener('change', () => { MODE = r.value; refreshBest(); }));
+document.querySelectorAll('input[name=mode]').forEach(r => r.addEventListener('change', () => { MODE = r.value; applyMode(); }));
 MODE = document.querySelector('input[name=mode]:checked').value;
-selectLang($('#lang').value);
+applyMode();
 requestAnimationFrame(frame);
 </script>
 </body>
