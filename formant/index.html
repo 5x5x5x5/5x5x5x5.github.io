@@ -87,6 +87,7 @@
       <li><b>Lips</b>: <kbd>Space</kbd>, click, or the <b>LIPS</b> button toggles spread ⇄ rounded.</li>
       <li>Park on a target's landing ring until it shatters. <span class="c">Cyan ellipse</span> = spread, <span class="m">magenta circle</span> = rounded, <span class="y">gold diamond</span> = either.</li>
       <li><b>Ear mode</b>: a <b>?</b> sings its vowel once (the ship ducks). Fly to that vowel before it lands; misses show where it was and sing it again.</li>
+      <li><b>Consonants by ear</b>: a recording plays; fly to its cell with the right voicing before it lands. Misses show the cell and replay it.</li>
       <li><b>Consonants</b>: place across, manner down; <kbd>Space</kbd> toggles <b>voicing</b>. Clear a whole row or column for a bonus; sweep the <span class="ipa y">ʘ ǀ ǁ ǃ ǂ</span> click trail. Dodge <span class="ipa r">‖</span> pauses.</li>
       <li>Dodge <span class="ipa r">ʔ</span> glottal-stop mines. Trace gold ring trails to sing diphthongs.</li>
     </ul>
@@ -95,6 +96,7 @@
       <label><input type="radio" name="mode" value="sight" checked> Sight: glyphs show where to fly</label>
       <label><input type="radio" name="mode" value="ear"> Ear: hear the vowel, find it</label>
       <label><input type="radio" name="mode" value="cons"> Consonants: the pulmonic chart</label>
+      <label><input type="radio" name="mode" value="consear"> Consonants by ear: recorded, find the cell</label>
     </fieldset>
     <fieldset class="lang">
       <legend>LANGUAGE</legend>
@@ -108,7 +110,7 @@
     </fieldset>
     <div class="row"><button id="go">FLY ▸</button></div>
     <p class="best" id="bestLine"></p>
-    <p class="fine">Sound on; headphones help. Vowels are synthesized live from approximate average formants, so treat them as cartoons of the cardinal vowels. <kbd>P</kbd> pause · <kbd>M</kbd> mute · <a href="../">5x5x5x5</a></p>
+    <p class="fine">Sound on; headphones help. Vowels are synthesized live from approximate average formants, so treat them as cartoons of the cardinal vowels. Consonant recordings are from Wikimedia Commons (<a href="credits.html">credits</a>). <kbd>P</kbd> pause · <kbd>M</kbd> mute · <a href="../">5x5x5x5</a></p>
   </div>
 </div>
 
@@ -157,6 +159,8 @@ const COL = {cyan:'#3ff0ff', mag:'#ff4fd8', gold:'#ffd166', red:'#ff3b5c', ink:'
 const BEST_KEY = 'formant-flyer-best', BEST_KEY_EAR = 'formant-flyer-best-ear', MODE_KEY = 'formant-flyer-mode', LANG_KEY = 'formant-flyer-lang';
 let MODE = 'sight';
 const EAR_CUE_LEAD = 1.25;   // seconds before arrival that an ear target sings
+const CLIP_MAX = 1.4;        // recorded consonant clips are cut (with fade) to this
+const cueLead = () => S && S.cons ? CLIP_MAX + .3 : EAR_CUE_LEAD;
 const EAR_RAD_MUL = 1.25;    // ear mode is forgiving on position
 
 /* ---------- vowels ----------
@@ -449,7 +453,7 @@ const VOICE_LINE = [110, 110, 130.81, 123.47];      // A2 A2 C3 B2 (voice f0, lo
 const BASS_MULT = [1,1,2,1,1.5,1,2,1.5];
 const CHIME = [440, 523.25, 587.33, 659.25, 783.99, 880, 1046.5, 1174.66];
 
-let ac = null, useAC = false, master, musBus, sfxBus, voiceBus, voice, cueBus, cue, NOISE, muted = false, eng = null;
+let ac = null, useAC = false, master, musBus, sfxBus, voiceBus, voice, cueBus, cue, clipBus, NOISE, muted = false, eng = null;
 const mus = {on:false, next:0, step:0};
 let voiceMul = 1, f0Mul = 1;
 
@@ -515,6 +519,7 @@ async function initAudio(){
     voiceBus = ac.createGain(); voiceBus.gain.value = 0; voiceBus.connect(master);
     voice = buildVoice(ac, voiceBus);
     cueBus = ac.createGain(); cueBus.gain.value = 0; cueBus.connect(master);
+    clipBus = ac.createGain(); clipBus.gain.value = 1; clipBus.connect(master);
     cue = buildVoice(ac, cueBus);
     // consonant engine: place-tuned noise and a trill LFO, both inside the ship voice's cut
     const ns = ac.createBufferSource(); ns.buffer = NOISE; ns.loop = true;
@@ -600,6 +605,40 @@ function playCue(v, tGame, dur = .5){
   voiceBus.gain.setTargetAtTime(.08, t, .015);
   voiceBus.gain.setTargetAtTime(.5, t + dur, .05);
 }
+/* ---------- recorded consonant clips ----------
+   Wikimedia Commons recordings (see credits.html), trimmed, loudness-
+   normalised and converted to MP3 in audio/. Files are named after the
+   chart description, e.g. audio/voiceless-bilabial-plosive.mp3. */
+const slug = s => s.replace(/\s*\(.*?\)/g, '').trim().replace(/[^a-z]+/gi, '-').toLowerCase();
+const clips = {};
+let clipsLoading = null;
+function loadClips(){
+  if (!ac) return Promise.resolve();
+  if (clipsLoading) return clipsLoading;
+  const items = CONS.map(k => [k.g, slug(k.name)]).concat(CLICKS.map(([gl, , name]) => [gl, slug(name)]));
+  clipsLoading = Promise.all(items.map(async ([gl, file]) => {
+    try {
+      const r = await fetch(`audio/${file}.mp3`);
+      if (!r.ok) return;
+      const buf = await r.arrayBuffer();
+      clips[gl] = await new Promise((res, rej) => ac.decodeAudioData(buf, res, rej));
+    } catch {}
+  }));
+  return clipsLoading;
+}
+const clipCount = () => Object.keys(clips).length;
+// Play a recording at game time tGame (or now); the ship's engine ducks under it.
+function playClip(gl, tGame){
+  const b = clips[gl];
+  if (!useAC || !b) return false;
+  const t = Math.max(ac.currentTime, tGame === undefined ? 0 : tGame + clock.base);
+  const dur = Math.min(b.duration, CLIP_MAX), s = ac.createBufferSource(), gn = ac.createGain();
+  s.buffer = b;
+  gn.gain.setValueAtTime(1, t); gn.gain.setValueAtTime(1, t + dur - .06); gn.gain.linearRampToValueAtTime(0, t + dur);
+  s.connect(gn).connect(clipBus); s.start(t); s.stop(t + dur + .02);
+  voiceBus.gain.setTargetAtTime(.06, t, .015); voiceBus.gain.setTargetAtTime(.5, t + dur, .05);
+  return true;
+}
 function setMuted(m){
   muted = m; $('#mBtn').textContent = m ? '♪̸' : '♪'; $('#mBtn').setAttribute('aria-label', m ? 'Unmute' : 'Mute');
   if (ac) master.gain.setTargetAtTime(m ? 0 : .9, ac.currentTime, .02);
@@ -668,7 +707,7 @@ function newStar(any){
   return {x:-1.6 + rnd()*4.2, h:-1.6 + rnd()*4.2, z: any ? Z0 + rnd()*ZF*1.3 : ZF*1.3};
 }
 
-const bestKey = (m, l) => m === 'cons' ? 'formant-flyer-best-cons' : l === 'ipa' ? (m === 'ear' ? BEST_KEY_EAR : BEST_KEY) : `formant-flyer-best-${m}-${l}`;
+const bestKey = (m, l) => m === 'cons' || m === 'consear' ? `formant-flyer-best-${m}` : l === 'ipa' ? (m === 'ear' ? BEST_KEY_EAR : BEST_KEY) : `formant-flyer-best-${m}-${l}`;
 function readBest(m = MODE, l = LANG){ try { return +localStorage.getItem(bestKey(m, l)) || 0; } catch { return 0; } }
 function writeBest(v){ try { localStorage.setItem(bestKey(MODE, LANG), String(v)); } catch {} }
 
@@ -679,11 +718,12 @@ function newGame(){
     ship:{x:.55, h:.45, lip:0, lipT:0}, stats:{}, shake:0, flash:0, flashCol:COL.red,
     over:false, paused:false, speedUp:0, densUp:0, diphUntil:-1, lastG:null, nextLife:30,
     banner:null, kNext:0, best:readBest(), newSet:new Set(RUN.stages[0].add.map(v => v.g)),
-    ear: MODE === 'ear' && useAC, cons: MODE === 'cons', conf:{}, lines:{}, clears:0,
+    ear: (MODE === 'ear' || (MODE === 'consear' && clipCount() >= CONS.length*.8)) && useAC, cons: MODE === 'cons' || MODE === 'consear', conf:{}, lines:{}, clears:0,
   };
   const st = stageP();
   S.kNext = Math.ceil(((ZF - Z0)/st.v + 1.2)/BEAT);
   showBanner();
+  if (MODE === 'consear' && !S.ear) S.banner.sub = 'recordings unavailable · playing by sight';
 }
 const stageP = () => {
   const st = RUN.stages[S.stage];
@@ -707,7 +747,7 @@ function spawnTick(now){
 function spawnBeat(t, st){
   if (t < S.diphUntil) return;
   // Ear mode: targets only on even beats so cues (~0.5 s) never overlap.
-  if (S.ear && Math.round(t/BEAT) % 2) { if (st.mine && rnd() < st.mine) spawnMine(t, st.v); return; }
+  if (S.ear && Math.round(t/BEAT) % (S.cons ? 3 : 2)) { if (st.mine && rnd() < st.mine) spawnMine(t, st.v); return; }
   if (st.diph && rnd() < st.diph){ if (S.cons) spawnClicks(t, st.v); else spawnDiph(t, st.v); S.diphUntil = t + (S.cons ? 2.5 : 2)*BEAT + .01; return; }
   if (rnd() < (S.ear ? Math.min(.9, st.p*1.7) : st.p)) spawnTarget(t, st.v);
   if (st.mine && rnd() < st.mine) spawnMine(t + BEAT/2, st.v);
@@ -724,7 +764,7 @@ function spawnTarget(t, v){
     if (clash) continue;
     S.lastG = pick.g;
     S.objs.push({type:'t', g:pick.g, v, x:pick.x, h:pick.h, dx:pick.dx, c:pick.c, m:pick.m, r:pick.r, arr:t, charge:0, wrong:0, done:false});
-    if (S.ear) playCue(pick, t - EAR_CUE_LEAD);
+    if (S.ear){ if (S.cons) playClip(pick.g, t - cueLead()); else playCue(pick, t - EAR_CUE_LEAD); }
     return;
   }
 }
@@ -780,7 +820,7 @@ function capture(o, now){
   const early = o.arr - now > .15 ? 50 : 0, pts = ((S.ear ? 150 : 100) + early)*mult();
   S.score += pts;
   shatter(px, py, o.g, roundCol(o.r), sc*BOARD.glyph*k);
-  if (S.cons){ consFx(v, px, py); lineClear(v); }
+  if (S.cons){ consFx(v, px, py); lineClear(v); if (!S.ear) playClip(o.g); }
   addText(px, py - sc*.07, `[${o.g}]`, roundCol(o.r), 26);
   addText(px, py - sc*.07 + 24, v.name, COL.ink, 12, UI_FONT);
   addText(px, py + sc*.06, `+${pts}`, COL.gold, 14, UI_FONT, .8);
@@ -834,9 +874,9 @@ function miss(o){
   if (S.ear){
     // Reveal where it was and sing it again; log what the player went for.
     S.parts.push({kind:'ghost', shape:o.r, col:roundCol(o.r), x:px, y:py, r:RAD*sc*.8, t:0, life:1.4});
-    const nv = nearestVowel(S.ship.x, S.ship.h, S.ship.lip);
-    if (nv && nv.g !== o.g){ const k = o.g + '>' + nv.g; S.conf[k] = (S.conf[k] || 0) + 1; }
-    playCue(RUN.by[o.g], clock.now() + .25, .45);
+    const nv = BOARD.label(S.ship);
+    if (nv && nv.g && nv.g !== o.g){ const k = o.g + '>' + nv.g; S.conf[k] = (S.conf[k] || 0) + 1; }
+    if (S.cons) playClip(o.g, clock.now() + .25); else playCue(RUN.by[o.g], clock.now() + .25, .45);
   }
   sfx.miss(); hurt();
 }
@@ -851,7 +891,7 @@ function ringPass(o, hit){
   const gr = S.groups[o.gid], [px, py] = proj(o.x, o.h, Z0);
   if (hit){
     gr.got++; S.parts.push({kind:'ring', col:COL.gold, x:px, y:py, r:sc*.03, t:0, life:.35});
-    if (gr.kind === 'click'){ sfx.click(o.idx); addText(px, py - 20, o.glyph, COL.gold, 22); addText(px, py + 4, o.gname, COL.ink, 10, UI_FONT, .9); }
+    if (gr.kind === 'click'){ if (!playClip(o.glyph)) sfx.click(o.idx); addText(px, py - 20, o.glyph, COL.gold, 22); addText(px, py + 4, o.gname, COL.ink, 10, UI_FONT, .9); }
     else sfx.blip(o.idx);
   }
   if (o.idx === gr.n - 1){
@@ -1117,7 +1157,7 @@ function drawObjects(now){
     const [px, py, k] = ear ? proj(S.ship.x, S.ship.h, z) : proj(o.dx ?? o.x, o.h, z), fade = Math.min(1, (ZF - z)/2.5);
     if (ear){
       const size = sc*.11*k, d = size*2, spr = sprite('?', '#ffffff');
-      const sing = o.arr - now < EAR_CUE_LEAD && o.arr - now > EAR_CUE_LEAD - .5;
+      const L = cueLead(), sing = o.arr - now < L && o.arr - now > L - (S.cons ? CLIP_MAX : .5);
       g.globalAlpha = fade*(sing ? 1 : .75);
       const pul = sing ? 1 + .15*Math.sin(now*40) : 1;
       g.drawImage(spr, px - d*pul/2, py - d*pul/2, d*pul, d*pul);
@@ -1210,7 +1250,7 @@ function drawParts(){
     } else if (p.kind === 'spark'){
       g.globalAlpha = a; g.fillStyle = p.col; g.beginPath(); g.arc(p.x, p.y, 1 + 2.5*a, 0, Math.PI*2); g.fill();
     } else if (p.kind === 'ghost'){
-      g.globalAlpha = Math.min(1, a*1.6); markerShape(p.x, p.y, p.r, p.shape);
+      g.globalAlpha = Math.min(1, a*1.6); BOARD.marker(p.x, p.y, p.r, p.shape);
       g.strokeStyle = p.col; g.lineWidth = 2.5; g.setLineDash([5, 4]); g.stroke(); g.setLineDash([]);
     } else {
       g.globalAlpha = a; g.strokeStyle = p.col; g.lineWidth = 3*a + .5;
@@ -1323,13 +1363,13 @@ function selectLang(code){
   refreshBest();
 }
 function refreshBest(){
-  if (MODE === 'cons'){ const c = readBest('cons'); $('#bestLine').textContent = c ? `CONSONANT BEST ${c}` : ''; return; }
+  if (MODE === 'cons' || MODE === 'consear'){ const c = readBest(MODE); $('#bestLine').textContent = c ? `${MODE === 'cons' ? 'CONSONANT' : 'CONSONANT EAR'} BEST ${c}` : ''; return; }
   const b = readBest('sight'), e = readBest('ear');
   $('#bestLine').textContent = [b && `BEST ${b}`, e && `EAR BEST ${e}`].filter(Boolean).join(' · ');
 }
 // Menu reflects the mode: consonants ignore the language picker.
 function applyMode(){
-  const cons = MODE === 'cons';
+  const cons = MODE === 'cons' || MODE === 'consear';
   $('#lang').disabled = cons;
   if (cons){
     BOARD = CONS_BOARD; RUN = buildConsRun();
@@ -1345,6 +1385,12 @@ async function start(){
   applyMode();
   try { localStorage.setItem(MODE_KEY, MODE); localStorage.setItem(LANG_KEY, LANG); } catch {}
   await initAudio();
+  if (BOARD === CONS_BOARD && useAC && !clipCount()){
+    const go = $('#go'), label = go.textContent;
+    go.textContent = 'LOADING SOUNDS…'; go.disabled = true;
+    await Promise.race([loadClips(), new Promise(r => setTimeout(r, 15000))]);
+    go.textContent = label; go.disabled = false;
+  }
   if (document.activeElement) document.activeElement.blur();
   newGame();
   clock.base = clock.raw() + .1;
@@ -1372,7 +1418,7 @@ function gameOver(){
   const acc = S.hits + S.misses ? Math.round(100*S.hits/(S.hits + S.misses)) : 0;
   const nem = Object.entries(S.stats).sort((a, b) => b[1].miss - a[1].miss)[0];
   const rows = [
-    ['Mode', S.cons ? 'Consonants' : S.ear ? 'Ear' : 'Sight'], ['Score', S.score + (S.score >= best && S.score > 0 ? '  ★ new best' : '')], ['Best', best],
+    ['Mode', S.cons ? (S.ear ? 'Consonants by ear' : 'Consonants') : S.ear ? 'Ear' : 'Sight'], ['Score', S.score + (S.score >= best && S.score > 0 ? '  ★ new best' : '')], ['Best', best],
     S.cons ? ['Chart', 'Pulmonic consonants'] : ['Language', LANGS[LANG].name], ['Stage', `${S.stage + 1} · ${RUN.stages[S.stage].name}`],
     [S.cons ? 'Consonants hit' : 'Vowels sung', S.hits], ['Accuracy', acc + '%'], ['Max combo', S.maxCombo],
     S.cons ? ['Click bonuses', S.diphs] : ['Diphthongs', S.diphs],
@@ -1456,7 +1502,7 @@ cvs.addEventListener('pointercancel', endDrag);
 $('#lang').innerHTML = Object.entries(LANGS).map(([k, L]) => `<option value="${k}">${L.name}</option>`).join('');
 let savedLang = 'ipa';
 try {
-  const m = localStorage.getItem(MODE_KEY); if (m === 'ear' || m === 'cons') document.querySelector(`input[name=mode][value=${m}]`).checked = true;
+  const m = localStorage.getItem(MODE_KEY); if (m === 'ear' || m === 'cons' || m === 'consear') document.querySelector(`input[name=mode][value=${m}]`).checked = true;
   savedLang = localStorage.getItem(LANG_KEY) || 'ipa';
 } catch {}
 $('#lang').value = LANGS[savedLang] ? savedLang : 'ipa';
