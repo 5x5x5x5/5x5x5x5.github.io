@@ -1,39 +1,99 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://5x5x5x5.github.io/</loc>
+    <loc>https://danielsiegle.com/</loc>
     <lastmod>2026-07-25</lastmod>
   </url>
   <url>
-    <loc>https://5x5x5x5.github.io/#about</loc>
+    <loc>https://danielsiegle.com/#about</loc>
     <lastmod>2026-07-25</lastmod>
   </url>
   <url>
-    <loc>https://5x5x5x5.github.io/#projects</loc>
+    <loc>https://danielsiegle.com/#projects</loc>
     <lastmod>2026-07-25</lastmod>
   </url>
   <url>
-    <loc>https://5x5x5x5.github.io/#community</loc>
+    <loc>https://danielsiegle.com/#community</loc>
     <lastmod>2026-07-25</lastmod>
   </url>
   <url>
-    <loc>https://5x5x5x5.github.io/#writing</loc>
+    <loc>https://danielsiegle.com/#writing</loc>
     <lastmod>2026-07-25</lastmod>
   </url>
   <url>
-    <loc>https://5x5x5x5.github.io/hire/</loc>
+    <loc>https://danielsiegle.com/hire/</loc>
     <lastmod>2026-07-27</lastmod>
   </url>
   <url>
-    <loc>https://5x5x5x5.github.io/ai-vocabulary/</loc>
+    <loc>https://danielsiegle.com/ai-vocabulary/</loc>
     <lastmod>2026-09-24</lastmod>
   </url>
   <url>
-    <loc>https://5x5x5x5.github.io/apl/</loc>
+    <loc>https://danielsiegle.com/apl/</loc>
     <lastmod>2026-09-24</lastmod>
   </url>
   <url>
-    <loc>https://5x5x5x5.github.io/eliza/</loc>
+    <loc>https://danielsiegle.com/eliza/</loc>
     <lastmod>2026-09-24</lastmod>
+  </url>
+  <url>
+    <loc>https://danielsiegle.com/formant/</loc>
+  </url>
+  <url>
+    <loc>https://danielsiegle.com/arcade/</loc>
+  </url>
+  <url>
+    <loc>https://danielsiegle.com/typist-guild/</loc>
+  </url>
+  <url>
+    <loc>https://danielsiegle.com/gutenberg-typist/</loc>
+  </url>
+  <url>
+    <loc>https://danielsiegle.com/deploy-pony/</loc>
+  </url>
+  <url>
+    <loc>https://danielsiegle.com/applied-ml-portfolio/</loc>
+  </url>
+  <url>
+    <loc>https://danielsiegle.com/craps/</loc>
+  </url>
+  <url>
+    <loc>https://danielsiegle.com/QuickPCA/</loc>
+  </url>
+  <url>
+    <loc>https://danielsiegle.com/phantom-architecture/</loc>
+  </url>
+  <url>
+    <loc>https://danielsiegle.com/malick-money/</loc>
+  </url>
+  <url>
+    <loc>https://danielsiegle.com/quant-lessons/</loc>
+  </url>
+  <url>
+    <loc>https://danielsiegle.com/schemer/</loc>
+  </url>
+  <url>
+    <loc>https://danielsiegle.com/slalom/</loc>
+  </url>
+  <url>
+    <loc>https://danielsiegle.com/ghidra-journey/</loc>
+  </url>
+  <url>
+    <loc>https://danielsiegle.com/never_use_node/</loc>
+  </url>
+  <url>
+    <loc>https://danielsiegle.com/data4good/</loc>
+  </url>
+  <url>
+    <loc>https://danielsiegle.com/automatingExperiments/</loc>
+  </url>
+  <url>
+    <loc>https://danielsiegle.com/convNetJStalk/</loc>
+  </url>
+  <url>
+    <loc>https://danielsiegle.com/ADAMtalk/</loc>
+  </url>
+  <url>
+    <loc>https://danielsiegle.com/Machine_Learning_Life_Science/</loc>
   </url>
 </urlset>

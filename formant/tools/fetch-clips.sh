@@ -4,7 +4,7 @@
 # Then commit formant/_raw/ and push; the clips get converted and _raw/ removed afterwards.
 set -u
 cd "$(dirname "$0")/.." && mkdir -p _raw && cd _raw
-UA="FormantFlyer/1.0 (https://5x5x5x5.github.io/formant/) curl"
+UA="FormantFlyer/1.0 (https://danielsiegle.com/formant/) curl"
 fail=0
 while read -r name url; do
   [ -s "$name" ] && continue

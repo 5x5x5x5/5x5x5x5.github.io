@@ -25,7 +25,7 @@ Triangle with 400+ past events focused on deep learning and AI.
 
 ## Links
 
-- Website: https://5x5x5x5.github.io
+- Website: https://danielsiegle.com
 - Consultancy: https://5x5x5x5.com
 - GitHub: https://github.com/5x5x5x5 (100+ public repos)
 - LinkedIn: https://www.linkedin.com/in/daniel-siegle/
@@ -36,7 +36,7 @@ Triangle with 400+ past events focused on deep learning and AI.
 ## Key Projects
 
 - **Applied ML Portfolio**: Applied ML and pharma projects — AWS MLOps, RAG,
-  CNNs, drug discovery (https://5x5x5x5.github.io/applied-ml-portfolio/)
+  CNNs, drug discovery (https://danielsiegle.com/applied-ml-portfolio/)
 - **dear-reader-bench**: LLM benchmark for translating comedic narration —
   do humor, voice, and running gags survive the trip into another language?
 - **GRPO Fine-Tuning on Modal**: LoRA-tunes small Qwen models on Countdown
@@ -46,16 +46,16 @@ Triangle with 400+ past events focused on deep learning and AI.
 - **Marketplace & Auction**: Two-sided marketplace API with independent buyer
   price and seller payout, plus a minimal sealed-bid call auction
 - **Quant Lessons**: Eight-unit quant finance curriculum
-  (https://5x5x5x5.github.io/quant-lessons/), also in Malick voiceover as
+  (https://danielsiegle.com/quant-lessons/), also in Malick voiceover as
   malick-money
 - **Gutenberg Typist**: Vim plugin for touch-typing practice by transcribing
-  Project Gutenberg books (https://5x5x5x5.github.io/gutenberg-typist/)
+  Project Gutenberg books (https://danielsiegle.com/gutenberg-typist/)
 - **Fourteen Years of AI Vocabulary**: 78 terms tracked across 625,000 arXiv
-  AI papers, 2012-2026 (https://5x5x5x5.github.io/ai-vocabulary/)
+  AI papers, 2012-2026 (https://danielsiegle.com/ai-vocabulary/)
 - **APL, Out Loud**: Beginner APL tutorial with a live in-page interpreter and
-  voice input (https://5x5x5x5.github.io/apl/)
+  voice input (https://danielsiegle.com/apl/)
 - **ELIZA**: The 1966 DOCTOR script in WebAssembly
-  (https://5x5x5x5.github.io/eliza/)
+  (https://danielsiegle.com/eliza/)
 - **CYP450 Inhibitor Classification**: M.S. thesis — Bayesian QSAR vs
   scikit-learn classifiers for drug metabolism screening
 - **Neural Network in NumPy**: From-scratch neural network implementation
