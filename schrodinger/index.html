@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Schrödinger Equation for Beginners</title>
+<meta name="description" content="The Schrödinger equation explained from the beginning, no physics background needed: five live figures you can turn, drag and run, from the double slit to the hydrogen atom.">
+<link rel="canonical" href="https://danielsiegle.com/schrodinger/">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://danielsiegle.com/schrodinger/">
+<meta property="og:title" content="The Schrödinger equation, from the beginning">
+<meta property="og:description" content="The rule matter follows at the scale of atoms, with five live figures you can turn, drag and run: the double slit, wave packets, tunnelling, energy levels and the hydrogen atom.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+/* Layout: one 680px reading column, journal-style type; five live figures, 3D first with a flat fallback. */
+:root{
+  --bg:#f2f4f8; --surface:#ffffff; --ink:#131a26; --muted:#5a6577; --rule:#d3d9e3;
+  --re:#1c5bd0; --im:#cf5416; --pot:#7f8a9c; --energy:#0a8566;
+  --display:"STIX Two Text","STIX Two Math",Georgia,"Times New Roman",serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e131b; --surface:#161d28; --ink:#e6ebf3; --muted:#93a0b5; --rule:#2a3443;
+    --re:#70a9ff; --im:#ff9b5a; --pot:#6f7c91; --energy:#4fd3aa; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e131b; --surface:#161d28; --ink:#e6ebf3; --muted:#93a0b5; --rule:#2a3443;
+  --re:#70a9ff; --im:#ff9b5a; --pot:#6f7c91; --energy:#4fd3aa; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 1rem/1.6 var(--body)}
+main{max-width:712px;margin:0 auto;padding:40px 16px 64px;display:flex;flex-direction:column;gap:44px}
+section,header{display:flex;flex-direction:column;gap:14px}
+h1,h2{font-family:var(--display);font-weight:600;margin:0;text-wrap:balance;line-height:1.15}
+h1{font-size:2.1rem}
+h2{font-size:1.45rem}
+p{margin:0;max-width:65ch}
+.lede{font-size:1.1rem;color:var(--muted)}
+.m{font-family:var(--display);font-style:italic;font-size:1.08em;white-space:nowrap}
+.m b{font-style:normal;font-weight:400}
+.small{font-size:.85rem;color:var(--muted)}
+
+.eq{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;font-family:var(--display);font-size:1.4rem}
+.eq .op{padding:0 2px}
+.term{font:inherit;color:inherit;background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:8px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;font-style:italic}
+.term[aria-pressed="true"]{border-color:var(--re);box-shadow:inset 0 -3px 0 var(--re)}
+.term i.up{font-style:normal}
+.fr{display:inline-flex;flex-direction:column;align-items:center;line-height:1.15;font-size:.9em}
+.fr>span:first-child{border-bottom:1px solid currentColor;padding:0 3px}
+.fr>span:last-child{padding:0 3px}
+.termnote{border-left:3px solid var(--re);padding:2px 0 2px 14px;min-height:5.2em}
+.termnote strong{font-weight:600}
+
+figure{margin:0;background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:12px}
+canvas{display:block;width:100%}
+#cv{height:300px;touch-action:pan-y}
+#cv.draw{touch-action:none;cursor:crosshair}
+#cvk{height:86px}
+#cv2{height:220px}
+#cv3{height:240px;border-radius:6px}
+.plabel{font-size:.78rem;color:var(--muted);margin-bottom:-8px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button,.btn{font:500 .875rem/1 var(--body);color:var(--ink);background:transparent;border:1px solid var(--rule);border-radius:999px;padding:9px 13px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.seg.lv button{font-family:var(--mono);font-size:.8rem;border-color:var(--energy)}
+.seg.lv button[aria-pressed="true"]{background:var(--energy);border-color:var(--energy);color:var(--surface)}
+.btn{border-radius:8px;min-width:76px}
+.btn.primary{background:var(--re);border-color:var(--re);color:var(--surface)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--re);outline-offset:2px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+.row.l{justify-content:flex-start}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.8rem;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:16px;height:0;border-top:2px solid var(--ink);display:inline-block}
+.sw.fill{height:10px;border:0;background:var(--ink);opacity:.25}
+.sw.re{border-color:var(--re)} .sw.im{border-color:var(--im)} .sw.pot{border-color:var(--pot)}
+.sw.en{border-top:2px dashed var(--energy)} .sw.lv{border-color:var(--energy)}
+.sw.hue{height:10px;width:44px;border:0;background:linear-gradient(90deg,hsl(-180 75% 52%),hsl(-90 75% 52%),hsl(0 75% 52%),hsl(90 75% 52%),hsl(180 75% 52%))}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px}
+.stat{border:1px solid var(--rule);border-radius:8px;padding:7px 9px;display:flex;flex-direction:column;gap:2px}
+.stat span{font-size:.72rem;color:var(--muted);line-height:1.2}
+.stat output{font:500 .95rem/1.2 var(--mono);font-variant-numeric:tabular-nums}
+.sliders{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px 20px}
+.sl{display:grid;grid-template-columns:1fr auto;gap:2px 8px;align-items:center;font-size:.85rem}
+.sl output{font:400 .85rem var(--mono);font-variant-numeric:tabular-nums;color:var(--muted)}
+.sl input{grid-column:1/-1;width:100%;accent-color:var(--re);height:28px;margin:0}
+.caption{font-size:.92rem;border-top:1px solid var(--rule);padding-top:12px}
+#caption{min-height:6.5em}
+.levels{display:flex;flex-direction:column;gap:6px;font-size:.85rem}
+.modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:8px 20px}
+.mode{display:grid;grid-template-columns:40px 1fr;gap:10px;align-items:center}
+.mode canvas{width:40px;height:40px}
+[hidden]{display:none!important}
+ul{margin:0;padding-left:1.2em;max-width:65ch}
+li+li{margin-top:6px}
+footer{font-size:.85rem;color:var(--muted);border-top:1px solid var(--rule);padding-top:16px}
+@media (max-width:420px){h1{font-size:1.8rem}.eq{font-size:1.1rem;gap:6px 4px}.term{padding:7px 6px;min-height:50px}.chips{gap:3px}#cv{height:270px}}
+.grp{display:flex;flex-direction:column;gap:5px;align-items:flex-start}
+.chips{display:flex;gap:4px;align-items:stretch}
+.gl{font:400 .72rem/1.2 var(--body);color:var(--muted);font-style:normal}
+.eq{align-items:flex-start}
+.eq .op{padding:9px 0 0}
+.term{padding:8px 9px;min-height:54px}
+.termnote{min-height:7.5em}
+.three{margin:0;padding-left:1.3em;max-width:65ch}
+.tw{overflow-x:auto}
+table.dict{border-collapse:collapse;width:100%;font-size:.86rem}
+.dict th,.dict td{text-align:left;vertical-align:top;padding:8px 6px;border-bottom:1px solid var(--rule)}
+.dict th{font-weight:600;font-size:.78rem;color:var(--muted)}
+.dict td:last-child{font-family:var(--display);font-style:italic;white-space:nowrap;font-size:1rem}
+#cva,#cv,#cv2{touch-action:pan-y;cursor:grab}
+#cva,#cv.v3d,#cv2.v3d{height:auto;aspect-ratio:1.75;max-height:340px}
+#gl3{aspect-ratio:1.15;max-height:420px;touch-action:pan-y;cursor:grab}
+#glh{aspect-ratio:1.2;max-height:400px;touch-action:pan-y;cursor:grab}
+.sw.ball{width:10px;height:10px;border-radius:50%;background:var(--ink);border:0}
+.sw.arrow{border-top:3px solid;border-image:linear-gradient(90deg,hsl(0 75% 50%),hsl(120 75% 50%),hsl(240 75% 50%),hsl(360 75% 50%)) 1}
+dl.gloss{margin:0;display:grid;grid-template-columns:1fr;gap:10px}
+dl.gloss div{display:grid;grid-template-columns:1fr;gap:1px}
+dl.gloss dt{font-weight:600}
+dl.gloss dd{margin:0;color:var(--muted)}
+@media (min-width:600px){dl.gloss div{grid-template-columns:11.5rem 1fr;gap:16px}}
+.hint{font-size:.8rem;color:var(--muted)}
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <h1>The Schrödinger equation, from the beginning</h1>
+  <p class="lede">This is the rule that matter follows at the scale of atoms. You need no physics background. Each idea comes with something you can turn, drag or run.</p>
+</header>
+
+<section aria-labelledby="h-why">
+  <h2 id="h-why">The puzzle</h2>
+  <p>Throw a ball and Newton's laws tell you where it goes. Know its position and speed now and you can work out its whole path.</p>
+  <p>Electrons do not behave like that. Send them one at a time at a wall with two narrow slits, and record where each one lands on a screen behind it. Every electron arrives at a single spot, like a tiny ball. But the spots pile up into stripes, and stripes are what overlapping waves make.</p>
+
+  <figure id="f-slit">
+    <canvas id="gl3" role="img" aria-label="A wave passing through two slits and building a striped pattern on a screen, drawn in 3D"></canvas>
+    <canvas id="cv3" role="img" aria-label="The same wave seen from above" hidden></canvas>
+    <div class="row">
+      <div class="row l">
+        <button class="btn primary" id="play3">Pause</button>
+        <button class="btn" id="fire">Start over</button>
+      </div>
+      <div class="seg" role="group" aria-label="View" id="seg3">
+        <button id="s3-3d" aria-pressed="true">3D</button>
+        <button id="s3-flat" aria-pressed="false">Flat</button>
+      </div>
+    </div>
+    <div class="row">
+      <div class="seg" role="group" aria-label="Open slits">
+        <button id="sl-both" aria-pressed="true">Both slits open</button>
+        <button id="sl-up" aria-pressed="false">Far slit only</button>
+        <button id="sl-lo" aria-pressed="false">Near slit only</button>
+      </div>
+      <div class="stat" style="min-width:150px"><span>Electrons detected</span><output id="o-det">0</output></div>
+    </div>
+    <p class="caption">Ripples spread from each slit. Where two sets of ripples meet in step they add, and where they meet out of step they cancel. On the screen at the far end, the blue shape shows where the wave arrives strongly and each dot is one electron detected. Close one slit and the stripes disappear. <span class="hint">Drag sideways to turn the view.</span></p>
+  </figure>
+
+  <p>So something wave-like travels and something particle-like arrives. Quantum mechanics keeps both, with three ideas:</p>
+  <ol class="three">
+    <li>Every particle has a wave, called its <strong>wavefunction</strong>.</li>
+    <li>The <strong>Schrödinger equation</strong> says how that wave moves.</li>
+    <li>Where the wave is strong, the particle is likely to be found.</li>
+  </ol>
+</section>
+
+<section aria-labelledby="h-psi">
+  <h2 id="h-psi">The wave: ψ</h2>
+  <p>The wavefunction is written <span class="m">ψ</span>, the Greek letter psi. A water wave has a height at every point. <span class="m">ψ</span> has an <em>arrow</em> at every point: something with a length and a direction, like a clock hand. The mathematical name for such an arrow is a complex number.</p>
+  <ul>
+    <li>The arrow's length is the <strong>amplitude</strong>. Square it and you get the chance of finding the particle at that point.</li>
+    <li>The arrow's direction is the <strong>phase</strong>. Colour shows phase: the full colour wheel in the moving figures, and two colours in the atom at the end.</li>
+    <li>How quickly the arrows turn as you move along the line is the <strong>momentum</strong>. A tight twist means a short wavelength and a fast particle.</li>
+  </ul>
+
+  <figure id="f-cork">
+    <canvas id="cva" role="img" aria-label="A wave packet drawn as a row of arrows forming a corkscrew, with its shadows on a back wall and floor"></canvas>
+    <div class="legend">
+      <span><i class="sw arrow"></i>arrows of ψ, coloured by direction</span>
+      <span><i class="sw re"></i>shadow on the back wall</span>
+      <span><i class="sw im"></i>shadow on the floor</span>
+      <span><i class="sw fill"></i>length squared: chance of finding the particle</span>
+    </div>
+    <div class="stats">
+      <div class="stat"><span>Wavelength λ</span><output id="a-lam"></output></div>
+      <div class="stat"><span>Momentum p = h/λ</span><output id="a-p"></output></div>
+      <div class="stat"><span>Avg. energy of motion</span><output id="a-ke"></output></div>
+      <div class="stat"><span>Direction</span><output id="a-dir"></output></div>
+    </div>
+    <div class="sliders">
+      <label class="sl" for="ak">Momentum <output id="ak-o"></output><input type="range" id="ak" min="-3" max="3" step="0.1" value="1.2"></label>
+      <label class="sl" for="as">Width of the packet <output id="as-o"></output><input type="range" id="as" min="1" max="4" step="0.1" value="2.4"></label>
+    </div>
+    <p class="caption">Drag sideways to turn it. From the end you see clock hands. From the front you see an ordinary wave, which is the corkscrew's shadow on the back wall. The grey hill is each arrow's length squared. Slide the momentum through zero: the twist unwinds, then winds the other way, and the particle is heading left. Try narrowing the packet too: even at zero average momentum, squeezing the wave makes it bend more sharply and raises its energy of motion. <span class="hint">That a wavelength goes with every momentum was Louis de Broglie's idea, in 1924.</span></p>
+  </figure>
+</section>
+
+<section aria-labelledby="h-eq">
+  <h2 id="h-eq">The equation</h2>
+  <p>In 1926 Erwin Schrödinger started from the ordinary rule for energy: total energy is energy of motion plus energy of position. In symbols, <span class="m">E = p²/2m + V</span>. He rewrote each piece in the language of waves, using two relations between particles and waves. Both were established for light, and de Broglie had proposed that matter obeys them too.</p>
+  <div class="tw">
+    <table class="dict">
+      <thead><tr><th>For a particle</th><th>For a wave</th><th>In symbols</th></tr></thead>
+      <tbody>
+        <tr><td>Energy <i>E</i></td><td>How fast the arrows turn in time. Planck and Einstein: <i>E = hf</i></td><td><b style="font-style:normal;font-weight:400">i</b>ħ ∂/∂t</td></tr>
+        <tr><td>Momentum <i>p</i></td><td>How tightly the arrows twist in space. De Broglie: <i>p = h/λ</i></td><td>−<b style="font-style:normal;font-weight:400">i</b>ħ ∂/∂x</td></tr>
+        <tr><td>Energy of motion <i>p²/2m</i></td><td>The twist taken twice, which measures how sharply the wave curves</td><td>−(ħ²/2m) ∂²/∂x²</td></tr>
+        <tr><td>Energy of position <i>V</i></td><td>Unchanged. It depends only on where you are</td><td>V(x)</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Put the wave versions into the energy rule, apply both sides to <span class="m">ψ</span>, and you have the Schrödinger equation. Tap any symbol.</p>
+  <div class="eq" role="group" aria-label="The Schrödinger equation. Select a symbol to read what it means.">
+    <div class="grp"><div class="chips">
+      <button class="term" id="t-i" aria-pressed="false"><i class="up">i</i></button>
+      <button class="term" id="t-h" aria-pressed="false">ħ</button>
+      <button class="term" id="t-dt" aria-pressed="true"><span class="fr"><span>∂ψ</span><span>∂t</span></span></button>
+    </div><span class="gl">how fast ψ changes</span></div>
+    <span class="op">=</span>
+    <div class="grp"><div class="chips">
+      <button class="term" id="t-m" aria-pressed="false">− <span class="fr"><span>ħ²</span><span>2m</span></span></button>
+      <button class="term" id="t-dx" aria-pressed="false"><span class="fr"><span>∂²ψ</span><span>∂x²</span></span></button>
+    </div><span class="gl">energy of motion</span></div>
+    <span class="op">+</span>
+    <div class="grp"><div class="chips">
+      <button class="term" id="t-v" aria-pressed="false">V(x)</button>
+      <button class="term" id="t-psi" aria-pressed="false">ψ</button>
+    </div><span class="gl">energy of position</span></div>
+  </div>
+  <p class="termnote" id="termnote" aria-live="polite"></p>
+  <p>In words: the landscape sets how fast each arrow spins in place, while how sharply the wave curves relative to its neighbours changes each arrow's direction and length—moving probability around while keeping the total fixed. That is the whole law.</p>
+</section>
+
+<section aria-labelledby="h-sim">
+  <h2 id="h-sim">Watch it move</h2>
+  <p>Here is the equation running. A packet of wave stands for one particle. The corkscrew is <span class="m">ψ</span>. On the back wall are its shadow, the grey hill of probability, and the landscape <span class="m">V(x)</span> the particle moves through. The black dot shows where a classical ball with the same start would be.</p>
+
+  <figure id="f-sim">
+    <div class="seg" id="presets" role="group" aria-label="Situation"></div>
+    <canvas id="cv" role="img" aria-label="Animated wave packet"></canvas>
+    <div class="legend">
+      <span><i class="sw fill"></i>chance of finding the particle</span>
+      <span><i class="sw re"></i>up–down part of ψ</span>
+      <span><i class="sw im"></i>front–back part of ψ</span>
+      <span><i class="sw pot"></i>landscape V(x)</span>
+      <span><i class="sw en"></i>the particle's average energy</span>
+      <span><i class="sw ball"></i>classical ball</span>
+    </div>
+    <div class="row">
+      <div class="row l">
+        <button class="btn primary" id="play">Pause</button>
+        <button class="btn" id="restart">Restart</button>
+        <button class="btn" id="measure">Look for the particle</button>
+      </div>
+      <div class="seg" role="group" aria-label="View">
+        <button id="sim-3d" aria-pressed="true">3D</button>
+        <button id="sim-flat" aria-pressed="false">Flat</button>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat"><span>Time</span><output id="o-t">0.0</output></div>
+      <div class="stat"><span>Average position of the wave</span><output id="o-x">0.0</output></div>
+      <div class="stat"><span>Classical ball</span><output id="o-b">0.0</output></div>
+      <div class="stat" id="s-tr"><span>On the far side</span><output id="o-tr">0.0%</output></div>
+      <div class="stat" id="s-rf"><span>On the near side</span><output id="o-rf">0.0%</output></div>
+    </div>
+    <div class="sliders">
+      <label class="sl" for="k0">Starting momentum <output id="k0-o"></output><input type="range" id="k0" min="0" max="4" step="0.1"></label>
+      <label class="sl" for="sg">Width of the packet <output id="sg-o"></output><input type="range" id="sg" min="0.4" max="5" step="0.02"></label>
+      <label class="sl" for="pa" id="pa-l"><span id="pa-t"></span> <output id="pa-o"></output><input type="range" id="pa"></label>
+      <label class="sl" for="pb" id="pb-l"><span id="pb-t"></span> <output id="pb-o"></output><input type="range" id="pb"></label>
+      <label class="sl" for="sp">Animation speed <output id="sp-o"></output><input type="range" id="sp" min="0.25" max="4" step="0.25"></label>
+    </div>
+    <p class="caption" id="caption"></p>
+  </figure>
+
+  <p>The equation never says where the particle <em>is</em>. It says how the odds change. Press <strong>Look for the particle</strong>: you find it at one spot, picked at random, more often where the hill is tall. The wave then starts again from a narrow packet at that spot. Try it several times. You get a different answer each time, and that randomness is part of nature as far as anyone can tell.</p>
+</section>
+
+<section aria-labelledby="h-st">
+  <h2 id="h-st">Trapped waves and energy levels</h2>
+  <p>A guitar string is fixed at both ends, so it can only vibrate in shapes that fit: one hump, two humps, three. A particle shut in a box is the same. Only certain wave shapes fit between the walls, each shape has its own energy, and no energy in between is possible. This is the "quantum" in quantum mechanics.</p>
+
+  <figure id="f-box">
+    <canvas id="cv2" role="img" aria-label="Wave shapes of a particle trapped in a box"></canvas>
+    <div class="legend">
+      <span><i class="sw fill"></i>chance of finding the particle</span><span><i class="sw re"></i>up–down part</span><span><i class="sw im"></i>front–back part</span>
+    </div>
+    <div class="modes" id="modes"></div>
+    <div class="row">
+      <div class="row l">
+        <button class="btn primary" id="play2">Pause</button>
+        <div class="seg" role="group" aria-label="Examples">
+          <button id="ex-1">Shape 1 alone</button>
+          <button id="ex-2">Shape 2 alone</button>
+          <button id="ex-12">1 and 2 mixed</button>
+        </div>
+      </div>
+      <div class="seg" role="group" aria-label="View">
+        <button id="box-3d" aria-pressed="true">3D</button>
+        <button id="box-flat" aria-pressed="false">Flat</button>
+      </div>
+    </div>
+    <p class="caption">One shape alone is a flat ribbon spinning in place. Its arrows turn together, at a rate set by its energy, so the grey hill never moves. Such a wave is called a stationary state. Mix two shapes and they spin at different rates, the ribbon twists, and the hill sloshes from side to side.</p>
+  </figure>
+  <p>That is why atoms give off light of particular colours only. An electron bound to an atom has a ladder of allowed energies. When it drops from one rung to another, the light it emits carries exactly the difference.</p>
+</section>
+
+<section aria-labelledby="h-atom">
+  <h2 id="h-atom">Three dimensions: the atom</h2>
+  <p>Real space has three dimensions. The equation keeps its form: the wave can now curve in three directions, and all three count towards the energy of motion. For hydrogen, the landscape <span class="m">V</span> is the electrical pull of the proton on the electron. The stationary states of that problem are the shapes below. The clouds do not change in time. For 2p, 3p and 3d, one of several equal-energy states is pictured.</p>
+
+  <figure id="f-atom">
+    <div class="seg" id="orbs" role="group" aria-label="Electron state"></div>
+    <canvas id="glh" role="img" aria-label="Cloud of points showing where the electron in a hydrogen atom is likely to be found"></canvas>
+    <p class="small" id="glh-msg" hidden>This 3D view needs WebGL, which is not available in this browser.</p>
+    <div class="legend">
+      <span><i class="sw re"></i>arrows in phase (+)</span><span><i class="sw im"></i>arrows opposite (−)</span>
+    </div>
+    <div class="stats">
+      <div class="stat"><span>State</span><output id="h-name"></output></div>
+      <div class="stat"><span>Energy</span><output id="h-e"></output></div>
+    </div>
+    <p class="caption" id="h-cap"></p>
+  </figure>
+  <p>Every dot is a place you might find the electron if you looked. Where the dots are dense it is likely to be, and the gaps are places it is never found. These shapes decide how atoms bond, so they are where chemistry starts.</p>
+</section>
+
+<section aria-labelledby="h-sum">
+  <h2 id="h-sum">What to remember</h2>
+  <ul>
+    <li><span class="m">ψ</span> is a wave made of arrows. An arrow's length squared is the chance of finding the particle there.</li>
+    <li>The Schrödinger equation updates the arrows from two things—the curvature of the wave and the height of the landscape—shifting probability from place to place while keeping the total at 100%.</li>
+    <li>Waves add. That gives the stripes behind two slits and the sloshing of a mixed state.</li>
+    <li>A trapped wave fits only in certain shapes, so a trapped particle has only certain energies.</li>
+    <li>The equation gives odds. Looking gives one result.</li>
+  </ul>
+</section>
+
+<section aria-labelledby="h-gl">
+  <h2 id="h-gl">Every term, in one place</h2>
+  <dl class="gloss">
+    <div><dt>Wavefunction, ψ</dt><dd>The wave that goes with a particle: one arrow at every point in space, changing in time.</dd></div>
+    <div><dt>Complex number</dt><dd>A number with a size and a direction. An arrow.</dd></div>
+    <div><dt>Amplitude</dt><dd>The length of the arrow.</dd></div>
+    <div><dt>Phase</dt><dd>The direction of the arrow.</dd></div>
+    <div><dt>Probability, |ψ|²</dt><dd>Amplitude squared. The chance of finding the particle near a point. This link is called the Born rule.</dd></div>
+    <div><dt>Wavelength, λ</dt><dd>The distance over which the arrows make one full turn.</dd></div>
+    <div><dt>Momentum, p</dt><dd>Mass times velocity for a ball. For a wave, <i>p = h/λ</i>.</dd></div>
+    <div><dt>Energy of motion</dt><dd>Kinetic energy, <i>p²/2m</i>. Large where the wave curves sharply.</dd></div>
+    <div><dt>Energy of position, V(x)</dt><dd>Potential energy: what the particle has because of where it is. Hills, valleys, the pull of a nucleus.</dd></div>
+    <div><dt>Planck's constant, h and ħ</dt><dd><i>h</i> = 6.626 × 10⁻³⁴ joule-seconds, and ħ = <i>h</i>/2π. It links energy to frequency and momentum to wavelength.</dd></div>
+    <div><dt>Mass, m</dt><dd>How much matter the particle has. Heavier particles have shorter wavelengths and look more classical.</dd></div>
+    <div><dt>i</dt><dd>The square root of −1. Multiplying an arrow by <i>i</i> turns it a quarter turn.</dd></div>
+    <div><dt>∂, partial derivative</dt><dd>A rate of change with respect to one thing (time, or position) while the other is held fixed.</dd></div>
+    <div><dt>Superposition</dt><dd>Adding two wavefunctions, arrow by arrow, to get another valid one.</dd></div>
+    <div><dt>Interference</dt><dd>What adding does. Arrows pointing the same way reinforce, and opposite arrows cancel.</dd></div>
+    <div><dt>Stationary state</dt><dd>A wave shape whose arrows all turn together, so its probability pattern stays put. It has one definite energy.</dd></div>
+    <div><dt>Energy level</dt><dd>One of the allowed energies of a trapped particle.</dd></div>
+    <div><dt>Tunnelling</dt><dd>Getting through a barrier the particle does not have the energy to climb.</dd></div>
+    <div><dt>Measurement</dt><dd>Looking. It gives one definite result, at random, with odds set by |ψ|².</dd></div>
+    <div><dt>Uncertainty principle</dt><dd>A narrow packet needs a wide spread of momenta. Position and momentum cannot both be sharp.</dd></div>
+  </dl>
+</section>
+
+<footer>
+  The moving figures are real solutions of the equation, computed in your browser. They use units in which ħ = 1 and m = 1.
+</footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+"use strict";
+var TAU=2*Math.PI, $=function(id){return document.getElementById(id);};
+var reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+var DPR=Math.min(window.devicePixelRatio||1,2);
+var dirty={slit:true,cork:true,sim:true,box:true,atom:true};
+function all(){for(var k in dirty) dirty[k]=true;}
+
+/* ---------- theme colours ---------- */
+var C=null, themeHooks=[];
+function colors(){
+  if(C) return C;
+  var s=getComputedStyle(document.documentElement), g=function(n){return s.getPropertyValue(n).trim();};
+  C={ink:g("--ink"),muted:g("--muted"),rule:g("--rule"),re:g("--re"),im:g("--im"),pot:g("--pot"),energy:g("--energy"),bg:g("--bg"),surface:g("--surface")};
+  return C;
+}
+function invalidate(){C=null; themeHooks.forEach(function(f){try{f();}catch(e){}}); all();}
+new MutationObserver(invalidate).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme","class","style"]});
+if(window.matchMedia){var mq=matchMedia("(prefers-color-scheme: dark)"); if(mq.addEventListener) mq.addEventListener("change",invalidate);}
+
+function fit(cv){
+  var dpr=Math.min(window.devicePixelRatio||1,2.5), w=cv.clientWidth, h=cv.clientHeight;
+  if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);}
+  var ctx=cv.getContext("2d"); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,w,h);
+  return {ctx:ctx,w:w,h:h};
+}
+function val(id){return parseFloat($(id).value);}
+function setPlay(btn,on){btn.textContent=on?"Pause":"Play";}
+function press(id,on){$(id).setAttribute("aria-pressed",on?"true":"false");}
+function fmt(v,d){return isFinite(v)?v.toFixed(d):"–";}
+
+/* drag to turn a 3D view */
+function orbit(el,view,key,lim){
+  var on=false,lx=0,ly=0;
+  el.addEventListener("pointerdown",function(e){on=true;lx=e.clientX;ly=e.clientY;view.touched=true;try{el.setPointerCapture(e.pointerId);}catch(x){}});
+  el.addEventListener("pointermove",function(e){
+    if(!on) return;
+    view.yaw+=(e.clientX-lx)*0.009; if(e.pointerType==="mouse") view.pitch+=(e.clientY-ly)*0.007;
+    view.yaw=Math.max(lim[0],Math.min(lim[1],view.yaw)); view.pitch=Math.max(lim[2],Math.min(lim[3],view.pitch));
+    lx=e.clientX; ly=e.clientY; dirty[key]=true;
+  });
+  function end(){on=false;}
+  el.addEventListener("pointerup",end); el.addEventListener("pointercancel",end);
+}
+function sway(view,key,now){
+  if(view.touched||reduce) return;
+  view.yaw=view.yaw0+view.amp*Math.sin(now*0.0006+view.ph); dirty[key]=true;
+}
+
+/* ---------- corkscrew renderer (canvas 2D, own projection) ---------- */
+var AX=1.7, YW=0.62, ZW=0.62;
+function cork(cv,view,o){
+  var f=fit(cv), ctx=f.ctx, w=f.w, h=f.h, c=colors(), n=o.n, i, q;
+  var cy=Math.cos(view.yaw), sy=Math.sin(view.yaw), cp=Math.cos(view.pitch), sp=Math.sin(view.pitch);
+  var T=0.32, dist=Math.max(4.0,2.5/(T*(w/h))), foc=(h/2)/T, px=[0,0,0];
+  function P(x,y,z){var x1=x*cy+z*sy, z1=-x*sy+z*cy, y2=y*cp-z1*sp, z2=y*sp+z1*cp, s=foc/(dist-z2); px[0]=w/2+x1*s; px[1]=h/2-(y2+0.04)*s; px[2]=z2; return px;}
+  function M(x,y,z){P(x,y,z); ctx.moveTo(px[0],px[1]);}
+  function Ln(x,y,z){P(x,y,z); ctx.lineTo(px[0],px[1]);}
+  function quad(a,b,d,e){ctx.beginPath(); M(a[0],a[1],a[2]); Ln(b[0],b[1],b[2]); Ln(d[0],d[1],d[2]); Ln(e[0],e[1],e[2]); ctx.closePath();}
+  ctx.lineJoin="round"; ctx.lineCap="round";
+
+  /* floor and back wall */
+  ctx.lineWidth=1; ctx.strokeStyle=c.rule; ctx.fillStyle=c.ink;
+  quad([-AX,-YW,-ZW],[AX,-YW,-ZW],[AX,-YW,ZW],[-AX,-YW,ZW]); ctx.globalAlpha=0.04; ctx.fill(); ctx.globalAlpha=1; ctx.stroke();
+  quad([-AX,-YW,-ZW],[AX,-YW,-ZW],[AX,YW,-ZW],[-AX,YW,-ZW]); ctx.globalAlpha=0.04; ctx.fill(); ctx.globalAlpha=1; ctx.stroke();
+  ctx.beginPath(); M(-AX,0,-ZW); Ln(AX,0,-ZW); M(-AX,-YW,0); Ln(AX,-YW,0); ctx.stroke();
+
+  if(o.pot){
+    ctx.beginPath(); M(o.x[0],0,-ZW); for(i=0;i<n;i++) Ln(o.x[i],o.pot[i],-ZW); Ln(o.x[n-1],0,-ZW); ctx.closePath();
+    ctx.globalAlpha=0.18; ctx.fillStyle=c.pot; ctx.fill(); ctx.globalAlpha=1;
+    ctx.beginPath(); M(o.x[0],o.pot[0],-ZW); for(i=1;i<n;i++) Ln(o.x[i],o.pot[i],-ZW); ctx.strokeStyle=c.pot; ctx.lineWidth=1.5; ctx.stroke();
+  }
+  if(o.rho){
+    ctx.beginPath(); M(o.x[0],0,-ZW); for(i=0;i<n;i++) Ln(o.x[i],o.rho[i],-ZW); Ln(o.x[n-1],0,-ZW); ctx.closePath();
+    ctx.globalAlpha=0.2; ctx.fillStyle=c.ink; ctx.fill(); ctx.globalAlpha=0.5; ctx.strokeStyle=c.ink; ctx.lineWidth=1; ctx.stroke(); ctx.globalAlpha=1;
+  }
+  if(o.eLine!==null&&o.eLine!==undefined&&o.eLine<YW){
+    ctx.setLineDash([5,4]); ctx.beginPath(); M(-AX,o.eLine,-ZW); Ln(AX,o.eLine,-ZW); ctx.strokeStyle=c.energy; ctx.lineWidth=1.25; ctx.stroke(); ctx.setLineDash([]);
+  }
+  /* shadows */
+  ctx.beginPath(); M(o.x[0],o.re[0],-ZW); for(i=1;i<n;i++) Ln(o.x[i],o.re[i],-ZW); ctx.strokeStyle=c.re; ctx.lineWidth=1.4; ctx.stroke();
+  ctx.beginPath(); M(o.x[0],-YW,o.im[0]); for(i=1;i<n;i++) Ln(o.x[i],-YW,o.im[i]); ctx.strokeStyle=c.im; ctx.lineWidth=1.4; ctx.stroke();
+  if(o.flash){
+    ctx.globalAlpha=Math.min(1,o.flash.f/25); ctx.beginPath(); M(o.flash.x,-YW,-ZW); Ln(o.flash.x,YW,-ZW); ctx.strokeStyle=c.im; ctx.lineWidth=2; ctx.stroke();
+    P(o.flash.x,YW,-ZW); ctx.fillStyle=c.im; ctx.font="500 11px 'IBM Plex Sans',system-ui,sans-serif"; ctx.textAlign=px[0]>w-80?"right":"left"; ctx.textBaseline="bottom";
+    ctx.fillText("found here",px[0]+(px[0]>w-80?-5:5),px[1]-2); ctx.globalAlpha=1;
+  }
+  if(o.ball){
+    P(o.ball.x,o.ball.y,-ZW); ctx.beginPath(); ctx.arc(px[0],px[1],5.5,0,TAU); ctx.fillStyle=c.ink; ctx.fill(); ctx.strokeStyle=c.surface; ctx.lineWidth=1.5; ctx.stroke();
+  }
+  if(o.plates){
+    [o.x[0],o.x[n-1]].forEach(function(xp){
+      quad([xp,-0.5,-0.5],[xp,0.5,-0.5],[xp,0.5,0.5],[xp,-0.5,0.5]);
+      ctx.globalAlpha=0.14; ctx.fillStyle=c.pot; ctx.fill(); ctx.globalAlpha=1; ctx.strokeStyle=c.pot; ctx.lineWidth=1.5; ctx.stroke();
+    });
+  }
+  /* axis */
+  ctx.beginPath(); M(-AX,0,0); Ln(AX,0,0); ctx.strokeStyle=c.muted; ctx.globalAlpha=0.6; ctx.lineWidth=1; ctx.stroke(); ctx.globalAlpha=1;
+
+  /* arrows */
+  if(o.spokes){
+    for(i=0;i<n;i+=o.spokes){
+      var am=Math.sqrt(o.re[i]*o.re[i]+o.im[i]*o.im[i]); if(am<0.015) continue;
+      var col="hsl("+Math.round(Math.atan2(o.im[i],o.re[i])*12/Math.PI)*15+" 75% 50%)";
+      ctx.beginPath(); M(o.x[i],0,0); Ln(o.x[i],o.re[i],o.im[i]); ctx.strokeStyle=col; ctx.globalAlpha=0.7; ctx.lineWidth=1.3; ctx.stroke();
+      ctx.globalAlpha=1; ctx.beginPath(); ctx.arc(px[0],px[1],2.3,0,TAU); ctx.fillStyle=col; ctx.fill();
+    }
+  }
+  /* the corkscrew itself, coloured by arrow direction */
+  var prev=null, open=false;
+  for(i=0;i<n-1;i++){
+    var a=Math.sqrt(o.re[i]*o.re[i]+o.im[i]*o.im[i]);
+    var key=a<0.012?"z":String(Math.round(Math.atan2(o.im[i],o.re[i])*12/Math.PI));
+    if(key!==prev){
+      if(open) ctx.stroke();
+      ctx.beginPath(); P(o.x[i],o.re[i],o.im[i]); ctx.moveTo(px[0],px[1]);
+      if(key==="z"){ctx.strokeStyle=c.muted; ctx.globalAlpha=0.5; ctx.lineWidth=1.4;}
+      else{ctx.strokeStyle="hsl("+(+key*15)+" 75% 50%)"; ctx.globalAlpha=1; ctx.lineWidth=2.4;}
+      prev=key; open=true;
+    }
+    P(o.x[i+1],o.re[i+1],o.im[i+1]); ctx.lineTo(px[0],px[1]);
+  }
+  if(open) ctx.stroke(); ctx.globalAlpha=1;
+}
+var LIM=[-1.35,1.35,0.05,1.2];
+function mkView(yaw,pitch,amp,ph){return {yaw:yaw,yaw0:yaw,pitch:pitch,amp:amp,ph:ph||0,touched:false};}
+
+/* ================= arrows figure ================= */
+var AV=mkView(0.5,0.34,0.3,0), AN=321, A={x:new Float32Array(AN),re:new Float32Array(AN),im:new Float32Array(AN),rho:new Float32Array(AN),n:AN,spokes:6};
+function drawArrows(){
+  var k=val("ak"), s=val("as"), i;
+  for(i=0;i<AN;i++){
+    var x=-10+20*i/(AN-1), g=Math.exp(-x*x/(4*s*s));
+    A.x[i]=x/10*AX; A.re[i]=0.5*g*Math.cos(k*x); A.im[i]=0.5*g*Math.sin(k*x); A.rho[i]=0.34*g*g;
+  }
+  cork($("cva"),AV,A);
+}
+function arrowOuts(){
+  var k=val("ak"), ak=Math.abs(k), s=val("as");
+  $("ak-o").textContent=(k<0?"−":"")+ak.toFixed(1); $("as-o").textContent=s.toFixed(1);
+  $("a-lam").textContent=ak<0.05?"no twist":(TAU/ak).toFixed(2);
+  $("a-p").textContent=(k<0?"−":"")+ak.toFixed(1);
+  $("a-ke").textContent=(k*k/2+1/(8*s*s)).toFixed(2);
+  $("a-dir").textContent=ak<0.05?"at rest":(k>0?"moving right":"moving left");
+  dirty.cork=true;
+}
+$("ak").addEventListener("input",arrowOuts); $("as").addEventListener("input",arrowOuts);
+orbit($("cva"),AV,"cork",LIM);
+arrowOuts();
+
+/* ================= the equation, symbol by symbol ================= */
+var notes={
+  "t-i":"<strong><span class='m'><b>i</b></span>, the square root of −1.</strong> Multiplying an arrow by <span class='m'><b>i</b></span> turns it a quarter turn without changing its length. In the equation, this keeps evolution balanced: individual arrows grow and shrink as probability flows from place to place (and purely rotate in stationary states), while the total chance of finding the particle somewhere stays fixed at exactly 100%.",
+  "t-h":"<strong>ħ, said “h-bar”.</strong> Planck's constant divided by 2π: about 1.05 × 10⁻³⁴ joule-seconds. It converts wave quantities into mechanical ones: frequency into energy, wavelength into momentum. It is tiny, which is why a thrown ball shows no wave behaviour you could ever notice.",
+  "t-dt":"<strong>How fast ψ is changing in time</strong> at one fixed place. The curly ∂ means “a small change in”: a small change in ψ divided by the small time it took, the way speed is a change in position divided by time. This is what the equation solves for. Everything on the right decides it.",
+  "t-m":"<strong>m is the particle's mass.</strong> A heavier particle makes this factor smaller, so its wave spreads and wanders less. That is why heavy things behave the way Newton said. The minus sign is there because an oscillating wave bends back towards the axis—its curvature has the opposite sign to ψ—so the minus sign turns that bending into a positive average energy of motion.",
+  "t-dx":"<strong>How sharply ψ curves</strong> as you move along x: the rate of change of its slope. A tightly wound wave curves sharply, and that means high momentum and high energy of motion. This is also the only part of the equation that connects each point to its neighbours, so it is what makes the wave travel and spread.",
+  "t-v":"<strong>The landscape.</strong> V(x) is the energy the particle has just from being at position x: a hill it must climb, a valley that holds it, the pull of a nucleus. Everything else in the equation is the same for every problem. V is where you describe the particular situation.",
+  "t-psi":"<strong>The wavefunction itself</strong>: the arrow at each point. Notice that ψ appears exactly once in every term. That makes the equation <em>linear</em>: add two solutions and you get another solution. All interference, including the stripes behind the two slits, comes from that."
+};
+var termIds=["t-i","t-h","t-dt","t-m","t-dx","t-v","t-psi"];
+function pickTerm(id){termIds.forEach(function(t){press(t,t===id);}); $("termnote").innerHTML=notes[id];}
+termIds.forEach(function(t){$(t).addEventListener("click",function(){pickTerm(t);});});
+pickTerm("t-dt");
+
+/* ---------- FFT (in place, with offset and stride) ---------- */
+function makeFFT(n){
+  var bits=Math.round(Math.log(n)/Math.LN2), rev=new Uint32Array(n), i;
+  for(i=0;i<n;i++) rev[i]=(rev[i>>1]>>1)|((i&1)<<(bits-1));
+  var c=new Float64Array(n/2), s=new Float64Array(n/2);
+  for(i=0;i<n/2;i++){c[i]=Math.cos(TAU*i/n); s[i]=Math.sin(TAU*i/n);}
+  return function(re,im,off,sd,inv){
+    var i,j,t,size,half,st,a,b,wr,wi,xr,xi,hs;
+    for(i=0;i<n;i++){j=rev[i]; if(j>i){a=off+i*sd; b=off+j*sd; t=re[a];re[a]=re[b];re[b]=t;t=im[a];im[a]=im[b];im[b]=t;}}
+    for(size=2;size<=n;size<<=1){
+      half=size>>1; st=n/size; hs=half*sd;
+      for(i=0;i<n;i+=size) for(j=0,t=0;j<half;j++,t+=st){
+        wr=c[t]; wi=inv?s[t]:-s[t]; a=off+(i+j)*sd; b=a+hs;
+        xr=re[b]*wr-im[b]*wi; xi=re[b]*wi+im[b]*wr;
+        re[b]=re[a]-xr; im[b]=im[a]-xi; re[a]+=xr; im[a]+=xi;
+      }
+    }
+    if(inv) for(i=0;i<n;i++){a=off+i*sd; re[a]/=n; im[a]/=n;}
+  };
+}
+
+
+
+/* ================= 1D simulation ================= */
+var N=2048, L=200, dx=L/N, dt=0.02, ABS=20, nAbs=Math.ceil(ABS/dx);
+var fft=makeFFT(N);
+var xs=new Float64Array(N), kk=new Float64Array(N), re=new Float64Array(N), im=new Float64Array(N),
+    tr=new Float64Array(N), ti=new Float64Array(N), V=new Float64Array(N),
+    hc=new Float64Array(N), hs=new Float64Array(N), kc=new Float64Array(N), kn=new Float64Array(N), mask=new Float64Array(N);
+(function(){
+  for(var i=0;i<N;i++){
+    xs[i]=-L/2+i*dx; kk[i]=TAU/L*(i<N/2?i:i-N);
+    kc[i]=Math.cos(kk[i]*kk[i]*dt/2); kn[i]=-Math.sin(kk[i]*kk[i]*dt/2);
+    var ax=Math.abs(xs[i]), xa=L/2-ABS, u=(ax-xa)/ABS;
+    mask[i]=ax>xa?Math.exp(-3*dt*u*u):1;
+  }
+})();
+var PRESETS={
+  free:{name:"Empty space",view:[-40,60],x0:-25,k0:1.5,s:1.5,speed:1,loop:true,tmax:70,
+    V:function(){return 0;},
+    cap:"Nothing pushes on the particle. The hill glides along with the classical ball, so on average the wave does what Newton says. It also spreads, because a packet is a blend of slightly different momenta that drift apart. Make the packet narrower and it spreads faster: the more tightly you pin down where a particle is, the less definite its speed. That trade-off is the uncertainty principle."},
+  barrier:{name:"A barrier",view:[-45,45],x0:-22,k0:2,s:3,speed:1,loop:true,tmax:60,
+    a:{t:"Height of the barrier",min:0,max:6,step:0.1,v:2.6}, b:{t:"Thickness of the barrier",min:0.2,max:4,step:0.1,v:1},
+    V:function(x,a,b){return x>=0&&x<b?a:0;}, split:function(a,b){return b/2;},
+    cap:"The dashed green line is the particle's average energy, and the grey block is a barrier taller than that. The classical ball bounces back every time. Most of the wave bounces too, but some leaks through, so there is a real chance of finding the particle on the far side. This is tunnelling. The Sun's fusion depends on it, and so does flash memory. Make the barrier thicker and the chance drops very fast. A narrow packet holds a wide spread of momenta, so its average energy sits above the ball's."},
+  bowl:{name:"A bowl",view:[-20,20],x0:-8,k0:0,s:1.58,speed:1.5,
+    a:{t:"Steepness of the bowl",min:0.1,max:0.5,step:0.01,v:0.2},
+    V:function(x,a){return 0.5*a*a*x*x;}, match:function(a){return 1/Math.sqrt(2*a);},
+    cap:"A particle in a valley, like a marble in a dish or an atom held in a molecule by a springy bond. The packet swings back and forth exactly in step with the classical ball. Watch the corkscrew: it winds one way on the way down, unwinds at the turning point, and winds the other way coming back."}
+};
+var order=["free","barrier","bowl"];
+var S={key:"free",t:0,absL:0,absR:0,Vtop:4,peakRho:1,peakAmp:1,split:null,mode:"3d",playing:!reduce,obs:{},flash:null,ball:null,a:0,b:0,vi0:0,vi1:N-1};
+var SV=mkView(0.42,0.36,0.22,1.3);
+
+function mul(c,s){for(var i=0;i<N;i++){var a=re[i],b=im[i]; re[i]=a*c[i]-b*s[i]; im[i]=a*s[i]+b*c[i];}}
+function step(){
+  mul(hc,hs); fft(re,im,0,1,false); mul(kc,kn); fft(re,im,0,1,true); mul(hc,hs);
+  var i,p,m;
+  for(i=0;i<nAbs;i++){m=mask[i]; p=re[i]*re[i]+im[i]*im[i]; S.absL+=p*(1-m*m)*dx; re[i]*=m; im[i]*=m;}
+  for(i=N-nAbs;i<N;i++){m=mask[i]; p=re[i]*re[i]+im[i]*im[i]; S.absR+=p*(1-m*m)*dx; re[i]*=m; im[i]*=m;}
+  S.t+=dt;
+}
+function stepBall(){
+  var B=S.ball; if(!B) return;
+  if(S.key==="bowl"){B.v-=S.a*S.a*B.x*dt; B.x+=B.v*dt; return;}
+  if(S.key!=="barrier"||S.a<=0||S.b<=0){B.x+=B.v*dt; return;}
+  var rem=dt, eps=1e-12;
+  for(var iter=0;iter<4&&rem>eps&&Math.abs(B.v)>eps;iter++){
+    var x=B.x, v=B.v, edge=null, entering=false;
+    if(v>0){
+      if(x<0){edge=0; entering=true;} else if(x<S.b){edge=S.b; entering=false;}
+    } else {
+      if(x>S.b){edge=S.b; entering=true;} else if(x>0){edge=0; entering=false;}
+    }
+    if(edge===null){B.x+=v*rem; break;}
+    var th=(edge-x)/v;
+    if(th>=rem){B.x+=v*rem; break;}
+    rem-=th;
+    if(entering){
+      if(0.5*v*v<=S.a){B.x=edge+(v>0?-eps:eps); B.v=-v;}
+      else{B.x=edge+(v>0?eps:-eps); B.v=(v>0?1:-1)*Math.sqrt(v*v-2*S.a);}
+    } else {
+      B.x=edge+(v>0?eps:-eps); B.v=(v>0?1:-1)*Math.sqrt(v*v+2*S.a);
+    }
+  }
+}
+function observe(){
+  var n=0,sx=0,sv=0,pl=0,pr=0,iv=0,i,p,sp=S.split;
+  for(i=0;i<N;i++){p=(re[i]*re[i]+im[i]*im[i])*dx; n+=p; sx+=p*xs[i]; sv+=p*V[i]; if(i>=S.vi0&&i<=S.vi1) iv+=p; if(sp!==null){if(xs[i]<sp) pl+=p; else pr+=p;}}
+  tr.set(re); ti.set(im); fft(tr,ti,0,1,false);
+  var nk=0,skk=0,q;
+  for(i=0;i<N;i++){q=tr[i]*tr[i]+ti[i]*ti[i]; nk+=q; skk+=q*kk[i]*kk[i];}
+  var o=S.obs; o.n=n; o.inView=iv;
+  if(n<1e-6||nk<=0){o.x=NaN;o.E=NaN;} else{o.x=sx/n; o.E=0.5*skk/nk+sv/n;}
+  o.T=pr+S.absR; o.R=pl+S.absL;
+  return o;
+}
+function peaks(){
+  var i,p,m=0; for(i=0;i<N;i++){p=re[i]*re[i]+im[i]*im[i]; if(p>m) m=p;}
+  S.peakRho=m||1; S.peakAmp=Math.sqrt(m)||1;
+}
+function launch(){
+  var P=PRESETS[S.key], k0=val("k0"), s=val("sg"), i;
+  for(i=0;i<N;i++){
+    var d=xs[i]-P.x0, g=Math.pow(TAU*s*s,-0.25)*Math.exp(-d*d/(4*s*s));
+    re[i]=g*Math.cos(k0*xs[i]); im[i]=g*Math.sin(k0*xs[i]);
+  }
+  S.t=0; S.absL=0; S.absR=0; S.flash=null; S.ball={x:P.x0,v:k0};
+  observe(); peaks();
+  S.Vtop=Math.max(1,1.8*(isFinite(S.obs.E)?S.obs.E:0),S.key==="barrier"?1.35*S.a:0);
+  dirty.sim=true; readouts();
+}
+function reset(){
+  var P=PRESETS[S.key], i;
+  S.a=P.a?val("pa"):0; S.b=P.b?val("pb"):0;
+  for(i=0;i<N;i++){V[i]=Math.min(60,P.V(xs[i],S.a,S.b)); hc[i]=Math.cos(V[i]*dt/2); hs[i]=-Math.sin(V[i]*dt/2);}
+  S.split=P.split?P.split(S.a,S.b):null;
+  S.vi0=Math.max(0,Math.floor((P.view[0]+L/2)/dx)); S.vi1=Math.min(N-1,Math.ceil((P.view[1]+L/2)/dx));
+  launch();
+}
+function readouts(){
+  var o=S.obs;
+  $("o-t").textContent=fmt(S.t,1); $("o-x").textContent=fmt(o.x,1); $("o-b").textContent=S.ball?fmt(S.ball.x,1):"–";
+  if(S.split!==null){$("o-tr").textContent=fmt(100*o.T,1)+"%"; $("o-rf").textContent=fmt(100*o.R,1)+"%";}
+}
+function measure(){
+  var n=0,i; for(i=0;i<N;i++) n+=re[i]*re[i]+im[i]*im[i];
+  if(n*dx<1e-4) return;
+  var r=Math.random()*n, acc=0, xm=0;
+  for(i=0;i<N;i++){acc+=re[i]*re[i]+im[i]*im[i]; if(acc>=r){xm=xs[i]; break;}}
+  var s=0.8, nn=0;
+  for(i=0;i<N;i++){var d=xs[i]-xm, g=Math.exp(-d*d/(4*s*s)); re[i]*=g; im[i]*=g; nn+=re[i]*re[i]+im[i]*im[i];}
+  nn=Math.sqrt(nn*dx)||1; for(i=0;i<N;i++){re[i]/=nn; im[i]/=nn;}
+  S.absL=0; S.absR=0; S.flash={x:xm,f:60}; S.ball=null;
+  observe(); peaks(); dirty.sim=true; readouts();
+}
+function niceStep(span){var c=[1,2,5,10,20,50],i; for(i=0;i<c.length;i++) if(span/c[i]<=6) return c[i]; return 100;}
+
+function drawSimFlat(){
+  var f=fit($("cv")), ctx=f.ctx, w=f.w, h=f.h, c=colors(), P=PRESETS[S.key];
+  var xa=P.view[0], xb=P.view[1], X=function(x){return (x-xa)/(xb-xa)*w;};
+  var y0=Math.round(h*0.6)+0.5, head=y0-18, i0=S.vi0, i1=S.vi1, i;
+  var rhoS=0.5*head/S.peakRho, ampS=0.3*head/S.peakAmp;
+  var yV=function(v){return Math.max(-4,y0-v/S.Vtop*head);};
+  ctx.beginPath(); ctx.moveTo(X(xs[i0]),y0); for(i=i0;i<=i1;i++) ctx.lineTo(X(xs[i]),yV(V[i])); ctx.lineTo(X(xs[i1]),y0); ctx.closePath();
+  ctx.globalAlpha=0.16; ctx.fillStyle=c.pot; ctx.fill(); ctx.globalAlpha=1;
+  ctx.beginPath(); for(i=i0;i<=i1;i++){var yy=yV(V[i]); if(i===i0) ctx.moveTo(X(xs[i]),yy); else ctx.lineTo(X(xs[i]),yy);}
+  ctx.strokeStyle=c.pot; ctx.lineWidth=1.5; ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(X(xs[i0]),y0); for(i=i0;i<=i1;i++) ctx.lineTo(X(xs[i]),Math.max(-4,y0-(re[i]*re[i]+im[i]*im[i])*rhoS)); ctx.lineTo(X(xs[i1]),y0); ctx.closePath();
+  ctx.globalAlpha=0.2; ctx.fillStyle=c.ink; ctx.fill(); ctx.globalAlpha=0.55; ctx.strokeStyle=c.ink; ctx.lineWidth=1; ctx.stroke(); ctx.globalAlpha=1;
+  ctx.beginPath(); ctx.moveTo(0,y0); ctx.lineTo(w,y0); ctx.strokeStyle=c.rule; ctx.lineWidth=1; ctx.stroke();
+  [[im,c.im],[re,c.re]].forEach(function(pair){
+    ctx.beginPath(); for(i=i0;i<=i1;i++){var y=y0-pair[0][i]*ampS; if(i===i0) ctx.moveTo(X(xs[i]),y); else ctx.lineTo(X(xs[i]),y);}
+    ctx.strokeStyle=pair[1]; ctx.lineWidth=1.5; ctx.lineJoin="round"; ctx.stroke();
+  });
+  var E=S.obs.E;
+  if(isFinite(E)){
+    var ye=Math.round(y0-E/S.Vtop*head)+0.5;
+    ctx.setLineDash([5,4]); ctx.beginPath(); ctx.moveTo(0,ye); ctx.lineTo(w,ye); ctx.strokeStyle=c.energy; ctx.lineWidth=1.25; ctx.stroke(); ctx.setLineDash([]);
+  }
+  ctx.font="500 11px 'IBM Plex Sans',system-ui,sans-serif";
+  if(S.flash){
+    var xf=Math.round(X(S.flash.x))+0.5;
+    ctx.globalAlpha=Math.min(1,S.flash.f/25); ctx.beginPath(); ctx.moveTo(xf,6); ctx.lineTo(xf,h-18); ctx.strokeStyle=c.im; ctx.lineWidth=2; ctx.stroke();
+    ctx.fillStyle=c.im; ctx.textAlign=xf>w-80?"right":"left"; ctx.textBaseline="top"; ctx.fillText("found here",xf+(xf>w-80?-5:5),6); ctx.globalAlpha=1;
+  }
+  if(S.ball){
+    var ib=Math.max(0,Math.min(N-1,Math.round((S.ball.x+L/2)/dx)));
+    ctx.beginPath(); ctx.arc(X(S.ball.x),yV(V[ib])-6,5.5,0,TAU); ctx.fillStyle=c.ink; ctx.fill(); ctx.strokeStyle=c.surface; ctx.lineWidth=1.5; ctx.stroke();
+  }
+  var st=niceStep(xb-xa), t0=Math.ceil(xa/st)*st;
+  ctx.fillStyle=c.muted; ctx.strokeStyle=c.rule; ctx.lineWidth=1; ctx.textBaseline="bottom"; ctx.textAlign="center"; ctx.font="400 10px 'IBM Plex Mono',ui-monospace,monospace";
+  for(var tx=t0;tx<=xb;tx+=st){
+    var X0=X(tx); if(X0<58||X0>w-12) continue;
+    ctx.beginPath(); ctx.moveTo(Math.round(X0)+0.5,h-16); ctx.lineTo(Math.round(X0)+0.5,h-12); ctx.stroke();
+    ctx.fillText((tx<0?"−":"")+Math.abs(tx),X0,h);
+  }
+  ctx.textAlign="left"; ctx.fillText("position",4,h);
+}
+var CM=900, CK={x:new Float32Array(CM),re:new Float32Array(CM),im:new Float32Array(CM),rho:new Float32Array(CM),pot:new Float32Array(CM),n:0,spokes:0,ball:null,flash:null,eLine:null};
+function drawSim3D(){
+  var P=PRESETS[S.key], xa=P.view[0], xb=P.view[1], i0=S.vi0, i1=S.vi1, st=Math.max(1,Math.ceil((i1-i0+1)/700)), n=0, i;
+  var aS=0.42/S.peakAmp, rS=0.3/S.peakRho, vS=YW*0.95/S.Vtop;
+  var sx=function(x){return ((x-xa)/(xb-xa)*2-1)*AX;};
+  for(i=i0;i<=i1&&n<CM;i+=st){
+    CK.x[n]=sx(xs[i]); CK.re[n]=re[i]*aS; CK.im[n]=im[i]*aS;
+    CK.rho[n]=Math.min(YW,(re[i]*re[i]+im[i]*im[i])*rS); CK.pot[n]=Math.min(YW,V[i]*vS); n++;
+  }
+  CK.n=n;
+  CK.eLine=isFinite(S.obs.E)?S.obs.E*vS:null;
+  if(S.ball&&S.ball.x>xa&&S.ball.x<xb){
+    var ib=Math.max(0,Math.min(N-1,Math.round((S.ball.x+L/2)/dx)));
+    CK.ball={x:sx(S.ball.x),y:Math.min(YW,V[ib]*vS)+0.035};
+  } else CK.ball=null;
+  CK.flash=S.flash?{x:sx(S.flash.x),f:S.flash.f}:null;
+  cork($("cv"),SV,CK);
+}
+function drawSim(){if(S.mode==="3d") drawSim3D(); else drawSimFlat();}
+
+function setRange(id,cfg){var e=$(id); e.min=cfg.min; e.max=cfg.max; e.step=cfg.step; e.value=cfg.v;}
+function syncOuts(){
+  $("k0-o").textContent=val("k0").toFixed(1); $("sg-o").textContent=val("sg").toFixed(2);
+  var P=PRESETS[S.key];
+  if(P.a) $("pa-o").textContent=val("pa").toFixed(2);
+  if(P.b) $("pb-o").textContent=val("pb").toFixed(1);
+  $("sp-o").textContent=val("sp").toFixed(2)+"×";
+}
+function choose(key){
+  S.key=key; var P=PRESETS[key];
+  order.forEach(function(k){press("p-"+k,k===key);});
+  $("k0").value=P.k0; $("sg").value=P.s; $("sp").value=P.speed;
+  $("pa-l").hidden=!P.a; $("pb-l").hidden=!P.b;
+  if(P.a){setRange("pa",P.a); $("pa-t").textContent=P.a.t;}
+  if(P.b){setRange("pb",P.b); $("pb-t").textContent=P.b.t;}
+  $("s-tr").hidden=$("s-rf").hidden=!P.split;
+  $("caption").innerHTML=P.cap;
+  syncOuts(); reset();
+}
+order.forEach(function(k){
+  var b=document.createElement("button"); b.id="p-"+k; b.textContent=PRESETS[k].name; b.setAttribute("aria-pressed","false");
+  b.addEventListener("click",function(){choose(k);}); $("presets").appendChild(b);
+});
+["k0","sg"].forEach(function(id){$(id).addEventListener("input",function(){syncOuts(); launch();});});
+$("pb").addEventListener("input",function(){syncOuts(); reset();});
+$("pa").addEventListener("input",function(){var P=PRESETS[S.key]; if(P.match) $("sg").value=P.match(val("pa")); syncOuts(); reset();});
+$("sp").addEventListener("input",syncOuts);
+$("play").addEventListener("click",function(){S.playing=!S.playing; setPlay($("play"),S.playing);});
+$("restart").addEventListener("click",function(){launch(); if(!S.playing&&!reduce){S.playing=true; setPlay($("play"),true);}});
+$("measure").addEventListener("click",measure);
+function simMode(m){S.mode=m; press("sim-3d",m==="3d"); press("sim-flat",m==="flat"); $("cv").classList.toggle("v3d",m==="3d"); dirty.sim=true;}
+$("sim-3d").addEventListener("click",function(){simMode("3d");});
+$("sim-flat").addEventListener("click",function(){simMode("flat");});
+orbit($("cv"),SV,"sim",LIM);
+
+/* ================= particle in a box ================= */
+var M=4, coef=[1,1,0,0], T2={t:0,playing:!reduce,mode:"3d"}, NP=240, BV=mkView(0.5,0.34,0.28,2.4);
+var BR=new Float64Array(NP+1), BI=new Float64Array(NP+1);
+var BK={x:new Float32Array(NP/2+1),re:new Float32Array(NP/2+1),im:new Float32Array(NP/2+1),rho:new Float32Array(NP/2+1),n:NP/2+1,spokes:3,plates:true};
+(function(){
+  var host=$("modes"), n;
+  for(n=1;n<=M;n++){
+    var d=document.createElement("div"); d.className="mode";
+    d.innerHTML='<canvas id="ph'+n+'" width="40" height="40" aria-hidden="true"></canvas>'+
+      '<label class="sl" for="c'+n+'">Shape '+n+' · energy ×'+(n*n)+' <output id="c'+n+'-o"></output><input type="range" id="c'+n+'" min="0" max="1" step="0.01"></label>';
+    host.appendChild(d);
+  }
+  for(n=1;n<=M;n++)(function(n){
+    $("c"+n).addEventListener("input",function(){coef[n-1]=val("c"+n); $("c"+n+"-o").textContent=coef[n-1].toFixed(2); dirty.box=true;});
+  })(n);
+})();
+function setCoef(c){coef=c.slice(); for(var n=1;n<=M;n++){$("c"+n).value=coef[n-1]; $("c"+n+"-o").textContent=coef[n-1].toFixed(2);} dirty.box=true;}
+$("ex-1").addEventListener("click",function(){setCoef([1,0,0,0]);});
+$("ex-2").addEventListener("click",function(){setCoef([0,1,0,0]);});
+$("ex-12").addEventListener("click",function(){setCoef([1,1,0,0]);});
+$("play2").addEventListener("click",function(){T2.playing=!T2.playing; setPlay($("play2"),T2.playing);});
+function boxMode(m){T2.mode=m; press("box-3d",m==="3d"); press("box-flat",m==="flat"); $("cv2").classList.toggle("v3d",m==="3d"); dirty.box=true;}
+$("box-3d").addEventListener("click",function(){boxMode("3d");});
+$("box-flat").addEventListener("click",function(){boxMode("flat");});
+orbit($("cv2"),BV,"box",LIM);
+
+function drawBox(){
+  var c=colors(), n, j, norm=0;
+  for(n=0;n<M;n++) norm+=coef[n]*coef[n]; norm=Math.sqrt(norm)||1;
+  var cr=[],ci=[];
+  for(n=1;n<=M;n++){var En=n*n*Math.PI*Math.PI/2, a=coef[n-1]/norm*Math.SQRT2; cr.push(a*Math.cos(En*T2.t)); ci.push(-a*Math.sin(En*T2.t));}
+  for(j=0;j<=NP;j++){var x=j/NP, r=0, m=0; for(n=1;n<=M;n++){var s=Math.sin(n*Math.PI*x); r+=cr[n-1]*s; m+=ci[n-1]*s;} BR[j]=r; BI[j]=m;}
+  if(T2.mode==="3d"){
+    for(j=0;j<=NP;j+=2){var q=j/2; BK.x[q]=(j/NP*2-1)*1.35; BK.re[q]=BR[j]*0.2; BK.im[q]=BI[j]*0.2; BK.rho[q]=Math.min(YW,(BR[j]*BR[j]+BI[j]*BI[j])*0.085);}
+    cork($("cv2"),BV,BK);
+  } else {
+    var f=fit($("cv2")), ctx=f.ctx, w=f.w, h=f.h, padX=14, y0=Math.round(h*0.6)+0.5, head=y0-12, W=w-2*padX;
+    var rhoS=head/4.6, ampS=(h-y0-8)/2.3, X=function(j){return padX+j/NP*W;};
+    ctx.beginPath(); ctx.moveTo(X(0),y0); for(j=0;j<=NP;j++) ctx.lineTo(X(j),y0-(BR[j]*BR[j]+BI[j]*BI[j])*rhoS); ctx.lineTo(X(NP),y0); ctx.closePath();
+    ctx.globalAlpha=0.2; ctx.fillStyle=c.ink; ctx.fill(); ctx.globalAlpha=0.55; ctx.strokeStyle=c.ink; ctx.lineWidth=1; ctx.stroke(); ctx.globalAlpha=1;
+    ctx.beginPath(); ctx.moveTo(padX,y0); ctx.lineTo(w-padX,y0); ctx.strokeStyle=c.rule; ctx.stroke();
+    [[BI,c.im],[BR,c.re]].forEach(function(p){
+      ctx.beginPath(); for(j=0;j<=NP;j++){var y=y0-p[0][j]*ampS; if(j===0) ctx.moveTo(X(j),y); else ctx.lineTo(X(j),y);}
+      ctx.strokeStyle=p[1]; ctx.lineWidth=1.5; ctx.lineJoin="round"; ctx.stroke();
+    });
+    ctx.fillStyle=c.pot; ctx.fillRect(padX-5,4,5,h-8); ctx.fillRect(w-padX,4,5,h-8);
+  }
+  for(n=1;n<=M;n++){
+    var g=fit($("ph"+n)), x2=g.ctx, cx=20, cy=20, rad=17, En2=n*n*Math.PI*Math.PI/2, amp=coef[n-1]/norm, ang=-En2*T2.t;
+    x2.beginPath(); x2.arc(cx,cy,rad,0,TAU); x2.strokeStyle=c.rule; x2.lineWidth=1.5; x2.stroke();
+    if(amp>0.005){
+      x2.beginPath(); x2.moveTo(cx,cy); x2.lineTo(cx+rad*amp*Math.sin(ang),cy-rad*amp*Math.cos(ang));
+      x2.strokeStyle="hsl("+Math.round(((ang*180/Math.PI)%360+360)%360/15)*15+" 75% 50%)"; x2.lineWidth=2.5; x2.lineCap="round"; x2.stroke();
+    }
+    x2.beginPath(); x2.arc(cx,cy,2,0,TAU); x2.fillStyle=c.muted; x2.fill();
+  }
+}
+
+/* ================= double slit (2D solver, 3D or flat view) ================= */
+var NX=256, NY=128, DX=0.25, DY=0.375, LX=NX*DX, LY=NY*DY, DT2=0.02, NN=NX*NY;
+var fftX=makeFFT(NX), fftY=makeFFT(NY);
+var R2=new Float64Array(NN), I2=new Float64Array(NN), KC=new Float64Array(NN), KS=new Float64Array(NN);
+var XW=-6, WT=1, XSCR=24, PX0=-18, PSX=2.5, PSY=7, VWALL=50, SD=5, SWI=1.2, SK0=4, MAXD=8000;
+var IA=Math.round((-24+LX/2)/DX), IS=Math.round((XSCR+LX/2)/DX), JA=8, JB=120, VW=IS-IA, VH=JB-JA;
+var bIdx, bVal, wallIdx=new Int32Array(0), wallC=Math.cos(VWALL*DT2/2), wallS=-Math.sin(VWALL*DT2/2);
+var acc=new Float64Array(NY), isWall=new Uint8Array(NN), wallRow=new Uint8Array(NY);
+var D={t:0,done:false,playing:!reduce,slits:"both",dots:[],cdf:null,tEnd:0,mode:"3d",dotsDirty:true,wallDirty:true};
+(function(){
+  var i,j,kx,ky,ph,bi=[],bv=[];
+  for(j=0;j<NY;j++){
+    ky=TAU/LY*(j<NY/2?j:j-NY); var y=-LY/2+j*DY;
+    for(i=0;i<NX;i++){
+      kx=TAU/LX*(i<NX/2?i:i-NX); ph=(kx*kx+ky*ky)*DT2/2;
+      KC[j*NX+i]=Math.cos(ph); KS[j*NX+i]=-Math.sin(ph);
+      var x=-LX/2+i*DX, ux=Math.max(0,(Math.abs(x)-28)/4), uy=Math.max(0,(Math.abs(y)-21)/3), m=Math.exp(-8*DT2*(ux*ux+uy*uy));
+      if(m<1){bi.push(j*NX+i); bv.push(m);}
+    }
+  }
+  bIdx=new Int32Array(bi); bVal=new Float64Array(bv);
+})();
+function fft2(inv){var i,j; for(j=0;j<NY;j++) fftX(R2,I2,j*NX,1,inv); for(i=0;i<NX;i++) fftY(R2,I2,i,NX,inv);}
+function wallMul(){for(var q=0;q<wallIdx.length;q++){var p=wallIdx[q], a=R2[p], b=I2[p]; R2[p]=a*wallC-b*wallS; I2[p]=a*wallS+b*wallC;}}
+function step2(){
+  var p,q,a,b,j;
+  wallMul(); fft2(false);
+  for(p=0;p<NN;p++){a=R2[p]; b=I2[p]; R2[p]=a*KC[p]-b*KS[p]; I2[p]=a*KS[p]+b*KC[p];}
+  fft2(true); wallMul();
+  for(q=0;q<bIdx.length;q++){p=bIdx[q]; R2[p]*=bVal[q]; I2[p]*=bVal[q];}
+  if(!D.done) for(j=0;j<NY;j++){p=j*NX+IS; var jx=(R2[p]*(I2[p+1]-I2[p-1])-I2[p]*(R2[p+1]-R2[p-1]))/(2*DX); if(jx>0) acc[j]+=jx*DT2;}
+  D.t+=DT2;
+}
+function wave2(){
+  var i,j;
+  for(j=0;j<NY;j++){
+    var yy=-LY/2+j*DY, gy=Math.exp(-yy*yy/(4*PSY*PSY));
+    for(i=0;i<NX;i++){var x=-LX/2+i*DX, g=gy*Math.exp(-(x-PX0)*(x-PX0)/(4*PSX*PSX)); R2[j*NX+i]=g*Math.cos(SK0*x); I2[j*NX+i]=g*Math.sin(SK0*x);}
+  }
+  D.t=0;
+}
+function restart2(){
+  var i,j,w=[];
+  isWall.fill(0); wallRow.fill(0);
+  var i0=Math.round((XW+LX/2)/DX), i1=Math.round((XW+WT+LX/2)/DX);
+  for(j=0;j<NY;j++){
+    var y=-LY/2+j*DY;
+    var up=Math.abs(y-SD/2)<SWI/2&&D.slits!=="lo", lo=Math.abs(y+SD/2)<SWI/2&&D.slits!=="up";
+    if(up||lo) continue;
+    wallRow[j]=1;
+    for(i=i0;i<i1;i++){w.push(j*NX+i); isWall[j*NX+i]=1;}
+  }
+  wallIdx=new Int32Array(w);
+  wave2();
+  acc.fill(0); D.done=false; D.dots=[]; D.cdf=null; D.tEnd=(XSCR-PX0+6*PSX)/SK0+1; D.dotsDirty=true; D.wallDirty=true;
+  $("o-det").textContent="0"; dirty.slit=true;
+}
+function finish2(){
+  D.done=true; var c=new Float64Array(VH), s=0, r;
+  for(r=0;r<VH;r++){s+=acc[JB-1-r]; c[r]=s;}
+  D.cdf=s>0?c:null;
+}
+function addDots(n){
+  if(!D.cdf||D.dots.length>=MAXD) return; var tot=D.cdf[VH-1];
+  for(var q=0;q<n&&D.dots.length<MAXD;q++){
+    var u=Math.random()*tot, lo=0, hi=VH-1;
+    while(lo<hi){var mid=(lo+hi)>>1; if(D.cdf[mid]<u) lo=mid+1; else hi=mid;}
+    D.dots.push(Math.random(),(lo+Math.random())/VH);
+  }
+  D.dotsDirty=true; $("o-det").textContent=String(D.dots.length/2);
+}
+function hueRGB(a,b,out){
+  var hh=((Math.atan2(b,a)/TAU)%1+1)%1*6, k=hh|0, fr=hh-k;
+  switch(k%6){case 0:out[0]=1;out[1]=fr;out[2]=0;break;case 1:out[0]=1-fr;out[1]=1;out[2]=0;break;case 2:out[0]=0;out[1]=1;out[2]=fr;break;case 3:out[0]=0;out[1]=1-fr;out[2]=1;break;case 4:out[0]=fr;out[1]=0;out[2]=1;break;default:out[0]=1;out[1]=0;out[2]=1-fr;}
+}
+var rgb=[0,0,0];
+var off=document.createElement("canvas"); off.width=VW; off.height=VH;
+var octx=off.getContext("2d"), img=octx.createImageData(VW,VH);
+function drawSlitFlat(){
+  var cv=$("cv3"), w0=cv.clientWidth; if(!w0) return;
+  var sw=Math.max(58,Math.round(w0*0.2)), fw=w0-sw-8, fh=Math.round(fw*(VH*DY)/(VW*DX));
+  if(cv.style.height!==fh+"px") cv.style.height=fh+"px";
+  var f=fit(cv), ctx=f.ctx, c=colors(), d=img.data, r,i,p,o=0;
+  for(r=0;r<VH;r++){
+    var j=JB-1-r;
+    for(i=IA;i<IS;i++,o+=4){
+      p=j*NX+i;
+      if(isWall[p]){d[o]=104;d[o+1]=116;d[o+2]=136;d[o+3]=255; continue;}
+      var a=R2[p], b=I2[p], br=Math.min(1,1.25*Math.sqrt(Math.sqrt(a*a+b*b)));
+      hueRGB(a,b,rgb);
+      d[o]=11+br*(40+200*rgb[0]); d[o+1]=15+br*(40+200*rgb[1]); d[o+2]=22+br*(40+200*rgb[2]); d[o+3]=255;
+    }
+  }
+  octx.putImageData(img,0,0);
+  ctx.imageSmoothingEnabled=true; ctx.drawImage(off,0,0,fw,fh);
+  var x0=fw+8, mx=0;
+  ctx.fillStyle=c.bg; ctx.fillRect(x0,0,sw,fh);
+  for(r=0;r<VH;r++) if(acc[JB-1-r]>mx) mx=acc[JB-1-r];
+  ctx.fillStyle=c.ink; ctx.globalAlpha=0.6;
+  for(i=0;i<D.dots.length;i+=2) ctx.fillRect(x0+3+D.dots[i]*(sw-8),D.dots[i+1]*fh-0.8,1.6,1.6);
+  ctx.globalAlpha=1;
+  if(mx>0){
+    ctx.beginPath();
+    for(r=0;r<VH;r++){var xx=x0+2+acc[JB-1-r]/mx*(sw-6), yy=(r+0.5)/VH*fh; if(r===0) ctx.moveTo(xx,yy); else ctx.lineTo(xx,yy);}
+    ctx.strokeStyle=c.re; ctx.lineWidth=1.75; ctx.lineJoin="round"; ctx.stroke();
+  }
+  ctx.strokeStyle=c.rule; ctx.lineWidth=1; ctx.strokeRect(x0+0.5,0.5,sw-1,fh-1);
+}
+
+/* WebGL helpers */
+function place(cam,view,tg,dist){
+  var cp=Math.cos(view.pitch);
+  cam.position.set(tg[0]+dist*cp*Math.sin(view.yaw),tg[1]+dist*Math.sin(view.pitch),tg[2]+dist*cp*Math.cos(view.yaw));
+  cam.lookAt(tg[0],tg[1],tg[2]);
+}
+function sizeGL(g,cv){
+  var w=cv.clientWidth,h=cv.clientHeight; if(!w||!h) return false;
+  if(g.w!==w||g.h!==h){g.r.setSize(w,h,false); g.cam.aspect=w/h; g.cam.updateProjectionMatrix(); g.w=w; g.h=h;}
+  return true;
+}
+var SL=4, SWD=3.5, SH=0.95;
+var G3={ok:false,view:mkView(-0.8,0.58,0.22,0.6)};
+function initSlit3(){
+  var T=window.THREE, cv=$("gl3");
+  G3.r=new T.WebGLRenderer({canvas:cv,antialias:true,alpha:true}); G3.r.setPixelRatio(DPR); G3.r.setClearColor(0x000000,0);
+  G3.scene=new T.Scene(); G3.cam=new T.PerspectiveCamera(35,1,0.1,60);
+  var nv=VW*VH, pos=new Float32Array(nv*3), col=new Float32Array(nv*3), idx=new Uint16Array((VW-1)*(VH-1)*6), r,q,k=0,p=0;
+  for(r=0;r<VH;r++) for(q=0;q<VW;q++){pos[p++]=q/(VW-1)*SL-SL/2; pos[p++]=0; pos[p++]=(r/(VH-1)-0.5)*SWD;}
+  for(r=0;r<VH-1;r++) for(q=0;q<VW-1;q++){var a=r*VW+q,b=a+1,c=a+VW,d=c+1; idx[k++]=a;idx[k++]=c;idx[k++]=b; idx[k++]=b;idx[k++]=c;idx[k++]=d;}
+  var geo=new T.BufferGeometry();
+  geo.setAttribute("position",new T.BufferAttribute(pos,3)); geo.setAttribute("color",new T.BufferAttribute(col,3)); geo.setIndex(new T.BufferAttribute(idx,1));
+  G3.pos=pos; G3.col=col; G3.geo=geo;
+  G3.scene.add(new T.Mesh(geo,new T.MeshBasicMaterial({vertexColors:true,side:T.DoubleSide})));
+  G3.walls=new T.Group(); G3.scene.add(G3.walls);
+  G3.wallMat=new T.MeshBasicMaterial({color:0x7a869b});
+  var scr=new T.Mesh(new T.PlaneGeometry(SWD,SH),new T.MeshBasicMaterial({color:0x8a94a6,transparent:true,opacity:0.22,side:T.DoubleSide,depthWrite:false}));
+  scr.rotation.y=-Math.PI/2; scr.position.set(SL/2,SH/2,0); G3.scene.add(scr);
+  var rp=new Float32Array(VH*2*3), ri=new Uint16Array((VH-1)*6); k=0;
+  for(r=0;r<VH;r++){var z=(r/(VH-1)-0.5)*SWD; rp[r*6]=SL/2-0.012; rp[r*6+1]=0; rp[r*6+2]=z; rp[r*6+3]=SL/2-0.012; rp[r*6+4]=0; rp[r*6+5]=z;}
+  for(r=0;r<VH-1;r++){var a2=r*2; ri[k++]=a2;ri[k++]=a2+1;ri[k++]=a2+2; ri[k++]=a2+1;ri[k++]=a2+3;ri[k++]=a2+2;}
+  var rg=new T.BufferGeometry(); rg.setAttribute("position",new T.BufferAttribute(rp,3)); rg.setIndex(new T.BufferAttribute(ri,1));
+  G3.rib=rp; G3.ribGeo=rg; G3.ribMat=new T.MeshBasicMaterial({color:0x1c5bd0,transparent:true,opacity:0.5,side:T.DoubleSide,depthWrite:false});
+  G3.scene.add(new T.Mesh(rg,G3.ribMat));
+  var dp=new Float32Array(MAXD/2*3), dg=new T.BufferGeometry(); dg.setAttribute("position",new T.BufferAttribute(dp,3)); dg.setDrawRange(0,0);
+  G3.dp=dp; G3.dotGeo=dg; G3.dotMat=new T.PointsMaterial({size:2.6*DPR,sizeAttenuation:false,color:0x131a26});
+  var pts=new T.Points(dg,G3.dotMat); pts.frustumCulled=false; G3.scene.add(pts);
+  G3.recolor=function(){var c=colors(); G3.ribMat.color.set(c.re); G3.dotMat.color.set(c.ink);};
+  G3.recolor(); themeHooks.push(G3.recolor);
+  G3.ok=true;
+}
+function drawSlit3(){
+  var T=window.THREE, cv=$("gl3"); if(!sizeGL(G3,cv)) return;
+  var pos=G3.pos, col=G3.col, r,q,p,v=0,j,a,b,amp,g,br;
+  for(r=0;r<VH;r++){
+    j=JB-1-r;
+    for(q=0;q<VW;q++,v+=3){
+      p=j*NX+IA+q;
+      if(isWall[p]){pos[v+1]=0; col[v]=0.41; col[v+1]=0.45; col[v+2]=0.53; continue;}
+      a=R2[p]; b=I2[p]; amp=Math.sqrt(a*a+b*b); g=Math.sqrt(amp); br=Math.min(1,1.25*g);
+      pos[v+1]=amp>1e-9?0.13*a/g:0;
+      hueRGB(a,b,rgb);
+      col[v]=(11+br*(40+200*rgb[0]))/255; col[v+1]=(15+br*(40+200*rgb[1]))/255; col[v+2]=(22+br*(40+200*rgb[2]))/255;
+    }
+  }
+  G3.geo.attributes.position.needsUpdate=true; G3.geo.attributes.color.needsUpdate=true;
+  if(D.wallDirty){
+    while(G3.walls.children.length){var ch=G3.walls.children[0]; G3.walls.remove(ch); ch.geometry.dispose();}
+    var xc=((XW+WT/2+24)/48)*SL-SL/2, start=-1;
+    for(r=0;r<=VH;r++){
+      var isW=r<VH&&wallRow[JB-1-r];
+      if(isW&&start<0) start=r;
+      if(!isW&&start>=0){
+        var z0=(start/(VH-1)-0.5)*SWD, z1=((r-1)/(VH-1)-0.5)*SWD;
+        var box=new T.Mesh(new T.BoxGeometry(0.1,0.34,z1-z0+SWD/(VH-1)),G3.wallMat); box.position.set(xc,0.17,(z0+z1)/2); G3.walls.add(box);
+        start=-1;
+      }
+    }
+    D.wallDirty=false;
+  }
+  var mx=0; for(r=0;r<VH;r++) if(acc[JB-1-r]>mx) mx=acc[JB-1-r];
+  for(r=0;r<VH;r++) G3.rib[r*6+4]=mx>0?acc[JB-1-r]/mx*SH*0.92:0;
+  G3.ribGeo.attributes.position.needsUpdate=true;
+  if(D.dotsDirty){
+    var nd=D.dots.length/2, dp=G3.dp;
+    for(q=0;q<nd;q++){dp[q*3]=SL/2-0.02; dp[q*3+1]=0.04+D.dots[q*2]*(SH-0.08); dp[q*3+2]=(D.dots[q*2+1]-0.5)*SWD;}
+    G3.dotGeo.attributes.position.needsUpdate=true; G3.dotGeo.setDrawRange(0,nd); D.dotsDirty=false;
+  }
+  place(G3.cam,G3.view,[0.25,0.1,0],Math.max(5.4,2.9/(0.315*G3.cam.aspect)));
+  G3.r.render(G3.scene,G3.cam);
+}
+function slitMode(m){
+  if(m==="3d"&&!G3.ok) m="flat";
+  D.mode=m; press("s3-3d",m==="3d"); press("s3-flat",m==="flat");
+  $("gl3").hidden=m!=="3d"; $("cv3").hidden=m!=="flat"; D.dotsDirty=true; D.wallDirty=true; dirty.slit=true;
+}
+$("s3-3d").addEventListener("click",function(){slitMode("3d");});
+$("s3-flat").addEventListener("click",function(){slitMode("flat");});
+function setSlits(m){D.slits=m; press("sl-both",m==="both"); press("sl-up",m==="up"); press("sl-lo",m==="lo"); restart2();}
+$("sl-both").addEventListener("click",function(){setSlits("both");});
+$("sl-up").addEventListener("click",function(){setSlits("up");});
+$("sl-lo").addEventListener("click",function(){setSlits("lo");});
+$("play3").addEventListener("click",function(){D.playing=!D.playing; setPlay($("play3"),D.playing);});
+$("fire").addEventListener("click",function(){restart2(); if(!D.playing&&!reduce){D.playing=true; setPlay($("play3"),true);}});
+orbit($("gl3"),G3.view,"slit",[-2.6,1.2,0.2,1.3]);
+
+/* ================= hydrogen ================= */
+var HN=22000;
+var ORB={
+  "1s":{n:1,R:6,f:function(x,y,z,r){return Math.exp(-r);},cap:"The lowest state: a fuzzy ball, densest at the centre where the proton sits. An undisturbed hydrogen atom looks like this."},
+  "2s":{n:2,R:16,f:function(x,y,z,r){return (2-r)*Math.exp(-r/2);},cap:"A small ball inside a larger shell. Between them is a sphere where the arrows shrink to zero and flip direction, so the electron is never found there."},
+  "2p":{n:2,R:16,f:function(x,y,z,r){return z*Math.exp(-r/2);},cap:"Two lobes with opposite arrow directions. On the flat sheet between them the wave is zero. Same energy as 2s, different shape."},
+  "3s":{n:3,R:30,f:function(x,y,z,r){return (27-18*r+2*r*r)*Math.exp(-r/3);},cap:"Three nested layers, with two empty spheres between them. Higher energy means more places where the wave passes through zero, just as with the shapes in the box."},
+  "3p":{n:3,R:30,f:function(x,y,z,r){return z*(6-r)*Math.exp(-r/3);},cap:"Two lobes, each split again into an inner and an outer part."},
+  "3d":{n:3,R:28,f:function(x,y,z,r){return (3*z*z-r*r)*Math.exp(-r/3);},cap:"Two lobes along the axis and a ring around the middle. Shapes like this matter for metals such as iron and copper."}
+};
+var H={ok:false,view:{yaw:0.6,pitch:0.28,touched:false,last:0},key:"1s"};
+function sampleOrb(key){
+  var o=ORB[key], R=o.R, mx=0, i, r, ct, st, ph, x, y, z, w, v, n=0, tries=0, pos=H.pos, col=H.col, T=window.THREE;
+  for(i=0;i<30000;i++){r=Math.random()*R; ct=2*Math.random()-1; st=Math.sqrt(1-ct*ct); v=o.f(r*st,0,r*ct,r); w=r*r*v*v; if(w>mx) mx=w;}
+  mx*=1.3;
+  var c=colors(), ca=new T.Color(c.re), cb=new T.Color(c.im), sc=1.25/R;
+  while(n<HN&&tries<4000000){
+    tries++;
+    r=Math.random()*R; ct=2*Math.random()-1; st=Math.sqrt(1-ct*ct); ph=TAU*Math.random();
+    x=r*st*Math.cos(ph); y=r*st*Math.sin(ph); z=r*ct; v=o.f(x,y,z,r); w=r*r*v*v;
+    if(Math.random()*mx<w){
+      pos[n*3]=x*sc; pos[n*3+1]=z*sc; pos[n*3+2]=y*sc;
+      var cc=v>=0?ca:cb; col[n*3]=cc.r; col[n*3+1]=cc.g; col[n*3+2]=cc.b; n++;
+    }
+  }
+  H.geo.setDrawRange(0,n); H.geo.attributes.position.needsUpdate=true; H.geo.attributes.color.needsUpdate=true;
+}
+function pickOrb(key){
+  H.key=key; Object.keys(ORB).forEach(function(k){press("orb-"+k,k===key);});
+  $("h-name").textContent=key; $("h-e").textContent="−"+(13.6/(ORB[key].n*ORB[key].n)).toFixed(2)+" eV"; $("h-cap").textContent=ORB[key].cap;
+  if(H.ok) sampleOrb(key);
+  dirty.atom=true;
+}
+function initAtom(){
+  var T=window.THREE, cv=$("glh");
+  H.r=new T.WebGLRenderer({canvas:cv,antialias:true,alpha:true}); H.r.setPixelRatio(DPR); H.r.setClearColor(0x000000,0);
+  H.scene=new T.Scene(); H.cam=new T.PerspectiveCamera(35,1,0.1,50);
+  H.pos=new Float32Array(HN*3); H.col=new Float32Array(HN*3);
+  H.geo=new T.BufferGeometry(); H.geo.setAttribute("position",new T.BufferAttribute(H.pos,3)); H.geo.setAttribute("color",new T.BufferAttribute(H.col,3));
+  var pts=new T.Points(H.geo,new T.PointsMaterial({size:0.042,vertexColors:true,transparent:true,opacity:0.8,depthWrite:false,sizeAttenuation:true}));
+  pts.frustumCulled=false; H.scene.add(pts);
+  var ag=new T.BufferGeometry(); ag.setAttribute("position",new T.BufferAttribute(new Float32Array([0,-1.35,0,0,1.35,0]),3));
+  H.axMat=new T.LineBasicMaterial({color:0x7f8a9c,transparent:true,opacity:0.6}); H.scene.add(new T.Line(ag,H.axMat));
+  themeHooks.push(function(){H.axMat.color.set(colors().pot); sampleOrb(H.key);});
+  H.axMat.color.set(colors().pot);
+  H.ok=true;
+}
+function drawAtom(){
+  var cv=$("glh"); if(!sizeGL(H,cv)) return;
+  place(H.cam,H.view,[0,0,0],Math.max(4.6,1.5/(0.315*H.cam.aspect)));
+  H.r.render(H.scene,H.cam);
+}
+Object.keys(ORB).forEach(function(k){
+  var b=document.createElement("button"); b.id="orb-"+k; b.textContent=k; b.setAttribute("aria-pressed","false");
+  b.addEventListener("click",function(){pickOrb(k);}); $("orbs").appendChild(b);
+});
+orbit($("glh"),H.view,"atom",[-1e9,1e9,-1.3,1.3]);
+
+/* ================= start-up and loop ================= */
+try{ if(!window.THREE) throw new Error("no three"); initSlit3(); }catch(e){ G3.ok=false; $("seg3").hidden=true; }
+try{ if(!window.THREE) throw new Error("no three"); initAtom(); }catch(e2){ H.ok=false; $("glh").hidden=true; $("glh-msg").hidden=false; }
+
+var vis={slit:true,cork:true,sim:true,box:true,atom:true};
+if("IntersectionObserver" in window){
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){vis[e.target.id.slice(2)]=e.isIntersecting;});},{rootMargin:"80px"});
+  ["slit","cork","sim","box","atom"].forEach(function(k){io.observe($("f-"+k));});
+}
+if("ResizeObserver" in window){new ResizeObserver(all).observe(document.querySelector("main"));} else window.addEventListener("resize",all);
+
+var frame=0, last=0;
+function tick(now){
+  var el=Math.min(0.05,(now-last)/1000||0.016), i; last=now; frame++;
+  if(vis.slit){
+    if(D.mode==="3d") sway(G3.view,"slit",now);
+    if(D.playing){
+      for(i=0;i<3;i++) step2();
+      if(D.t>D.tEnd){if(!D.done) finish2(); wave2();}
+      if(D.done) addDots(5);
+      dirty.slit=true;
+    }
+    if(dirty.slit){if(D.mode==="3d"&&G3.ok) drawSlit3(); else drawSlitFlat(); dirty.slit=false;}
+  }
+  if(vis.cork){
+    sway(AV,"cork",now);
+    if(dirty.cork){drawArrows(); dirty.cork=false;}
+  }
+  if(vis.sim){
+    if(S.mode==="3d") sway(SV,"sim",now);
+    if(S.playing){
+      var ns=Math.max(1,Math.round(4*val("sp")));
+      for(i=0;i<ns;i++){step(); stepBall();}
+      observe(); dirty.sim=true;
+      var P=PRESETS[S.key];
+      if(P.loop&&(S.obs.inView<0.12||S.t>P.tmax)) launch();
+      if(frame%6===0) readouts();
+    }
+    if(S.flash){S.flash.f--; if(S.flash.f<=0) S.flash=null; dirty.sim=true;}
+    if(dirty.sim){drawSim(); dirty.sim=false;}
+  }
+  if(vis.box){
+    if(T2.mode==="3d") sway(BV,"box",now);
+    if(T2.playing){T2.t+=0.1*el; dirty.box=true;}
+    if(dirty.box){drawBox(); dirty.box=false;}
+  }
+  if(vis.atom&&H.ok){
+    if(!reduce&&!H.view.touched){H.view.yaw+=0.25*el; dirty.atom=true;}
+    if(dirty.atom){drawAtom(); dirty.atom=false;}
+  }
+  requestAnimationFrame(tick);
+}
+
+setPlay($("play"),S.playing); setPlay($("play2"),T2.playing); setPlay($("play3"),D.playing);
+setCoef([1,1,0,0]);
+simMode("3d"); boxMode("3d");
+choose("free");
+restart2(); slitMode("3d");
+pickOrb("1s");
+if(document.fonts&&document.fonts.ready) document.fonts.ready.then(all);
+requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>
