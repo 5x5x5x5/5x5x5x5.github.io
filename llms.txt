@@ -57,7 +57,7 @@ Triangle with 400+ past events focused on deep learning and AI.
 - **ELIZA**: The 1966 DOCTOR script in WebAssembly
   (https://danielsiegle.com/eliza/)
 - **Crumple Zone Talent**: Parody "Blame as a Service" staffing agency with a
-  playable interview game (https://danielsiegle.com/crumple-zone/)
+  playable interview game (https://aiaiohdotai.com/crumple-zone/)
 - **CYP450 Inhibitor Classification**: M.S. thesis — Bayesian QSAR vs
   scikit-learn classifiers for drug metabolism screening
 - **Neural Network in NumPy**: From-scratch neural network implementation
