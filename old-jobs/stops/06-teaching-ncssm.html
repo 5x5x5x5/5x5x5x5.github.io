@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stop 6: AI Instructor (Health &amp; Life Sciences) (taihls-feedback) — Daniel Siegle</title>
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<div class="page">
+  <header class="masthead">
+    <a class="brand" href="../index.html">← Automate My Old Jobs</a>
+    <nav>
+      <a href="https://danielsiegle.com/">danielsiegle.com</a>
+      <a href="https://possiblefutures.bio" target="_blank" rel="noopener">Possible Futures ↗</a>
+    </nav>
+  </header>
+
+  <section class="hero" style="padding-top:2.25rem;">
+    <div class="eyebrow">Stop 6 of 9 · North Carolina School of Science &amp; Mathematics (NCSSM)</div>
+    <h1 style="max-width:24ch;">AI Instructor (Health &amp; Life Sciences)</h1>
+    <div class="stop-meta" style="margin-top:0.85rem;">
+      <span class="badge live">Live</span>
+      <code>taihls-feedback</code>
+      <span style="font-size:0.88rem;color:var(--soft);">Build time: 1.0 hr (feedback engine) + full semester textbook</span>
+    </div>
+    <p class="lead">Giving timely, Socratic formative feedback on high-school biomedical ML exercises (base rates, data leakage, thresholds, Clever Hans shortcuts, proxy bias) without handing out the answer or missing struggling students.</p>
+    <div class="tags" style="margin-top:1rem;"><span class="tag">life-sciences</span><span class="tag">rag</span><span class="tag">measurement</span></div>
+    <div style="display:flex;flex-wrap:wrap;gap:0.75rem;margin-top:1.35rem;">
+      <a class="btn primary" href="https://taihls.com" target="_blank" rel="noopener">Open Site / Endpoint ↗</a>
+      <a class="btn" href="../demos/explainers/gradient-descent.html">Explainer: Gradient Descent →</a>
+      <a class="btn" href="../demos/explainers/kmeans.html">Explainer: k-means by Hand →</a>
+      <a class="btn" href="../demos/explainers/spaced-repetition.html">Explainer: Spaced Repetition →</a>
+      <a class="btn" href="https://github.com/5x5x5x5/taihls-feedback" target="_blank" rel="noopener">View Repository on GitHub ↗</a>
+    </div>
+  </section>
+
+  <section class="band">
+    <h2>Human vs. Machine Boundary</h2>
+    <div class="grid-2">
+      <div class="card">
+        <h3>Automated by <code>taihls-feedback</code></h3>
+        <ul><li>BM25 retrieval over all 28 chapters of the open TAIHLS textbook (taihls.com).</li><li>Misconception detection paired with Socratic revision hints and a strict anti-answer-leak guard.</li><li>Automatic teacher escalation for confused, off-rubric, or help-seeking submissions — paired with interactive static webpage explainers (gradient descent, k-means, spaced repetition) and the `duck` voice sparring partner.</li></ul>
+      </div>
+      <div class="card">
+        <h3>Stays Human</h3>
+        <ul><li>Final grading, nuanced partial credit, and classroom facilitation.</li><li>Mentoring and spotting quiet disengagement.</li><li>Instructor review of all escalated submissions and editorial review of TAIHLS chapters.</li></ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <h2>Measured Proof &amp; Scorecard</h2>
+    <table class="scorecard">
+      <tbody><tr><th>Curriculum Grounding</th><td>All 28 real TAIHLS chapters indexed · 100.0% chapter citation recall</td></tr><tr><th>20-Submission Pedagogy Eval</th><td>100.0% decision accuracy vs. 40.0% naive keyword grader</td></tr><tr><th>Anti-Answer-Leak Guard</th><td>0/20 answer leaks (0.0%) vs. 14/20 (70.0%) on naive baseline</td></tr><tr><th>Teacher Escalation Recall</th><td>100.0% on help/distress/minimal-response submissions (vs. 0.0% naive)</td></tr></tbody>
+    </table>
+  </section>
+
+  <section class="band">
+    <h2>Where It Fails (Honest Limits)</h2>
+    <div class="card fail-box">
+      <ul><li>Rule-based misconception matching misses novel wrong phrasings (pairing with a calibrated LLM judge improves recall if guarded against answer leakage).</li><li>Text rubric grading does not execute arbitrary student Colab code (requires sandboxed unit tests).</li><li>Escalation catches explicit help signals, not quiet disengagement.</li></ul>
+    </div>
+  </section>
+
+  <nav class="pager" aria-label="Tour pagination">
+    <div><a href="05-community-agent-ops.html">← Stop 5: Founder &amp; Organizer</a></div>
+    <div><a href="07-consulting-eval-gates.html">Stop 7: Principal Consultant →</a></div>
+  </nav>
+
+  <footer>
+    <span>Field Report · Stop 6</span>
+    <span><a href="../index.html">All Stops</a> · <a href="mailto:hello@possiblefutures.bio">hello@possiblefutures.bio</a></span>
+  </footer>
+</div>
+</body>
+</html>

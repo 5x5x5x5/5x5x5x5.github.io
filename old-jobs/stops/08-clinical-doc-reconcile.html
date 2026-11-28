@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stop 8: Scientific Programmer (Bonus Stop) (clinical-doc-reconcile) — Daniel Siegle</title>
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<div class="page">
+  <header class="masthead">
+    <a class="brand" href="../index.html">← Automate My Old Jobs</a>
+    <nav>
+      <a href="https://danielsiegle.com/">danielsiegle.com</a>
+      <a href="https://possiblefutures.bio" target="_blank" rel="noopener">Possible Futures ↗</a>
+    </nav>
+  </header>
+
+  <section class="hero" style="padding-top:2.25rem;">
+    <div class="eyebrow">Stop 8 of 9 · Q² Solutions (Clinical Trial Lab Data)</div>
+    <h1 style="max-width:24ch;">Scientific Programmer (Bonus Stop)</h1>
+    <div class="stop-meta" style="margin-top:0.85rem;">
+      <span class="badge live">Live</span> <span class="badge bonus">Bonus Gap-Filler</span>
+      <code>clinical-doc-reconcile</code>
+      <span style="font-size:0.88rem;color:var(--soft);">Build time: 0.7 hrs</span>
+    </div>
+    <p class="lead">Clinical trial labs reconcile messy lab requisition sheets and Certificates of Analysis against LIMS exports—where exact-string joins trigger false alarms on equivalent units (`µg/mL` vs `ng/mL`) while silently clearing unsigned or out-of-window forms.</p>
+    <div class="tags" style="margin-top:1rem;"><span class="tag">life-sciences</span><span class="tag">rag</span><span class="tag">measurement</span></div>
+    <div style="display:flex;flex-wrap:wrap;gap:0.75rem;margin-top:1.35rem;">
+      
+      <a class="btn" href="https://github.com/5x5x5x5/clinical-doc-reconcile" target="_blank" rel="noopener">View Repository on GitHub ↗</a>
+    </div>
+  </section>
+
+  <section class="band">
+    <h2>Human vs. Machine Boundary</h2>
+    <div class="grid-2">
+      <div class="card">
+        <h3>Automated by <code>clinical-doc-reconcile</code></h3>
+        <ul><li>Structured field extraction into strict Pydantic schemas with 1-based line-number provenance spans.</li><li>Deterministic SI and analyte-specific molar unit normalization (`µg/mL ↔ ng/mL`, glucose `mg/dL ↔ mmol/L`).</li><li>Protocol visit-window validation, missing-signature detection, subject-ID transposition checks, and QA escalation.</li></ul>
+      </div>
+      <div class="card">
+        <h3>Stays Human</h3>
+        <ul><li>Resolving ESCALATE_QA discrepancies (subject ID transpositions, unsigned source requisitions).</li><li>Issuing official site queries and locking the clinical study database.</li></ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <h2>Measured Proof &amp; Scorecard</h2>
+    <table class="scorecard">
+      <tbody><tr><th>Packet Status Accuracy (8 packets)</th><td>100.0% vs. 50.0% naive exact-string join</td></tr><tr><th>False-Clear Count (Missed QA Risk)</th><td>0 vs. 2 naive (caught unsigned source form &amp; out-of-window date)</td></tr><tr><th>Unit-Conversion False Alarms</th><td>0 vs. 2 naive (resolved 1.2 µg/mL == 1200 ng/mL and 100 mg/dL == 5.55 mmol/L)</td></tr><tr><th>Line-Number Provenance</th><td>100.0% of extracted fields mapped back to exact source line</td></tr></tbody>
+    </table>
+  </section>
+
+  <section class="band">
+    <h2>Where It Fails (Honest Limits)</h2>
+    <div class="card fail-box">
+      <ul><li>Handwritten or heavily skewed scanned PDFs require a VLM/OCR layer upfront (with low-confidence cells escalating to QA).</li><li>Unknown analyte molar weights intentionally raise VALUE_CONFLICT rather than guessing.</li></ul>
+    </div>
+  </section>
+
+  <nav class="pager" aria-label="Tour pagination">
+    <div><a href="07-consulting-eval-gates.html">← Stop 7: Principal Consultant</a></div>
+    <div><a href="09-diy-bio-voice.html">Stop 9: DIY Bio Bench &amp; Voice Bridge (Bonus Stop) →</a></div>
+  </nav>
+
+  <footer>
+    <span>Field Report · Stop 8</span>
+    <span><a href="../index.html">All Stops</a> · <a href="mailto:hello@possiblefutures.bio">hello@possiblefutures.bio</a></span>
+  </footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stop 3: M.S. Graduate Researcher (Pharmaceutical Sciences) (CYP-thesis-edits) — Daniel Siegle</title>
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<div class="page">
+  <header class="masthead">
+    <a class="brand" href="../index.html">← Automate My Old Jobs</a>
+    <nav>
+      <a href="https://danielsiegle.com/">danielsiegle.com</a>
+      <a href="https://possiblefutures.bio" target="_blank" rel="noopener">Possible Futures ↗</a>
+    </nav>
+  </header>
+
+  <section class="hero" style="padding-top:2.25rem;">
+    <div class="eyebrow">Stop 3 of 9 · North Carolina Central University (2015 Thesis + 2026 Revisit)</div>
+    <h1 style="max-width:24ch;">M.S. Graduate Researcher (Pharmaceutical Sciences)</h1>
+    <div class="stop-meta" style="margin-top:0.85rem;">
+      <span class="badge live">Live</span>
+      <code>CYP-thesis-edits</code>
+      <span style="font-size:0.88rem;color:var(--soft);">Build time: ~3.5 hrs wall-clock (2026 Tiers 1–4 revisit)</span>
+    </div>
+    <p class="lead">Early ADMET screening must predict cytochrome P450 (CYP) drug-metabolism inhibition across 5 isozymes (1A2, 2C9, 2C19, 2D6, 3A4) without relying on expensive proprietary descriptor suites.</p>
+    <div class="tags" style="margin-top:1rem;"><span class="tag">life-sciences</span><span class="tag">measurement</span><span class="tag">post-training</span></div>
+    <div style="display:flex;flex-wrap:wrap;gap:0.75rem;margin-top:1.35rem;">
+      
+      <a class="btn" href="https://github.com/5x5x5x5/CYP-thesis-edits" target="_blank" rel="noopener">View Repository on GitHub ↗</a>
+    </div>
+  </section>
+
+  <section class="band">
+    <h2>Human vs. Machine Boundary</h2>
+    <div class="grid-2">
+      <div class="card">
+        <h3>Automated by <code>CYP-thesis-edits</code></h3>
+        <ul><li>Zero-leakage 5-fold CV and multi-task firewall across 16,725 PubChem AID1851 compounds on exact 2015 held-out splits.</li><li>30+ models spanning GBDTs, Tanimoto/Hybrid kernel SVMs, 5-head Multi-Task ResMLPs, GINE GNNs, ChemBERTa-77M, MoLFormer-XL, and 3D ETKDGv3 conformers.</li><li>Targeted all-atom Boltz-2 Protein–Heme–Ligand co-folding on the 100 hardest CYP 1A2 compounds.</li></ul>
+      </div>
+      <div class="card">
+        <h3>Stays Human</h3>
+        <ul><li>Medicinal-chemistry series prioritization and structural redesign.</li><li>Wet-lab IC50 confirmation and clinical drug-drug interaction (DDI) risk assessment.</li><li>Selecting which 2026 bio-AI tools fit the physics (ruling out protein-design models that don&#x27;t model small molecules).</li></ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <h2>Measured Proof &amp; Scorecard</h2>
+    <table class="scorecard">
+      <tbody><tr><th>2015 Baseline (MOE SVM)</th><td>Mean Test ROC-AUC 0.8416 · Accuracy 76.40% · Brier 0.1601</td></tr><tr><th>2026 Tier 4 Open-Source (0 MOE)</th><td>Mean Test ROC-AUC 0.8777 · Accuracy 80.47% (beats MOE-only p ≤ 0.0033 on 5/5 isozymes)</td></tr><tr><th>2026 Tier 5 All-Modal Stack</th><td>Mean Test ROC-AUC 0.8810 · Accuracy 80.98% · Brier 0.1376</td></tr><tr><th>Boltz-2 Hard Novel Scaffolds (1A2)</th><td>ROC-AUC 0.6144 → 0.7104 (+0.0960) via zero-fit rank fusion with ligand_ipTM &amp; Fe distance</td></tr></tbody>
+    </table>
+  </section>
+
+  <section class="band">
+    <h2>Where It Fails (Honest Limits)</h2>
+    <div class="card fail-box">
+      <ul><li>2D QSAR degrades sharply on unseen Bemis–Murcko scaffolds (AUC ~0.61–0.65 on the hardest slice).</li><li>Boltz-2 co-folding (~30s–4min/complex) is too slow to train on 52k pairs, limiting it to surgical deployment on hard/novel test compounds.</li><li>Binarizing ActivityScore ≥ 40 discards potency gradation unless paired with continuous regression heads (addressed in Tier 5).</li></ul>
+    </div>
+  </section>
+
+  <nav class="pager" aria-label="Tour pagination">
+    <div><a href="02-biomanufacturing.html">← Stop 2: Manufacturing Associate / Associate Scientist</a></div>
+    <div><a href="04-bioinformatics-ngs-qc.html">Stop 4: Bioinformatics Software Engineer →</a></div>
+  </nav>
+
+  <footer>
+    <span>Field Report · Stop 3</span>
+    <span><a href="../index.html">All Stops</a> · <a href="mailto:hello@possiblefutures.bio">hello@possiblefutures.bio</a></span>
+  </footer>
+</div>
+</body>
+</html>

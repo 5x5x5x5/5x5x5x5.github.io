@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Automate My Old Jobs — Daniel Siegle</title>
+<meta name="description" content="A tour through a varied career — from Alaska fishing boats and biomanufacturing to NGS genomics, teaching, and AI consulting — made legible through small, measured systems built in the domains I know first-hand.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="page">
+  <header class="masthead">
+    <a class="brand" href="https://danielsiegle.com/">Daniel Siegle</a>
+    <nav>
+      <a href="#tour">The Tour (9 Stops)</a>
+      <a href="#flagships">Beyond the Jobs</a>
+      <a href="#faq">Questions &amp; Trust</a>
+      <a href="https://possiblefutures.bio" target="_blank" rel="noopener">Possible Futures ↗</a>
+      <a href="https://github.com/5x5x5x5" target="_blank" rel="noopener">GitHub ↗</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div class="eyebrow">Portfolio Tour · Applied ML Across Real Domains</div>
+    <h1>Automate My Old Jobs.</h1>
+    <p class="lead">A tour through a varied career — from Alaska fishing boats and biomanufacturing to NGS genomics, teaching, and AI consulting — made legible through small, measured systems built in the domains I know first-hand.</p>
+    <figure style="margin:1.75rem 0 0;padding:1rem 1.25rem;background:var(--surface);border:1px solid var(--line);border-radius:10px;">
+      <svg viewBox="0 0 980 96" width="100%" role="img" aria-label="Career route map from Fisheries Observer through Possible Futures">
+        <line x1="55" y1="36" x2="925" y2="36" stroke="#cbd5e1" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="185" y1="36" x2="925" y2="36" stroke="#11325f" stroke-width="2.5" stroke-linecap="round"/>
+        <g font-family="system-ui,-apple-system,sans-serif" font-size="11.5" text-anchor="middle" fill="#141923">
+          <a href="stops/01-fisheries-observer.html"><circle cx="55" cy="36" r="10" fill="#fffbeb" stroke="#92400e" stroke-width="2.5"/><text x="55" y="40" font-weight="700" fill="#92400e">1</text><text x="55" y="64" font-weight="600">Fisheries</text><text x="55" y="80" fill="#6b7280" font-size="10">Vision (WIP)</text></a>
+          <a href="stops/02-biomanufacturing.html"><circle cx="195" cy="36" r="10" fill="#11325f"/><text x="195" y="40" font-weight="700" fill="#fff">2</text><text x="195" y="64" font-weight="600">Biogen</text><text x="195" y="80" fill="#6b7280" font-size="10">mAb Analytics</text></a>
+          <a href="stops/03-grad-school-qsar.html"><circle cx="340" cy="36" r="10" fill="#11325f"/><text x="340" y="40" font-weight="700" fill="#fff">3</text><text x="340" y="64" font-weight="600">NCCU M.S.</text><text x="340" y="80" fill="#6b7280" font-size="10">QSAR + Boltz-2</text></a>
+          <a href="stops/04-bioinformatics-ngs-qc.html"><circle cx="490" cy="36" r="10" fill="#11325f"/><text x="490" y="40" font-weight="700" fill="#fff">4</text><text x="490" y="64" font-weight="600">Q² Genomics</text><text x="490" y="80" fill="#6b7280" font-size="10">Agents + RAG</text></a>
+          <a href="stops/05-community-agent-ops.html"><circle cx="640" cy="36" r="10" fill="#11325f"/><text x="640" y="40" font-weight="700" fill="#fff">5</text><text x="640" y="64" font-weight="600">DLRTP</text><text x="640" y="80" fill="#6b7280" font-size="10">Safe Ops</text></a>
+          <a href="stops/06-teaching-ncssm.html"><circle cx="785" cy="36" r="10" fill="#11325f"/><text x="785" y="40" font-weight="700" fill="#fff">6</text><text x="785" y="64" font-weight="600">NCSSM</text><text x="785" y="80" fill="#6b7280" font-size="10">TAIHLS + RAG</text></a>
+          <a href="stops/07-consulting-eval-gates.html"><circle cx="925" cy="36" r="10" fill="#11325f"/><text x="925" y="40" font-weight="700" fill="#fff">7</text><text x="925" y="64" font-weight="600">Consulting</text><text x="925" y="80" fill="#6b7280" font-size="10">Evals &amp; TCO</text></a>
+        </g>
+      </svg>
+    </figure>
+    <div class="rules">
+      <div class="rule-card"><strong>1. Name the human boundary</strong><span>Every project automates one real subtask and states explicitly what stays human.</span></div>
+      <div class="rule-card"><strong>2. Measure &amp; show where it fails</strong><span>Real public data where available, honest baselines, and explicit failure modes.</span></div>
+      <div class="rule-card"><strong>3. State build velocity</strong><span>Hours to build logged on every entry so speed is evidence, not a claim.</span></div>
+      <div class="rule-card"><strong>4. Greenfield for gaps</strong><span>Missing roles and modern capabilities get clean new repos, not retrofits.</span></div>
+    </div>
+  </section>
+
+  <section class="band" id="tour">
+    <h2>The Route Map</h2>
+    <p class="sub">Seven core stops covering my career arc—plus two bonus stops answering the enterprise clinical-document and physical wet-lab voice questions. Filter by engineering capability:</p>
+    <div class="filters" role="group" aria-label="Filter stops by skill">
+      <button class="filter-btn active" data-filter="all">All Stops (9)</button>
+      <button class="filter-btn" data-filter="life-sciences">Life Sciences</button>
+      <button class="filter-btn" data-filter="agents">Agents &amp; Tool Use</button>
+      <button class="filter-btn" data-filter="rag">RAG &amp; Provenance</button>
+      <button class="filter-btn" data-filter="measurement">Evals &amp; Measurement</button>
+      <button class="filter-btn" data-filter="ops">Production Ops</button>
+      <button class="filter-btn" data-filter="vision">Vision</button>
+      <button class="filter-btn" data-filter="post-training">Post-Training</button>
+      <button class="filter-btn" data-filter="voice">Voice &amp; Edge</button>
+    </div>
+    <div class="stop-list">
+      
+            <article class="stop-card" data-skills="vision edge measurement">
+              <div class="stop-num">1</div>
+              <div>
+                <div class="stop-meta">
+                  <span class="badge progress">In Progress</span>
+                  <span style="font-size:0.82rem;color:var(--soft);">Build time: In progress (active branch)</span>
+                </div>
+                <h3><a href="stops/01-fisheries-observer.html">Fisheries Observer — <code>deck-observer</code></a></h3>
+                <div class="org">North Pacific &amp; Gulf of Alaska (Commercial Longline)</div>
+                <p style="margin:0;font-size:0.94rem;">Human fisheries observers cannot provide 100% haul coverage across commercial longline vessels at sea, yet catch accounting and protected-species bycatch depend on species-level tallies as fish come over the rail.</p>
+                <div class="metric-line"><strong>Measured proof:</strong> Two-stage YOLO26 detect → crop classify pipeline; Fishnet label converter tested; NOAA AFSC data requested</div>
+                <div class="tags"><span class="tag">vision</span><span class="tag">edge</span><span class="tag">measurement</span></div>
+              </div>
+              <div class="stop-actions">
+                <a class="btn primary" href="stops/01-fisheries-observer.html">Field Report →</a>
+                <span class="btn" style="opacity:0.6;cursor:default;">Local WIP</span>
+                
+              </div>
+            </article>
+            
+            <article class="stop-card" data-skills="life-sciences measurement tabular">
+              <div class="stop-num">2</div>
+              <div>
+                <div class="stop-meta">
+                  <span class="badge live">Live</span>
+                  <span style="font-size:0.82rem;color:var(--soft);">Build time: Iterative (97 commits / 42 PRs)</span>
+                </div>
+                <h3><a href="stops/02-biomanufacturing.html">Manufacturing Associate / Associate Scientist — <code>batchlens</code></a></h3>
+                <div class="org">Biogen (Biomanufacturing)</div>
+                <p style="margin:0;font-size:0.94rem;">When a 2,000 L monoclonal antibody batch yields less recoverable drug substance than comparable batches, the clues sit scattered across batch phases, online bioreactor signals, offline assays, and purification pool records.</p>
+                <div class="metric-line"><strong>Measured proof:</strong> 7-batch 2,000 L mAb campaign: isolates titer divergence, Protein A pH drift (−20 pts), and refuses bad records</div>
+                <div class="tags"><span class="tag">life-sciences</span><span class="tag">measurement</span><span class="tag">tabular</span></div>
+              </div>
+              <div class="stop-actions">
+                <a class="btn primary" href="stops/02-biomanufacturing.html">Field Report →</a>
+                <a class="btn" href="https://github.com/5x5x5x5/batchlens" target="_blank" rel="noopener">GitHub Repo</a>
+                
+              </div>
+            </article>
+            
+            <article class="stop-card" data-skills="life-sciences measurement post-training">
+              <div class="stop-num">3</div>
+              <div>
+                <div class="stop-meta">
+                  <span class="badge live">Live</span>
+                  <span style="font-size:0.82rem;color:var(--soft);">Build time: ~3.5 hrs wall-clock (2026 Tiers 1–4 revisit)</span>
+                </div>
+                <h3><a href="stops/03-grad-school-qsar.html">M.S. Graduate Researcher (Pharmaceutical Sciences) — <code>CYP-thesis-edits</code></a></h3>
+                <div class="org">North Carolina Central University (2015 Thesis + 2026 Revisit)</div>
+                <p style="margin:0;font-size:0.94rem;">Early ADMET screening must predict cytochrome P450 (CYP) drug-metabolism inhibition across 5 isozymes (1A2, 2C9, 2C19, 2D6, 3A4) without relying on expensive proprietary descriptor suites.</p>
+                <div class="metric-line"><strong>Measured proof:</strong> Mean Test ROC-AUC 0.8416 (2015 SVM) → 0.8810 (2026 Tier 5); Boltz-2 +0.096 AUC on novel scaffolds</div>
+                <div class="tags"><span class="tag">life-sciences</span><span class="tag">measurement</span><span class="tag">post-training</span></div>
+              </div>
+              <div class="stop-actions">
+                <a class="btn primary" href="stops/03-grad-school-qsar.html">Field Report →</a>
+                <a class="btn" href="https://github.com/5x5x5x5/CYP-thesis-edits" target="_blank" rel="noopener">GitHub Repo</a>
+                
+              </div>
+            </article>
+            
+            <article class="stop-card" data-skills="life-sciences agents rag ops measurement">
+              <div class="stop-num">4</div>
+              <div>
+                <div class="stop-meta">
+                  <span class="badge live">Live</span>
+                  <span style="font-size:0.82rem;color:var(--soft);">Build time: 1.5 hrs (v0.1 + web demo)</span>
+                </div>
+                <h3><a href="stops/04-bioinformatics-ngs-qc.html">Bioinformatics Software Engineer — <code>ngs-qc-triage</code></a></h3>
+                <div class="org">Q² Solutions / Q² Genomics (4 Years · Beijing Satellite Lab)</div>
+                <p style="margin:0;font-size:0.94rem;">Before transferring Illumina sequencing runs from a satellite lab in Beijing to the central repository, a bioinformatician must audit Stats.json and FastQC metrics against SOPs, catch lane-wide defects and biological exceptions, and emit clean transfer manifests.</p>
+                <div class="metric-line"><strong>Measured proof:</strong> 100% triage accuracy &amp; 0 critical False-PASSes vs. 6 (13.3%) naive · 0.52 ms p50 · MCP server</div>
+                <div class="tags"><span class="tag">life-sciences</span><span class="tag">agents</span><span class="tag">rag</span><span class="tag">ops</span><span class="tag">measurement</span></div>
+              </div>
+              <div class="stop-actions">
+                <a class="btn primary" href="stops/04-bioinformatics-ngs-qc.html">Field Report →</a>
+                <a class="btn" href="https://github.com/5x5x5x5/ngs-qc-triage" target="_blank" rel="noopener">GitHub Repo</a>
+                <a class="btn" href="demos/qc-triage.html">Interactive Demo →</a>
+              </div>
+            </article>
+            
+            <article class="stop-card" data-skills="agents ops">
+              <div class="stop-num">5</div>
+              <div>
+                <div class="stop-meta">
+                  <span class="badge live">Live</span>
+                  <span style="font-size:0.82rem;color:var(--soft);">Build time: 1.2 hrs (public PII-free sandbox)</span>
+                </div>
+                <h3><a href="stops/05-community-agent-ops.html">Founder &amp; Organizer — <code>dlrtp-ops-demo</code></a></h3>
+                <div class="org">Deep Learning RTP (1,700+ Members · 400+ Events)</div>
+                <p style="margin:0;font-size:0.94rem;">Running a weekly practitioner paper-reading community requires event fan-out (ICS, website, Discord, Luma/Meetup), inbound triage, local seminar radar curation, and recaps—without letting an autonomous agent spam members or fake personal relationships.</p>
+                <div class="metric-line"><strong>Measured proof:</strong> 9/9 architectural safety invariants · 4/4 prompt injections contained · 75–90 min → 25–30 min/wk</div>
+                <div class="tags"><span class="tag">agents</span><span class="tag">ops</span></div>
+              </div>
+              <div class="stop-actions">
+                <a class="btn primary" href="stops/05-community-agent-ops.html">Field Report →</a>
+                <a class="btn" href="https://github.com/5x5x5x5/dlrtp-ops-demo" target="_blank" rel="noopener">GitHub Repo</a>
+                
+              </div>
+            </article>
+            
+            <article class="stop-card" data-skills="life-sciences rag measurement">
+              <div class="stop-num">6</div>
+              <div>
+                <div class="stop-meta">
+                  <span class="badge live">Live</span>
+                  <span style="font-size:0.82rem;color:var(--soft);">Build time: 1.0 hr (feedback engine) + full semester textbook</span>
+                </div>
+                <h3><a href="stops/06-teaching-ncssm.html">AI Instructor (Health &amp; Life Sciences) — <code>taihls-feedback</code></a></h3>
+                <div class="org">North Carolina School of Science &amp; Mathematics (NCSSM)</div>
+                <p style="margin:0;font-size:0.94rem;">Giving timely, Socratic formative feedback on high-school biomedical ML exercises (base rates, data leakage, thresholds, Clever Hans shortcuts, proxy bias) without handing out the answer or missing struggling students.</p>
+                <div class="metric-line"><strong>Measured proof:</strong> 28 real TAIHLS chapters indexed · 100% rubric accuracy · 0 answer leaks vs. 14 (70%) naive</div>
+                <div class="tags"><span class="tag">life-sciences</span><span class="tag">rag</span><span class="tag">measurement</span></div>
+              </div>
+              <div class="stop-actions">
+                <a class="btn primary" href="stops/06-teaching-ncssm.html">Field Report →</a>
+                <a class="btn" href="https://github.com/5x5x5x5/taihls-feedback" target="_blank" rel="noopener">GitHub Repo</a>
+                <a class="btn" href="https://taihls.com" target="_blank" rel="noopener">Live / Site ↗</a>
+              </div>
+            </article>
+            
+            <article class="stop-card" data-skills="post-training measurement ops life-sciences">
+              <div class="stop-num">7</div>
+              <div>
+                <div class="stop-meta">
+                  <span class="badge live">Live</span>
+                  <span style="font-size:0.82rem;color:var(--soft);">Build time: 1.2 hrs (Colab T4 run + eval gate)</span>
+                </div>
+                <h3><a href="stops/07-consulting-eval-gates.html">Principal Consultant — <code>LLM_tuning_demonstration + llm-eval-gate</code></a></h3>
+                <div class="org">Possible Futures, LLC</div>
+                <p style="margin:0;font-size:0.94rem;">Clients want proof before investing in fine-tuning: does LoRA actually move the needle on domain tasks, can we trust the eval gate, and at what volume does self-hosting beat an API?</p>
+                <div class="metric-line"><strong>Measured proof:</strong> Real Colab T4 QLoRA (Qwen2.5-1.5B on PubMedQA): strict acc 58% → 68% (+10 pp), JSON 100%, macro-F1 +0.088 + TCO/McNemar gate</div>
+                <div class="tags"><span class="tag">post-training</span><span class="tag">measurement</span><span class="tag">ops</span><span class="tag">life-sciences</span></div>
+              </div>
+              <div class="stop-actions">
+                <a class="btn primary" href="stops/07-consulting-eval-gates.html">Field Report →</a>
+                <a class="btn" href="https://github.com/5x5x5x5/LLM_tuning_demonstration" target="_blank" rel="noopener">GitHub Repo</a>
+                <a class="btn" href="https://possiblefutures.bio" target="_blank" rel="noopener">Live / Site ↗</a>
+              </div>
+            </article>
+            
+            <article class="stop-card" data-skills="life-sciences rag measurement">
+              <div class="stop-num">8</div>
+              <div>
+                <div class="stop-meta">
+                  <span class="badge live">Live</span> <span class="badge bonus">Bonus Gap-Filler</span>
+                  <span style="font-size:0.82rem;color:var(--soft);">Build time: 0.7 hrs</span>
+                </div>
+                <h3><a href="stops/08-clinical-doc-reconcile.html">Scientific Programmer (Bonus Stop) — <code>clinical-doc-reconcile</code></a></h3>
+                <div class="org">Q² Solutions (Clinical Trial Lab Data)</div>
+                <p style="margin:0;font-size:0.94rem;">Clinical trial labs reconcile messy lab requisition sheets and Certificates of Analysis against LIMS exports—where exact-string joins trigger false alarms on equivalent units (`µg/mL` vs `ng/mL`) while silently clearing unsigned or out-of-window forms.</p>
+                <div class="metric-line"><strong>Measured proof:</strong> 100% status accuracy · 0 false clears vs. 2 naive · 0 unit false alarms · 100% line provenance</div>
+                <div class="tags"><span class="tag">life-sciences</span><span class="tag">rag</span><span class="tag">measurement</span></div>
+              </div>
+              <div class="stop-actions">
+                <a class="btn primary" href="stops/08-clinical-doc-reconcile.html">Field Report →</a>
+                <a class="btn" href="https://github.com/5x5x5x5/clinical-doc-reconcile" target="_blank" rel="noopener">GitHub Repo</a>
+                
+              </div>
+            </article>
+            
+            <article class="stop-card" data-skills="life-sciences voice edge">
+              <div class="stop-num">9</div>
+              <div>
+                <div class="stop-meta">
+                  <span class="badge live">Live</span> <span class="badge bonus">Bonus Gap-Filler</span>
+                  <span style="font-size:0.82rem;color:var(--soft);">Build time: 0.7 hrs</span>
+                </div>
+                <h3><a href="stops/09-diy-bio-voice.html">DIY Bio Bench &amp; Voice Bridge (Bonus Stop) — <code>bench-voice-copilot</code></a></h3>
+                <div class="org">tridiybio / Voice Seam from duck</div>
+                <p style="margin:0;font-size:0.94rem;">At a wet-lab bench with gloves on and a pipette in hand, typing is awkward—yet a naive voice assistant that ignores SI units or tells you to pipette 0.05 µL ruins the experiment.</p>
+                <div class="metric-line"><strong>Measured proof:</strong> 100% command/math accuracy · 0/5 unsafe commands passed vs. 5/5 naive · catches &lt;0.5 µL pipette floor</div>
+                <div class="tags"><span class="tag">life-sciences</span><span class="tag">voice</span><span class="tag">edge</span></div>
+              </div>
+              <div class="stop-actions">
+                <a class="btn primary" href="stops/09-diy-bio-voice.html">Field Report →</a>
+                <a class="btn" href="https://github.com/5x5x5x5/bench-voice-copilot" target="_blank" rel="noopener">GitHub Repo</a>
+                
+              </div>
+            </article>
+            
+    </div>
+  </section>
+
+  <section class="band" id="flagships">
+    <h2>Beyond the Old Jobs</h2>
+    <p class="sub">High-signal engineering work that does not map to a single past job—evals, verifiable-reward RL on GPUs, generative pipelines, and interactive teaching tools.</p>
+    <div class="grid-2">
+      
+            <div class="card">
+              <div class="eyebrow" style="margin-bottom:0.3rem;">Evals &amp; Judging</div>
+              <h3><a href="https://dear-reader-bench.5x5x5x5.dev" target="_blank" rel="noopener">dear-reader-bench</a></h3>
+              <p style="margin:0.4rem 0 0.75rem;color:var(--soft);font-size:0.92rem;">Pairwise LLM-as-judge evaluation benchmark with Bradley–Terry scoring, gag-bible auditing, and Season 2 behavioral autopsies.</p>
+              <a href="https://github.com/5x5x5x5/dear-reader-bench" target="_blank" rel="noopener" style="font-size:0.86rem;font-weight:600;">View Repository →</a>
+            </div>
+            
+            <div class="card">
+              <div class="eyebrow" style="margin-bottom:0.3rem;">RL Post-Training (GPU)</div>
+              <h3><a href="https://github.com/5x5x5x5/grpo-countdown-modal" target="_blank" rel="noopener">grpo-countdown-modal</a></h3>
+              <p style="margin:0.4rem 0 0.75rem;color:var(--soft);font-size:0.92rem;">Verifiable-reward GRPO training on Modal T4 GPUs (Countdown arithmetic + sandboxed MBPP Python execution in network-blocked modal.Sandbox).</p>
+              <a href="https://github.com/5x5x5x5/grpo-countdown-modal" target="_blank" rel="noopener" style="font-size:0.86rem;font-weight:600;">View Repository →</a>
+            </div>
+            
+            <div class="card">
+              <div class="eyebrow" style="margin-bottom:0.3rem;">Generative Pipelines</div>
+              <h3><a href="https://github.com/5x5x5x5/celery-man" target="_blank" rel="noopener">celery-man</a></h3>
+              <p style="margin:0.4rem 0 0.75rem;color:var(--soft);font-size:0.92rem;">Full generative video/media pipeline with explicit human-or-model decision design, CI, and 81 commits.</p>
+              <a href="https://github.com/5x5x5x5/celery-man" target="_blank" rel="noopener" style="font-size:0.86rem;font-weight:600;">View Repository →</a>
+            </div>
+            
+            <div class="card">
+              <div class="eyebrow" style="margin-bottom:0.3rem;">Tools &amp; Teaching Craft</div>
+              <h3><a href="https://github.com/5x5x5x5/gutenberg-typist" target="_blank" rel="noopener">gutenberg-typist + Static Explainers</a></h3>
+              <p style="margin:0.4rem 0 0.75rem;color:var(--soft);font-size:0.92rem;">Tested editor plugin alongside browser-native interactive explainers for gradient descent, k-means, spaced repetition, and regression.</p>
+              <a href="https://github.com/5x5x5x5/gutenberg-typist" target="_blank" rel="noopener" style="font-size:0.86rem;font-weight:600;">View Repository →</a>
+            </div>
+            
+    </div>
+  </section>
+
+  <section class="band" id="faq">
+    <h2>Questions a Peer or Client Usually Asks</h2>
+    <div class="grid-2">
+      <div class="card">
+        <h3>Why are some datasets public and some synthetic?</h3>
+        <p style="margin:0;font-size:0.92rem;color:var(--soft);">No proprietary, clinical, or member-identifiable data is ever placed in a public repo. Stops 1, 3, 4, and 6 use real public datasets (Fishnet Open Images, PubChem AID1851, MIT-licensed MultiQC Illumina runs, and the 28-chapter TAIHLS textbook). Stops 2, 5, 8, and 9 use explicitly labeled synthetic fixtures to mirror GMP, privacy, and CRO boundaries honestly.</p>
+      </div>
+      <div class="card">
+        <h3>Why emphasize deterministic cores over pure LLM agents?</h3>
+        <p style="margin:0;font-size:0.92rem;color:var(--soft);">In regulated biology and operations, asking an LLM to do arithmetic, unit conversion, or send unattended emails is an engineering defect. Every system here pushes arithmetic, schema validation, and safety gates into tested Python—and uses models where language judgment actually earns its keep.</p>
+      </div>
+      <div class="card">
+        <h3>How does this translate to consulting engagements?</h3>
+        <p style="margin:0;font-size:0.92rem;color:var(--soft);">Through <a href="https://possiblefutures.bio">Possible Futures, LLC</a>, I design, build, and evaluate applied AI systems—especially for biotech, clinical labs, and life-sciences teams. Each stop demonstrates how quickly a domain-grounded prototype with real eval gates can be shipped.</p>
+      </div>
+      <div class="card">
+        <h3>Where is the rest of the work?</h3>
+        <p style="margin:0;font-size:0.92rem;color:var(--soft);">Full profile on <a href="https://github.com/5x5x5x5">GitHub</a>, community sessions at <a href="https://deeplearningrtp.org">Deep Learning RTP</a>, open biomedical AI textbook at <a href="https://taihls.com">taihls.com</a>, and consulting inquiries at <a href="mailto:hello@possiblefutures.bio">hello@possiblefutures.bio</a>.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>Daniel Siegle · Durham, North Carolina</span>
+    <span><a href="https://danielsiegle.com/">danielsiegle.com</a> · <a href="https://possiblefutures.bio">possiblefutures.bio</a> · <a href="mailto:daniel.siegle@gmail.com">daniel.siegle@gmail.com</a></span>
+  </footer>
+</div>
+
+<script>
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const f = btn.dataset.filter;
+    document.querySelectorAll('.stop-card').forEach(card => {
+      const skills = (card.dataset.skills || '').split(' ');
+      card.style.display = (f === 'all' || skills.includes(f)) ? '' : 'none';
+    });
+  });
+});
+</script>
+</body>
+</html>

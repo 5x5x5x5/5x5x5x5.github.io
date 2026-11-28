@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stop 1: Fisheries Observer (deck-observer) — Daniel Siegle</title>
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<div class="page">
+  <header class="masthead">
+    <a class="brand" href="../index.html">← Automate My Old Jobs</a>
+    <nav>
+      <a href="https://danielsiegle.com/">danielsiegle.com</a>
+      <a href="https://possiblefutures.bio" target="_blank" rel="noopener">Possible Futures ↗</a>
+    </nav>
+  </header>
+
+  <section class="hero" style="padding-top:2.25rem;">
+    <div class="eyebrow">Stop 1 of 9 · North Pacific &amp; Gulf of Alaska (Commercial Longline)</div>
+    <h1 style="max-width:24ch;">Fisheries Observer</h1>
+    <div class="stop-meta" style="margin-top:0.85rem;">
+      <span class="badge progress">In Progress</span>
+      <code>deck-observer</code>
+      <span style="font-size:0.88rem;color:var(--soft);">Build time: In progress (active branch)</span>
+    </div>
+    <p class="lead">Human fisheries observers cannot provide 100% haul coverage across commercial longline vessels at sea, yet catch accounting and protected-species bycatch depend on species-level tallies as fish come over the rail.</p>
+    <div class="tags" style="margin-top:1rem;"><span class="tag">vision</span><span class="tag">edge</span><span class="tag">measurement</span></div>
+    <div style="display:flex;flex-wrap:wrap;gap:0.75rem;margin-top:1.35rem;">
+      
+      <span class="btn" style="opacity:0.65;cursor:default;">Repository in active local development</span>
+    </div>
+  </section>
+
+  <section class="band">
+    <h2>Human vs. Machine Boundary</h2>
+    <div class="grid-2">
+      <div class="card">
+        <h3>Automated by <code>deck-observer</code></h3>
+        <ul><li>Detect each fish and person in rail/chute electronic monitoring (EM) frames with coarse taxonomic grouping.</li><li>Crop detected fish for fine-grained species classification with confidence-based abstention.</li><li>Emit structured observer tally sheets and route uncertain/rare frames for review.</li></ul>
+      </div>
+      <div class="card">
+        <h3>Stays Human</h3>
+        <ul><li>Final species verification on occluded, rare, or protected bycatch (e.g., seabirds/rockfish).</li><li>Biological sampling: otolith extraction, length/sex measurements, and physical deck inspection.</li><li>Regulatory compliance judgment and vessel debriefing.</li></ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <h2>Measured Proof &amp; Scorecard</h2>
+    <table class="scorecard">
+      <tbody><tr><th>Pipeline Stage</th><td>Stage 1 label conversion &amp; Colab T4 GPU smoke path verified</td></tr><tr><th>Public Training Set</th><td>Fishnet Open Images v1.0.0 (86,029 images, 406,463 boxes, 34 classes, CC BY-SA 4.0)</td></tr><tr><th>Target Domain Set</th><td>NOAA AFSC FMA Alaska longline dataset (requested; non-blocking)</td></tr><tr><th>License Posture</th><td>AGPL-3.0 (Ultralytics YOLO26); Apache-2.0 alternatives (RF-DETR, D-FINE) mapped in recon</td></tr></tbody>
+    </table>
+  </section>
+
+  <section class="band">
+    <h2>Where It Fails (Honest Limits)</h2>
+    <div class="card fail-box">
+      <ul><li>Domain shift: Fishnet captures western/central Pacific tuna longline gear rather than Alaska groundfish species until AFSC data arrives.</li><li>Motion blur, salt spray, and overlapping fish on the rail degrade single-frame confidence (requiring tracking + human abstention).</li><li>Stage 1 training and edge-CPU FPS benchmarks are actively underway in a parallel session; no trained mAP numbers are claimed yet.</li></ul>
+    </div>
+  </section>
+
+  <nav class="pager" aria-label="Tour pagination">
+    <div><a href="../index.html">← Back to Route Map</a></div>
+    <div><a href="02-biomanufacturing.html">Stop 2: Manufacturing Associate / Associate Scientist →</a></div>
+  </nav>
+
+  <footer>
+    <span>Field Report · Stop 1</span>
+    <span><a href="../index.html">All Stops</a> · <a href="mailto:hello@possiblefutures.bio">hello@possiblefutures.bio</a></span>
+  </footer>
+</div>
+</body>
+</html>

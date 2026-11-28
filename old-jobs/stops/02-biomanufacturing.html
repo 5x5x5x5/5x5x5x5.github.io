@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stop 2: Manufacturing Associate / Associate Scientist (batchlens) — Daniel Siegle</title>
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<div class="page">
+  <header class="masthead">
+    <a class="brand" href="../index.html">← Automate My Old Jobs</a>
+    <nav>
+      <a href="https://danielsiegle.com/">danielsiegle.com</a>
+      <a href="https://possiblefutures.bio" target="_blank" rel="noopener">Possible Futures ↗</a>
+    </nav>
+  </header>
+
+  <section class="hero" style="padding-top:2.25rem;">
+    <div class="eyebrow">Stop 2 of 9 · Biogen (Biomanufacturing)</div>
+    <h1 style="max-width:24ch;">Manufacturing Associate / Associate Scientist</h1>
+    <div class="stop-meta" style="margin-top:0.85rem;">
+      <span class="badge live">Live</span>
+      <code>batchlens</code>
+      <span style="font-size:0.88rem;color:var(--soft);">Build time: Iterative (97 commits / 42 PRs)</span>
+    </div>
+    <p class="lead">When a 2,000 L monoclonal antibody batch yields less recoverable drug substance than comparable batches, the clues sit scattered across batch phases, online bioreactor signals, offline assays, and purification pool records.</p>
+    <div class="tags" style="margin-top:1rem;"><span class="tag">life-sciences</span><span class="tag">measurement</span><span class="tag">tabular</span></div>
+    <div style="display:flex;flex-wrap:wrap;gap:0.75rem;margin-top:1.35rem;">
+      
+      <a class="btn" href="https://github.com/5x5x5x5/batchlens" target="_blank" rel="noopener">View Repository on GitHub ↗</a>
+    </div>
+  </section>
+
+  <section class="band">
+    <h2>Human vs. Machine Boundary</h2>
+    <div class="grid-2">
+      <div class="card">
+        <h3>Automated by <code>batchlens</code></h3>
+        <ul><li>Join upstream culture signals (VCD, IVCD, specific productivity, harvest titer) with downstream purification steps (Protein A through UF/DF).</li><li>Quantify exactly where a batch diverged from the reference batch and what that divergence cost in grams.</li><li>Detect incomplete/invalid batch records (`BL-0005`) and refuse to fabricate a yield number.</li></ul>
+      </div>
+      <div class="card">
+        <h3>Stays Human</h3>
+        <ul><li>Causal root-cause attribution and GMP deviation / CAPA sign-off.</li><li>Batch disposition and release decisions.</li><li>Bioreactor or chromatography floor intervention.</li></ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <h2>Measured Proof &amp; Scorecard</h2>
+    <table class="scorecard">
+      <tbody><tr><th>Campaign Scope</th><td>7 synthetic 2,000 L mAb batches (BL-0001..BL-0007) + 3 prior-campaign reference batches</td></tr><tr><th>Upstream Divergence</th><td>BL-0003 flagged at culture day 7.9 (7,317 g vs 10,170 g reference harvest)</td></tr><tr><th>Downstream Step Fault</th><td>BL-0004 Protein A recovery −20 pts (elution buffer pH 3.94 vs 3.49 reference)</td></tr><tr><th>Bad-Record Abstention</th><td>BL-0005 marked invalid/insufficient with exact offending records cited (zero hallucinated numbers)</td></tr></tbody>
+    </table>
+  </section>
+
+  <section class="band">
+    <h2>Where It Fails (Honest Limits)</h2>
+    <div class="card fail-box">
+      <ul><li>Uses synthetic simulated campaign data—explicitly not validated for GMP process control or batch disposition.</li><li>Surfaces statistical divergence and adjacent lot anomalies, never proving mechanistic causality on its own.</li></ul>
+    </div>
+  </section>
+
+  <nav class="pager" aria-label="Tour pagination">
+    <div><a href="01-fisheries-observer.html">← Stop 1: Fisheries Observer</a></div>
+    <div><a href="03-grad-school-qsar.html">Stop 3: M.S. Graduate Researcher (Pharmaceutical Sciences) →</a></div>
+  </nav>
+
+  <footer>
+    <span>Field Report · Stop 2</span>
+    <span><a href="../index.html">All Stops</a> · <a href="mailto:hello@possiblefutures.bio">hello@possiblefutures.bio</a></span>
+  </footer>
+</div>
+</body>
+</html>

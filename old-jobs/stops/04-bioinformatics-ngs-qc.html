@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stop 4: Bioinformatics Software Engineer (ngs-qc-triage) — Daniel Siegle</title>
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<div class="page">
+  <header class="masthead">
+    <a class="brand" href="../index.html">← Automate My Old Jobs</a>
+    <nav>
+      <a href="https://danielsiegle.com/">danielsiegle.com</a>
+      <a href="https://possiblefutures.bio" target="_blank" rel="noopener">Possible Futures ↗</a>
+    </nav>
+  </header>
+
+  <section class="hero" style="padding-top:2.25rem;">
+    <div class="eyebrow">Stop 4 of 9 · Q² Solutions / Q² Genomics (4 Years · Beijing Satellite Lab)</div>
+    <h1 style="max-width:24ch;">Bioinformatics Software Engineer</h1>
+    <div class="stop-meta" style="margin-top:0.85rem;">
+      <span class="badge live">Live</span>
+      <code>ngs-qc-triage</code>
+      <span style="font-size:0.88rem;color:var(--soft);">Build time: 1.5 hrs (v0.1 + web demo)</span>
+    </div>
+    <p class="lead">Before transferring Illumina sequencing runs from a satellite lab in Beijing to the central repository, a bioinformatician must audit Stats.json and FastQC metrics against SOPs, catch lane-wide defects and biological exceptions, and emit clean transfer manifests.</p>
+    <div class="tags" style="margin-top:1rem;"><span class="tag">life-sciences</span><span class="tag">agents</span><span class="tag">rag</span><span class="tag">ops</span><span class="tag">measurement</span></div>
+    <div style="display:flex;flex-wrap:wrap;gap:0.75rem;margin-top:1.35rem;">
+      <a class="btn primary" href="../demos/qc-triage.html">Launch Interactive Demo →</a>
+      <a class="btn" href="https://github.com/5x5x5x5/ngs-qc-triage" target="_blank" rel="noopener">View Repository on GitHub ↗</a>
+    </div>
+  </section>
+
+  <section class="band">
+    <h2>Human vs. Machine Boundary</h2>
+    <div class="grid-2">
+      <div class="card">
+        <h3>Automated by <code>ngs-qc-triage</code></h3>
+        <ul><li>Deterministic parsing of real Illumina bcl2fastq Stats.json and FastQC archives (zero LLM arithmetic).</li><li>Assay-aware rules (exempting expected duplication in targeted panels/amplicons while escalating WGS GC contamination, Read 2 phasing drops, and lane-wide defects).</li><li>Hybrid BM25 + char n-gram SOP-NGS-042 retrieval with verbatim clause citations, MCP server, and split transfer/quarantine CSV manifests.</li></ul>
+      </div>
+      <div class="card">
+        <h3>Stays Human</h3>
+        <ul><li>Resolving every ESCALATE flag (GC contamination, Read 2 phasing drops, &gt;20% undetermined reads, corrupted files).</li><li>Authorizing wet-lab re-sequencing or library-prep repeats.</li><li>Sponsor waivers and external communication with the satellite lab.</li></ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <h2>Measured Proof &amp; Scorecard</h2>
+    <table class="scorecard">
+      <tbody><tr><th>Benchmark Scope</th><td>12 scenarios / 45 samples (real MIT MultiQC Illumina runs + clinical edge cases)</td></tr><tr><th>Exact Triage Accuracy</th><td>100.0% vs. 82.2% naive threshold script</td></tr><tr><th>Critical False-PASS Count</th><td>0 (0.0%) vs. 6 (13.3%) naive (zero contaminated or truncated runs released)</td></tr><tr><th>SOP Citation Recall &amp; Latency</th><td>100.0% verbatim SOP-NGS-042 citations · 0.52 ms p50 / 3.98 ms p95 (offline)</td></tr></tbody>
+    </table>
+  </section>
+
+  <section class="band">
+    <h2>Where It Fails (Honest Limits)</h2>
+    <div class="card fail-box">
+      <ul><li>Upstream LIMS metadata errors: if a PCR-overamplified WGS library is mislabeled `targeted_panel`, the §4.2 exemption fires incorrectly.</li><li>QC-invisible sample swaps between two clean human libraries cannot be detected without downstream alignment/SNP fingerprinting.</li><li>Novel optical artifacts outside SOP-NGS-042 still require human visual inspection.</li></ul>
+    </div>
+  </section>
+
+  <nav class="pager" aria-label="Tour pagination">
+    <div><a href="03-grad-school-qsar.html">← Stop 3: M.S. Graduate Researcher (Pharmaceutical Sciences)</a></div>
+    <div><a href="05-community-agent-ops.html">Stop 5: Founder &amp; Organizer →</a></div>
+  </nav>
+
+  <footer>
+    <span>Field Report · Stop 4</span>
+    <span><a href="../index.html">All Stops</a> · <a href="mailto:hello@possiblefutures.bio">hello@possiblefutures.bio</a></span>
+  </footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stop 7: Principal Consultant (LLM_tuning_demonstration + llm-eval-gate) — Daniel Siegle</title>
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<div class="page">
+  <header class="masthead">
+    <a class="brand" href="../index.html">← Automate My Old Jobs</a>
+    <nav>
+      <a href="https://danielsiegle.com/">danielsiegle.com</a>
+      <a href="https://possiblefutures.bio" target="_blank" rel="noopener">Possible Futures ↗</a>
+    </nav>
+  </header>
+
+  <section class="hero" style="padding-top:2.25rem;">
+    <div class="eyebrow">Stop 7 of 9 · Possible Futures, LLC</div>
+    <h1 style="max-width:24ch;">Principal Consultant</h1>
+    <div class="stop-meta" style="margin-top:0.85rem;">
+      <span class="badge live">Live</span>
+      <code>LLM_tuning_demonstration + llm-eval-gate</code>
+      <span style="font-size:0.88rem;color:var(--soft);">Build time: 1.2 hrs (Colab T4 run + eval gate)</span>
+    </div>
+    <p class="lead">Clients want proof before investing in fine-tuning: does LoRA actually move the needle on domain tasks, can we trust the eval gate, and at what volume does self-hosting beat an API?</p>
+    <div class="tags" style="margin-top:1rem;"><span class="tag">post-training</span><span class="tag">measurement</span><span class="tag">ops</span><span class="tag">life-sciences</span></div>
+    <div style="display:flex;flex-wrap:wrap;gap:0.75rem;margin-top:1.35rem;">
+      <a class="btn primary" href="https://possiblefutures.bio" target="_blank" rel="noopener">Open Site / Endpoint ↗</a>
+      <a class="btn" href="https://github.com/5x5x5x5/LLM_tuning_demonstration" target="_blank" rel="noopener">View Repository on GitHub ↗</a>
+    </div>
+  </section>
+
+  <section class="band">
+    <h2>Human vs. Machine Boundary</h2>
+    <div class="grid-2">
+      <div class="card">
+        <h3>Automated by <code>LLM_tuning_demonstration + llm-eval-gate</code></h3>
+        <ul><li>Real Colab Tesla T4 4-bit NF4 QLoRA run (`Qwen/Qwen2.5-1.5B-Instruct`, 600 train / 100 val / 100 held-out PubMedQA test, 6.64 GB VRAM, 10.3 min) with full JSON results committed.</li><li>Paired CI regression gates (`llm-eval-gate`): Cohen&#x27;s κ judge calibration, exact McNemar + bootstrap 95% CIs, hard safety/schema gates.</li><li>Monthly-volume build-vs-buy TCO modeling across frontier API, mid-tier API+RAG, and amortized self-hosted 8B fine-tune.</li></ul>
+      </div>
+      <div class="card">
+        <h3>Stays Human</h3>
+        <ul><li>Labeling the initial human gold set and defining business error-cost asymmetry.</li><li>Schema design calls (e.g., ordering rationale before verdict after error analysis) and class-imbalance strategy.</li><li>Compliance (HIPAA/GxP), data-residency, and final go/no-go capital allocation with the client.</li></ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <h2>Measured Proof &amp; Scorecard</h2>
+    <table class="scorecard">
+      <tbody><tr><th>Colab T4 QLoRA (PubMedQA, N=100)</th><td>Strict JSON verdict acc 58.0% → 68.0% (+10.0 pp) · Macro-F1 0.389 → 0.477 · JSON validity 98% → 100% · Val loss 2.037 → 1.522</td></tr><tr><th>Paired McNemar &amp; Throughput</th><td>17 improved vs. 7 regressed (exact McNemar p=0.0639 at N=100) · 96.3 → 44.9 tok/s unmerged PEFT (proving merge necessity)</td></tr><tr><th>Judge Calibration Audit (llm-eval-gate)</th><td>Rejects lenient judge (κ=0.500, +15 pp bias); approves calibrated judge (κ=0.867, 0 pp bias)</td></tr><tr><th>Build-vs-Buy Crossover</th><td>Mid-tier API wins 10k–250k req/mo ($10–$260/mo); self-hosted fine-tune wins ≥1M req/mo ($950 vs $1,040–$5,200/mo)</td></tr></tbody>
+    </table>
+  </section>
+
+  <section class="band">
+    <h2>Where It Fails (Honest Limits)</h2>
+    <div class="card fail-box">
+      <ul><li>Minority-class collapse on PubMedQA: neither base nor 2-epoch SFT predicted `maybe` (0/12 gold items) without class weighting/oversampling.</li><li>Autoregressive contradiction (`pubid 12068831`): emitted `verdict: yes` before writing a rationale concluding no evidence existed — solved by generating `rationale` before `verdict`.</li><li>Unmerged 4-bit LoRA adapters halved T4 throughput (96.3 → 44.9 tok/s), and N=100 yielded borderline p=0.064 (proving larger eval sets + adapter merging are required before production).</li></ul>
+    </div>
+  </section>
+
+  <nav class="pager" aria-label="Tour pagination">
+    <div><a href="06-teaching-ncssm.html">← Stop 6: AI Instructor (Health &amp; Life Sciences)</a></div>
+    <div><a href="08-clinical-doc-reconcile.html">Stop 8: Scientific Programmer (Bonus Stop) →</a></div>
+  </nav>
+
+  <footer>
+    <span>Field Report · Stop 7</span>
+    <span><a href="../index.html">All Stops</a> · <a href="mailto:hello@possiblefutures.bio">hello@possiblefutures.bio</a></span>
+  </footer>
+</div>
+</body>
+</html>

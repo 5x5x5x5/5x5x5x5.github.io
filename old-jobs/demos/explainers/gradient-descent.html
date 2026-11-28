@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Gradient Descent on a Loss Surface</title>
+<style>
+  :root {
+    --bg: #0d0f12;
+    --panel: #14171c;
+    --panel-2: #1b1f26;
+    --line: #2a2f38;
+    --text: #d8dce3;
+    --muted: #8b93a1;
+    --faint: #5c6371;
+    --accent: #f2a65a;       /* one restrained accent */
+    --accent-dim: #b6794030;
+    --mono: ui-monospace, "SF Mono", "Menlo", "Cascadia Code", monospace;
+    --sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 48px 20px 64px;
+  }
+  h1 {
+    font-size: clamp(1.6rem, 4.5vw, 2.2rem);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin: 0 0 14px;
+    font-weight: 650;
+  }
+  h1 .em { color: var(--accent); }
+  .intro {
+    color: var(--muted);
+    font-size: 1.02rem;
+    margin: 0 0 26px;
+    max-width: 60ch;
+  }
+  .stage {
+    position: relative;
+    width: 100%;
+    background: #000;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+    aspect-ratio: 16 / 11;
+    touch-action: none;
+  }
+  canvas { display: block; width: 100%; height: 100%; }
+  .readout {
+    position: absolute;
+    top: 10px; left: 10px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    pointer-events: none;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+  }
+  .chip {
+    background: #0a0c0fcc;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 4px 8px;
+    backdrop-filter: blur(3px);
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .chip b { color: var(--text); font-weight: 600; }
+  .chip.warn { border-color: var(--accent); color: var(--accent); }
+  .hint {
+    position: absolute;
+    bottom: 10px; left: 10px; right: 10px;
+    pointer-events: none;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--faint);
+    text-align: center;
+  }
+
+  .controls {
+    margin-top: 18px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 18px 18px 20px;
+  }
+  .sliders { display: grid; gap: 16px; }
+  .field { display: grid; grid-template-columns: 1fr; gap: 6px; }
+  .field .row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .field label {
+    font-size: 0.82rem;
+    color: var(--text);
+    font-weight: 550;
+  }
+  .field .val {
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+  .field .desc {
+    font-size: 0.72rem;
+    color: var(--faint);
+    margin: 0;
+  }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 26px;
+    background: transparent;
+    cursor: pointer;
+    margin: 0;
+  }
+  input[type="range"]:focus { outline: none; }
+  input[type="range"]::-webkit-slider-runnable-track {
+    height: 4px;
+    border-radius: 4px;
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+  }
+  input[type="range"]::-moz-range-track {
+    height: 4px;
+    border-radius: 4px;
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px; height: 16px;
+    margin-top: -7px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid #0d0f12;
+    box-shadow: 0 0 0 1px var(--accent);
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid #0d0f12;
+    box-shadow: 0 0 0 1px var(--accent);
+  }
+  input[type="range"]:focus-visible::-webkit-slider-thumb {
+    box-shadow: 0 0 0 1px var(--accent), 0 0 0 4px var(--accent-dim);
+  }
+  input[type="range"]:focus-visible::-moz-range-thumb {
+    box-shadow: 0 0 0 1px var(--accent), 0 0 0 4px var(--accent-dim);
+  }
+
+  .buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+  }
+  button {
+    font-family: var(--sans);
+    font-size: 0.85rem;
+    font-weight: 550;
+    color: var(--text);
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 9px 16px;
+    cursor: pointer;
+    transition: border-color .12s, background .12s, color .12s;
+  }
+  button:hover { border-color: var(--faint); background: #20252e; }
+  button:focus-visible {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-dim);
+  }
+  button.primary {
+    background: var(--accent);
+    color: #1a1206;
+    border-color: var(--accent);
+  }
+  button.primary:hover { background: #f7b873; }
+
+  .explain {
+    margin-top: 32px;
+    color: var(--muted);
+    font-size: 0.95rem;
+  }
+  .explain h2 {
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--faint);
+    margin: 0 0 12px;
+    font-weight: 600;
+  }
+  .explain p { margin: 0 0 12px; }
+  .explain code {
+    font-family: var(--mono);
+    font-size: 0.86em;
+    color: var(--accent);
+    background: var(--accent-dim);
+    padding: 1px 5px;
+    border-radius: 4px;
+  }
+  .explain b { color: var(--text); font-weight: 600; }
+
+  footer {
+    margin-top: 44px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    font-family: var(--mono);
+    font-size: 0.82rem;
+  }
+  footer a {
+    color: var(--muted);
+    text-decoration: none;
+    transition: color .12s;
+  }
+  footer a:hover { color: var(--accent); }
+
+  @media (max-width: 480px) {
+    .wrap { padding: 32px 16px 48px; }
+    .buttons button { flex: 1 1 auto; }
+  }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>Gradient Descent on a <span class="em">Loss Surface</span></h1>
+  <p class="intro">
+    Training a model means rolling downhill on a loss surface — repeatedly stepping
+    against the gradient toward lower error. Drag the start point, tune the
+    learning rate and momentum, and watch the optimizer either settle into a basin
+    or shake itself apart.
+  </p>
+
+  <div class="stage" id="stage">
+    <canvas id="cv" aria-label="Loss surface heatmap with the optimizer's descent path"></canvas>
+    <div class="readout" aria-live="polite">
+      <span class="chip">iter <b id="r-iter">0</b></span>
+      <span class="chip">loss <b id="r-loss">—</b></span>
+      <span class="chip">‖∇‖ <b id="r-grad">—</b></span>
+      <span class="chip" id="r-status">paused</span>
+    </div>
+    <div class="hint" id="hint">drag the marker • or focus the canvas and use arrow keys</div>
+  </div>
+
+  <div class="controls">
+    <div class="sliders">
+      <div class="field">
+        <div class="row">
+          <label for="lr">Learning rate</label>
+          <span class="val" id="lr-val">0.063</span>
+        </div>
+        <input type="range" id="lr" min="0" max="1000" value="600" step="1"
+               aria-describedby="lr-desc" />
+        <p class="desc" id="lr-desc">Step size, log scale 0.001 → 1.0. Push it high to make descent overshoot and diverge.</p>
+      </div>
+      <div class="field">
+        <div class="row">
+          <label for="mom">Momentum</label>
+          <span class="val" id="mom-val">0.00</span>
+        </div>
+        <input type="range" id="mom" min="0" max="99" value="0" step="1"
+               aria-describedby="mom-desc" />
+        <p class="desc" id="mom-desc">Fraction of the previous step carried forward (0 → 0.99). Builds velocity through flat regions and shallow ridges.</p>
+      </div>
+    </div>
+
+    <div class="buttons">
+      <button id="run" class="primary" aria-pressed="false">Run</button>
+      <button id="step">Step</button>
+      <button id="reset">Reset</button>
+    </div>
+  </div>
+
+  <section class="explain">
+    <h2>What's happening</h2>
+    <p>
+      The colored field is a <b>loss surface</b> <code>L(x, y)</code> — here a mix of
+      Gaussian wells and a ridge, so it is decidedly <b>non-convex</b>: there are several
+      basins, and where you start decides which one you fall into. Dark valleys are low
+      loss; bright ridges are high.
+    </p>
+    <p>
+      At every iteration we compute the <b>gradient</b> <code>∇L</code> analytically — the
+      direction of steepest <i>increase</i> — and move the opposite way:
+      <code>v ← μ·v − η·∇L</code>, then <code>p ← p + v</code>. The learning rate
+      <code>η</code> scales the step; <b>momentum</b> <code>μ</code> lets velocity
+      accumulate, smoothing the path and powering it over small bumps.
+    </p>
+    <p>
+      Set <code>η</code> sensibly and the marker glides into the nearest valley and stops.
+      Set it too large and each step overshoots the minimum, so the path
+      <b>oscillates and explodes</b> outward — the optimizer diverges. Adding momentum
+      reshapes the trajectory: it overshoots and corrects like a ball with inertia rather
+      than tracing the gradient exactly.
+    </p>
+  </section>
+
+  <footer><a href="../../index.html">← atlas</a></footer>
+</main>
+
+<script>
+(() => {
+  "use strict";
+
+  // ---- Loss surface: sum of Gaussian bumps over domain [-3,3]^2 -------------
+  // L(x,y) = sum_i a_i * exp(-((x-cx)^2 + (y-cy)^2) / (2 s^2))
+  // Negative amplitudes = wells (low loss), positive = ridges (high loss).
+  // Add a gentle bowl so the domain is bounded and edges read as "high".
+  const BUMPS = [
+    { a: -3.00, cx: -1.35, cy: -1.05, s: 0.62 }, // deep basin (global-ish min)
+    { a: -2.20, cx:  1.45, cy:  1.25, s: 0.72 }, // second basin
+    { a: -1.70, cx:  1.20, cy: -1.35, s: 0.50 }, // small narrow well
+    { a:  1.80, cx:  0.05, cy:  0.10, s: 0.90 }, // central ridge separating basins
+  ];
+  const BOWL = 0.04; // mild quadratic confinement
+
+  function loss(x, y) {
+    let L = BOWL * (x * x + y * y);
+    for (const b of BUMPS) {
+      const dx = x - b.cx, dy = y - b.cy;
+      L += b.a * Math.exp(-(dx * dx + dy * dy) / (2 * b.s * b.s));
+    }
+    return L;
+  }
+  function grad(x, y) {
+    let gx = 2 * BOWL * x, gy = 2 * BOWL * y;
+    for (const b of BUMPS) {
+      const dx = x - b.cx, dy = y - b.cy;
+      const e = b.a * Math.exp(-(dx * dx + dy * dy) / (2 * b.s * b.s));
+      const k = -e / (b.s * b.s);
+      gx += k * dx;
+      gy += k * dy;
+    }
+    return [gx, gy];
+  }
+
+  const DOM = 3.0;                 // domain half-width: x,y in [-3,3]
+  const toWorldX = u => (u * 2 - 1) * DOM;   // u in [0,1] -> world
+  const toWorldY = v => (1 - v * 2) * DOM;   // v in [0,1] -> world (y up)
+  // world -> normalized [0,1]
+  const fromWorldU = x => (x / DOM + 1) / 2;
+  const fromWorldV = y => (1 - y / DOM) / 2;
+
+  // Precompute loss range for the colormap.
+  let LMIN = Infinity, LMAX = -Infinity;
+  for (let i = 0; i <= 120; i++) for (let j = 0; j <= 120; j++) {
+    const L = loss(toWorldX(i / 120), toWorldY(j / 120));
+    if (L < LMIN) LMIN = L;
+    if (L > LMAX) LMAX = L;
+  }
+
+  // ---- Colormap: dark teal-navy (low) -> warm amber (high) ------------------
+  // restrained: stays mostly cool/dark, accent-warm only at high loss.
+  function colormap(t) {
+    t = t < 0 ? 0 : t > 1 ? 1 : t;
+    // control stops [r,g,b]
+    const stops = [
+      [0.00, 10, 14, 20],
+      [0.30, 22, 42, 58],
+      [0.55, 46, 78, 92],
+      [0.78, 150, 120, 78],
+      [1.00, 242, 166, 90],
+    ];
+    for (let i = 0; i < stops.length - 1; i++) {
+      const a = stops[i], b = stops[i + 1];
+      if (t <= b[0]) {
+        const f = (t - a[0]) / (b[0] - a[0]);
+        return [
+          Math.round(a[1] + (b[1] - a[1]) * f),
+          Math.round(a[2] + (b[2] - a[2]) * f),
+          Math.round(a[3] + (b[3] - a[3]) * f),
+        ];
+      }
+    }
+    return [stops[stops.length - 1][1], stops[stops.length - 1][2], stops[stops.length - 1][3]];
+  }
+
+  // ---- Canvas / DPR ---------------------------------------------------------
+  const stage = document.getElementById("stage");
+  const cv = document.getElementById("cv");
+  const ctx = cv.getContext("2d");
+  let W = 0, H = 0, DPR = 1;
+  let field = null; // offscreen heatmap (ImageData drawn to a buffer canvas)
+  const buf = document.createElement("canvas");
+  const bctx = buf.getContext("2d");
+
+  function renderField() {
+    // render heatmap at a modest internal resolution, then scale up.
+    const FW = Math.max(80, Math.min(360, Math.round(W)));
+    const FH = Math.max(60, Math.min(280, Math.round(H)));
+    buf.width = FW; buf.height = FH;
+    const img = bctx.createImageData(FW, FH);
+    const d = img.data;
+    const span = (LMAX - LMIN) || 1;
+    for (let j = 0; j < FH; j++) {
+      const y = toWorldY((j + 0.5) / FH);
+      for (let i = 0; i < FW; i++) {
+        const x = toWorldX((i + 0.5) / FW);
+        const t = (loss(x, y) - LMIN) / span;
+        const c = colormap(t);
+        const o = (j * FW + i) * 4;
+        d[o] = c[0]; d[o + 1] = c[1]; d[o + 2] = c[2]; d[o + 3] = 255;
+      }
+    }
+    bctx.putImageData(img, 0, 0);
+  }
+
+  function resize() {
+    const r = stage.getBoundingClientRect();
+    DPR = Math.min(window.devicePixelRatio || 1, 2.5);
+    W = Math.round(r.width);
+    H = Math.round(r.height);
+    cv.width = Math.round(W * DPR);
+    cv.height = Math.round(H * DPR);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    renderField();
+    draw();
+  }
+
+  // ---- Optimizer state ------------------------------------------------------
+  const START = { x: -2.15, y: 1.95 }; // default start: outside the basins
+  let pos = { x: START.x, y: START.y };
+  let vel = { x: 0, y: 0 };
+  let path = [{ x: pos.x, y: pos.y }];
+  let iter = 0;
+  let diverged = false;
+  let running = false;
+  let dragging = false;
+
+  function controlsLR() {
+    // log scale 0.001 .. 1.0
+    const s = +lrEl.value / 1000; // 0..1
+    return Math.pow(10, -3 + 3 * s); // 1e-3 .. 1e0
+  }
+  function controlsMom() { return +momEl.value / 100; }
+
+  function stepOnce() {
+    if (diverged) return;
+    const [gx, gy] = grad(pos.x, pos.y);
+    const lr = controlsLR(), mu = controlsMom();
+    vel.x = mu * vel.x - lr * gx;
+    vel.y = mu * vel.y - lr * gy;
+    pos.x += vel.x;
+    pos.y += vel.y;
+    iter++;
+    path.push({ x: pos.x, y: pos.y });
+    if (path.length > 4000) path.shift();
+    // divergence detection: left the visible domain by a margin or non-finite
+    const LIM = DOM * 1.6;
+    if (!isFinite(pos.x) || !isFinite(pos.y) ||
+        Math.abs(pos.x) > LIM || Math.abs(pos.y) > LIM) {
+      diverged = true;
+      setRunning(false);
+    }
+    updateReadout();
+  }
+
+  function reset() {
+    pos = { x: START.x, y: START.y };
+    vel = { x: 0, y: 0 };
+    path = [{ x: pos.x, y: pos.y }];
+    iter = 0;
+    diverged = false;
+    setRunning(false);
+    updateReadout();
+    draw();
+  }
+
+  function reseed(x, y) {
+    pos = { x, y };
+    vel = { x: 0, y: 0 };
+    path = [{ x, y }];
+    iter = 0;
+    diverged = false;
+    updateReadout();
+    draw();
+  }
+
+  // ---- Drawing --------------------------------------------------------------
+  function worldToPx(x, y) {
+    return [fromWorldU(x) * W, fromWorldV(y) * H];
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    // heatmap
+    ctx.imageSmoothingEnabled = true;
+    ctx.drawImage(buf, 0, 0, W, H);
+
+    // contour lines via marching the precomputed loss at sampled grid
+    drawContours();
+
+    // path polyline
+    if (path.length > 1) {
+      ctx.lineJoin = "round";
+      ctx.lineCap = "round";
+      // glow underlay
+      ctx.strokeStyle = "rgba(242,166,90,0.18)";
+      ctx.lineWidth = 5;
+      tracePath();
+      ctx.stroke();
+      // crisp line
+      ctx.strokeStyle = diverged ? "#ff6b5e" : "#f2a65a";
+      ctx.lineWidth = 1.8;
+      tracePath();
+      ctx.stroke();
+    }
+
+    // iteration dots (subtle, sampled)
+    const stepEvery = Math.max(1, Math.floor(path.length / 60));
+    ctx.fillStyle = "rgba(255,255,255,0.55)";
+    for (let i = 0; i < path.length; i += stepEvery) {
+      const [px, py] = worldToPx(path[i].x, path[i].y);
+      ctx.beginPath();
+      ctx.arc(px, py, 1.4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // current marker (draggable start / current position)
+    const [mx, my] = worldToPx(pos.x, pos.y);
+    ctx.beginPath();
+    ctx.arc(mx, my, 8, 0, Math.PI * 2);
+    ctx.fillStyle = diverged ? "#ff6b5e22" : "#f2a65a22";
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(mx, my, 6, 0, Math.PI * 2);
+    ctx.fillStyle = diverged ? "#ff6b5e" : "#f2a65a";
+    ctx.fill();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "#0d0f12";
+    ctx.stroke();
+    // focus ring when canvas focused
+    if (document.activeElement === cv) {
+      ctx.beginPath();
+      ctx.arc(mx, my, 11, 0, Math.PI * 2);
+      ctx.strokeStyle = "rgba(242,166,90,0.7)";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+  }
+
+  function tracePath() {
+    ctx.beginPath();
+    let started = false;
+    for (const p of path) {
+      const [px, py] = worldToPx(p.x, p.y);
+      if (!started) { ctx.moveTo(px, py); started = true; }
+      else ctx.lineTo(px, py);
+    }
+  }
+
+  // Marching-squares contour lines at evenly spaced loss levels.
+  let contourGrid = null, CGN = 0;
+  function buildContourGrid() {
+    CGN = 96;
+    contourGrid = new Float32Array((CGN + 1) * (CGN + 1));
+    for (let j = 0; j <= CGN; j++)
+      for (let i = 0; i <= CGN; i++)
+        contourGrid[j * (CGN + 1) + i] = loss(toWorldX(i / CGN), toWorldY(j / CGN));
+  }
+  function drawContours() {
+    if (!contourGrid) buildContourGrid();
+    const N = CGN, stride = N + 1;
+    const cell = (a, b) => contourGrid[a * stride + b];
+    const levels = 9;
+    ctx.lineWidth = 1;
+    for (let l = 1; l < levels; l++) {
+      const lev = LMIN + (LMAX - LMIN) * (l / levels);
+      ctx.strokeStyle = "rgba(216,220,227,0.10)";
+      ctx.beginPath();
+      for (let j = 0; j < N; j++) {
+        for (let i = 0; i < N; i++) {
+          const tl = cell(j, i), tr = cell(j, i + 1),
+                bl = cell(j + 1, i), br = cell(j + 1, i + 1);
+          // cell corners in normalized coords
+          const x0 = i / N, x1 = (i + 1) / N, y0 = j / N, y1 = (j + 1) / N;
+          marchCell(lev, tl, tr, br, bl, x0, y0, x1, y1);
+        }
+      }
+      ctx.stroke();
+    }
+  }
+  function interp(lev, va, vb, pa, pb) {
+    const t = (lev - va) / (vb - va);
+    return pa + (pb - pa) * t;
+  }
+  function marchCell(lev, tl, tr, br, bl, x0, y0, x1, y1) {
+    // corners: TL(x0,y0) TR(x1,y0) BR(x1,y1) BL(x0,y1)
+    let idx = 0;
+    if (tl > lev) idx |= 8;
+    if (tr > lev) idx |= 4;
+    if (br > lev) idx |= 2;
+    if (bl > lev) idx |= 1;
+    if (idx === 0 || idx === 15) return;
+    // edge midpoints (interpolated)
+    const top    = () => [interp(lev, tl, tr, x0, x1), y0];
+    const right  = () => [x1, interp(lev, tr, br, y0, y1)];
+    const bottom = () => [interp(lev, bl, br, x0, x1), y1];
+    const left   = () => [x0, interp(lev, tl, bl, y0, y1)];
+    let segs = [];
+    switch (idx) {
+      case 1:  segs = [left, bottom]; break;
+      case 2:  segs = [bottom, right]; break;
+      case 3:  segs = [left, right]; break;
+      case 4:  segs = [top, right]; break;
+      case 5:  segs = [left, top, bottom, right]; break; // ambiguous: two segs
+      case 6:  segs = [top, bottom]; break;
+      case 7:  segs = [left, top]; break;
+      case 8:  segs = [top, left]; break;
+      case 9:  segs = [top, bottom]; break;
+      case 10: segs = [top, right, left, bottom]; break; // ambiguous
+      case 11: segs = [top, right]; break;
+      case 12: segs = [left, right]; break;
+      case 13: segs = [bottom, right]; break;
+      case 14: segs = [left, bottom]; break;
+    }
+    for (let k = 0; k < segs.length; k += 2) {
+      const [ax, ay] = segs[k]();
+      const [bx, by] = segs[k + 1]();
+      ctx.moveTo(ax * W, ay * H);
+      ctx.lineTo(bx * W, by * H);
+    }
+  }
+
+  // ---- Readout --------------------------------------------------------------
+  const rIter = document.getElementById("r-iter");
+  const rLoss = document.getElementById("r-loss");
+  const rGrad = document.getElementById("r-grad");
+  const rStatus = document.getElementById("r-status");
+
+  function updateReadout() {
+    rIter.textContent = iter;
+    if (diverged) {
+      rLoss.textContent = "∞";
+      rGrad.textContent = "∞";
+      rStatus.textContent = "diverged";
+      rStatus.classList.add("warn");
+    } else {
+      const L = loss(pos.x, pos.y);
+      const [gx, gy] = grad(pos.x, pos.y);
+      rLoss.textContent = L.toFixed(3);
+      rGrad.textContent = Math.hypot(gx, gy).toFixed(3);
+      rStatus.textContent = running ? "running" : "paused";
+      rStatus.classList.remove("warn");
+    }
+  }
+
+  // ---- Controls -------------------------------------------------------------
+  const lrEl = document.getElementById("lr");
+  const momEl = document.getElementById("mom");
+  const lrVal = document.getElementById("lr-val");
+  const momVal = document.getElementById("mom-val");
+  const runBtn = document.getElementById("run");
+  const stepBtn = document.getElementById("step");
+  const resetBtn = document.getElementById("reset");
+
+  function syncLabels() {
+    lrVal.textContent = controlsLR().toFixed(controlsLR() < 0.01 ? 4 : 3);
+    momVal.textContent = controlsMom().toFixed(2);
+  }
+  lrEl.addEventListener("input", syncLabels);
+  momEl.addEventListener("input", syncLabels);
+
+  function setRunning(on) {
+    running = on && !diverged;
+    runBtn.textContent = running ? "Pause" : "Run";
+    runBtn.setAttribute("aria-pressed", running ? "true" : "false");
+    if (!diverged) {
+      rStatus.textContent = running ? "running" : "paused";
+      rStatus.classList.remove("warn");
+    }
+    if (running) startLoop();
+  }
+
+  runBtn.addEventListener("click", () => {
+    if (diverged) reset();
+    setRunning(!running);
+  });
+  stepBtn.addEventListener("click", () => {
+    if (diverged) reset();
+    setRunning(false);
+    stepOnce();
+    draw();
+  });
+  resetBtn.addEventListener("click", reset);
+
+  // ---- Animation loop (rate-limited; respects reduced motion via no autoplay)
+  let rafId = null;
+  let acc = 0, lastT = 0;
+  // Respect prefers-reduced-motion: there is no autoplay (nothing moves until the
+  // user presses Run or Step), and when reduced motion is requested we run the
+  // optimizer at a calmer rate so the animation is gentler.
+  const reduceMotion = window.matchMedia
+    ? window.matchMedia("(prefers-reduced-motion: reduce)")
+    : { matches: false };
+  function stepHz() { return reduceMotion.matches ? 12 : 60; } // steps per second when running
+  function loop(t) {
+    if (!running) { rafId = null; return; }
+    if (!lastT) lastT = t;
+    let dt = (t - lastT) / 1000;
+    lastT = t;
+    if (dt > 0.1) dt = 0.1; // clamp tab-switch gaps
+    acc += dt;
+    const interval = 1 / stepHz();
+    let did = false;
+    let guard = 0;
+    while (acc >= interval && guard < 20) {
+      stepOnce();
+      acc -= interval;
+      did = true;
+      guard++;
+      if (diverged) break;
+    }
+    if (did) draw();
+    if (running) rafId = requestAnimationFrame(loop);
+    else rafId = null;
+  }
+  function startLoop() {
+    if (rafId == null) {
+      lastT = 0; acc = 0;
+      rafId = requestAnimationFrame(loop);
+    }
+  }
+
+  // ---- Pointer drag to reseed start point -----------------------------------
+  function eventToWorld(ev) {
+    const r = cv.getBoundingClientRect();
+    const cx = (ev.touches ? ev.touches[0].clientX : ev.clientX) - r.left;
+    const cy = (ev.touches ? ev.touches[0].clientY : ev.clientY) - r.top;
+    const u = Math.min(1, Math.max(0, cx / r.width));
+    const v = Math.min(1, Math.max(0, cy / r.height));
+    return [toWorldX(u), toWorldY(v)];
+  }
+  function nearMarker(ev) {
+    const r = cv.getBoundingClientRect();
+    const cx = (ev.touches ? ev.touches[0].clientX : ev.clientX) - r.left;
+    const cy = (ev.touches ? ev.touches[0].clientY : ev.clientY) - r.top;
+    const [mx, my] = worldToPx(pos.x, pos.y);
+    return Math.hypot(cx - mx, cy - my) < 28;
+  }
+
+  function onDown(ev) {
+    // Start dragging if we grab the marker, OR (when idle) anywhere to place it.
+    const idle = !running && iter === 0;
+    if (nearMarker(ev) || idle || diverged) {
+      dragging = true;
+      setRunning(false);
+      const [x, y] = eventToWorld(ev);
+      reseed(x, y);
+      cv.focus();
+      ev.preventDefault();
+    }
+  }
+  function onMove(ev) {
+    if (!dragging) return;
+    const [x, y] = eventToWorld(ev);
+    reseed(x, y);
+    ev.preventDefault();
+  }
+  function onUp() { dragging = false; }
+
+  cv.addEventListener("mousedown", onDown);
+  window.addEventListener("mousemove", onMove);
+  window.addEventListener("mouseup", onUp);
+  cv.addEventListener("touchstart", onDown, { passive: false });
+  cv.addEventListener("touchmove", onMove, { passive: false });
+  window.addEventListener("touchend", onUp);
+
+  // keyboard nudge when canvas focused
+  cv.setAttribute("tabindex", "0");
+  cv.setAttribute("role", "application");
+  cv.addEventListener("keydown", (e) => {
+    const d = e.shiftKey ? 0.25 : 0.08;
+    let handled = true;
+    let nx = pos.x, ny = pos.y;
+    switch (e.key) {
+      case "ArrowLeft":  nx -= d; break;
+      case "ArrowRight": nx += d; break;
+      case "ArrowUp":    ny += d; break;
+      case "ArrowDown":  ny -= d; break;
+      case " ": case "Enter": setRunning(!running); break;
+      default: handled = false;
+    }
+    if (handled) {
+      e.preventDefault();
+      if (e.key.startsWith("Arrow")) {
+        nx = Math.max(-DOM, Math.min(DOM, nx));
+        ny = Math.max(-DOM, Math.min(DOM, ny));
+        reseed(nx, ny);
+      }
+    }
+  });
+  cv.addEventListener("focus", draw);
+  cv.addEventListener("blur", draw);
+
+  // ---- Resize handling ------------------------------------------------------
+  let resizeRAF = null;
+  const ro = new ResizeObserver(() => {
+    if (resizeRAF) cancelAnimationFrame(resizeRAF);
+    resizeRAF = requestAnimationFrame(resize);
+  });
+  ro.observe(stage);
+
+  // ---- Init -----------------------------------------------------------------
+  syncLabels();
+  resize();
+  updateReadout();
+})();
+</script>
+</body>
+</html>

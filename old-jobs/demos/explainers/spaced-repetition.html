@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Why Spaced Repetition Works</title>
+<style>
+  :root {
+    --bg: #0d0f12;
+    --panel: #14171c;
+    --ink: #d7dbe0;
+    --muted: #8b93a0;
+    --faint: #2a2f37;
+    --grid: #1b2027;
+    --accent: #5ad1b0;
+    --accent-dim: #2f7d6a;
+    --danger: #c9785a;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  main {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 48px 20px 24px;
+  }
+  h1 {
+    font-size: clamp(1.6rem, 4.5vw, 2.2rem);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin: 0 0 0.5em;
+    font-weight: 650;
+  }
+  .lede {
+    color: var(--muted);
+    font-size: 1.02rem;
+    margin: 0 0 1.8em;
+    max-width: 62ch;
+  }
+  .figure {
+    background: var(--panel);
+    border: 1px solid var(--faint);
+    border-radius: 12px;
+    padding: 10px 10px 4px;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.02) inset;
+  }
+  .canvas-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+  }
+  canvas { display: block; width: 100%; height: 100%; }
+
+  .controls {
+    margin-top: 18px;
+    display: grid;
+    gap: 16px;
+  }
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+  }
+  .slider-block {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: var(--panel);
+    border: 1px solid var(--faint);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .slider-block label {
+    font-size: 0.86rem;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+  }
+  .slider-block label .val {
+    font-family: var(--mono);
+    color: var(--accent);
+    font-size: 1rem;
+    font-variant-numeric: tabular-nums;
+  }
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 22px;
+    background: transparent;
+    cursor: pointer;
+    margin: 0;
+  }
+  input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 6px; }
+  input[type="range"]::-webkit-slider-runnable-track {
+    height: 4px; border-radius: 2px;
+    background: linear-gradient(to right, var(--accent-dim), var(--accent));
+  }
+  input[type="range"]::-moz-range-track { height: 4px; border-radius: 2px; background: var(--accent-dim); }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 16px; height: 16px; margin-top: -6px;
+    border-radius: 50%; background: var(--accent);
+    border: 3px solid var(--bg); box-shadow: 0 0 0 1px var(--accent);
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 16px; height: 16px; border-radius: 50%;
+    background: var(--accent); border: 3px solid var(--bg); box-shadow: 0 0 0 1px var(--accent);
+  }
+
+  button {
+    font-family: var(--sans);
+    font-size: 0.92rem;
+    font-weight: 550;
+    color: var(--ink);
+    background: #1c2128;
+    border: 1px solid var(--faint);
+    border-radius: 9px;
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: border-color .15s, background .15s, transform .05s;
+  }
+  button:hover { border-color: var(--accent-dim); background: #20262e; }
+  button:active { transform: translateY(1px); }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  button.primary {
+    background: var(--accent-dim);
+    border-color: var(--accent);
+    color: #061410;
+    font-weight: 650;
+  }
+  button.primary:hover { background: var(--accent); }
+  button[disabled] { opacity: .4; cursor: not-allowed; }
+
+  .toggle {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 0.88rem; color: var(--muted); cursor: pointer;
+    user-select: none;
+  }
+  .toggle input { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
+
+  .readout {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 4px;
+  }
+  .stat {
+    background: var(--panel);
+    border: 1px solid var(--faint);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .stat .k { font-size: 0.74rem; color: var(--muted); letter-spacing: 0.03em; text-transform: uppercase; }
+  .stat .v {
+    font-family: var(--mono); font-size: 1.35rem; color: var(--ink);
+    margin-top: 4px; font-variant-numeric: tabular-nums;
+  }
+  .stat .v small { font-size: 0.8rem; color: var(--muted); font-weight: 400; }
+
+  .explain {
+    margin-top: 30px;
+    color: var(--ink);
+  }
+  .explain h2 { font-size: 1rem; letter-spacing: 0.02em; color: var(--accent); margin: 0 0 0.5em; }
+  .explain p { color: var(--muted); font-size: 0.97rem; margin: 0 0 0.8em; max-width: 64ch; }
+  .explain code { font-family: var(--mono); color: var(--ink); background: #181c22; padding: 1px 5px; border-radius: 4px; font-size: 0.88em; }
+
+  footer {
+    margin-top: 40px; padding-top: 18px;
+    border-top: 1px solid var(--faint);
+    font-size: 0.9rem;
+  }
+  footer a { color: var(--muted); text-decoration: none; }
+  footer a:hover { color: var(--accent); }
+
+  @media (max-width: 480px) {
+    .readout { grid-template-columns: 1fr; }
+    .canvas-wrap { aspect-ratio: 4 / 3; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>Why Spaced Repetition Works</h1>
+  <p class="lede">
+    A memory fades along a <em>forgetting curve</em>: the chance you can recall it,
+    <span style="font-family:var(--mono);color:var(--accent)">R(t)&nbsp;=&nbsp;e<sup>−t/S</sup></span>,
+    slides toward zero as days pass. Each well-timed review raises the
+    memory's <em>stability</em> S — flattening the curve and stretching the gap
+    before you need to see the card again. Review just as recall dips to your target,
+    and the next interval grows the most.
+  </p>
+
+  <div class="figure">
+    <div class="canvas-wrap">
+      <canvas id="chart" role="img"
+        aria-label="Retrievability decay curves over time. Each review starts a flatter curve and a longer interval until the next review is due."></canvas>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="slider-block">
+      <label for="target">
+        Target retention <span class="muted-hint" aria-hidden="true">(review when recall drops to here)</span>
+        <span class="val" id="targetVal">90%</span>
+      </label>
+      <input type="range" id="target" min="80" max="95" step="1" value="90"
+        aria-describedby="targetHelp" />
+      <span id="targetHelp" style="font-size:.78rem;color:var(--muted)">
+        Higher target → review sooner & more often; lower → fewer, riskier reviews.
+      </span>
+    </div>
+
+    <div class="row">
+      <button id="review" class="primary" type="button">Schedule next due review →</button>
+      <button id="reset" type="button">Reset</button>
+      <label class="toggle">
+        <input type="checkbox" id="auto" />
+        Auto-schedule
+      </label>
+    </div>
+
+    <div class="readout" aria-live="polite">
+      <div class="stat">
+        <div class="k">Stability S</div>
+        <div class="v"><span id="statS">1.0</span> <small>days</small></div>
+      </div>
+      <div class="stat">
+        <div class="k">Next due in</div>
+        <div class="v"><span id="statInt">0.4</span> <small>days</small></div>
+      </div>
+      <div class="stat">
+        <div class="k">Reviews</div>
+        <div class="v"><span id="statReps">0</span></div>
+      </div>
+    </div>
+  </div>
+
+  <section class="explain">
+    <h2>What's happening</h2>
+    <p>
+      The blue curves are successive forgetting curves, drawn as a ladder. The first
+      card is fragile — low stability <code>S</code>, so <code>R(t) = e<sup>−t/S</sup></code>
+      plunges within days. The dashed line is your <strong>target retention</strong>:
+      the moment a curve crosses it, the card is <em>due</em>.
+    </p>
+    <p>
+      Each review multiplies stability (FSRS-lite: <code>S × 1.8</code>, with a bonus
+      when you review right at the target, where the <em>spacing effect</em> is strongest).
+      Because the next interval is <code>−S·ln(retention)</code>, a bigger <code>S</code>
+      means a visibly flatter curve and a longer wait — the same algorithm that drives
+      atlas's <code>study</code> scheduler. Keep reviewing: the curve barely droops and
+      the interval climbs from days to weeks to months.
+    </p>
+  </section>
+
+  <footer><a href="../../index.html">← atlas</a></footer>
+</main>
+
+<script>
+(() => {
+  "use strict";
+
+  // ---- FSRS-lite model (mirrors packages/study/src/study/fsrs.py) ----
+  const INITIAL_STABILITY = 1.0;
+  const MAX_STABILITY = 36500.0;
+  const GROWTH_GOOD = 1.8;          // GOOD-grade multiplicative growth
+  const DIFF_SCALE = 1.0;           // fixed difficulty 5.0 -> scale ≈ 1.0
+  const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+
+  // R(t) = exp(-t / S)
+  const retrievability = (t, S) => Math.exp(-t / S);
+  // interval to decay to target retention: t = -S * ln(R)
+  const intervalFor = (S, R) => -S * Math.log(R);
+
+  // Spacing-effect bonus: stability grows most when the review lands right at
+  // the target (recall ~= target). Reviewing too early (recall near 1) wastes
+  // the rep; too late risks a lapse. Bonus peaks at the target retention.
+  function reviewStability(S, recallAtReview, target) {
+    // distance from target, normalized; bonus in [1.0, 1.35], peak at recall≈target
+    const d = Math.abs(recallAtReview - target);
+    const bonus = 1.0 + 0.35 * Math.max(0, 1 - d / 0.18);
+    return clamp(S * GROWTH_GOOD * DIFF_SCALE * bonus, INITIAL_STABILITY, MAX_STABILITY);
+  }
+
+  // ---- State: a ladder of segments {t0 (day offset of review), S} ----
+  let target = 0.90;
+  let segments;     // each: {start, S}  (start = day at which this curve begins)
+  let reps;
+
+  function reset() {
+    segments = [{ start: 0, S: INITIAL_STABILITY }];
+    reps = 0;
+    const autoBox = document.getElementById("auto");
+    if (autoBox && autoBox.checked) { autoBox.checked = false; }
+    clearTimeout(autoTimer);
+    document.getElementById("review").disabled = false;
+    render();
+    syncReadout();
+  }
+
+  // current (last) segment
+  const cur = () => segments[segments.length - 1];
+
+  // absolute day at which the current curve next becomes due
+  function nextDueDay() {
+    const s = cur();
+    return s.start + intervalFor(s.S, target);
+  }
+
+  function doReview() {
+    const s = cur();
+    const dueDay = nextDueDay();
+    // recall at the review moment, relative to start of the active curve:
+    const recall = retrievability(dueDay - s.start, s.S); // ≈ target by construction
+    const newS = reviewStability(s.S, recall, target);
+    segments.push({ start: dueDay, S: newS });
+    reps += 1;
+    animateTo();
+    syncReadout();
+  }
+
+  // ---- Readouts ----
+  const $ = (id) => document.getElementById(id);
+  function syncReadout() {
+    const s = cur();
+    $("statS").textContent = s.S < 10 ? s.S.toFixed(1) : Math.round(s.S).toLocaleString();
+    const interval = intervalFor(s.S, target);
+    $("statInt").textContent = interval < 10 ? interval.toFixed(1) : Math.round(interval).toLocaleString();
+    $("statReps").textContent = reps;
+  }
+
+  // ---- Canvas chart ----
+  const canvas = $("chart");
+  const ctx = canvas.getContext("2d");
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  let W = 0, H = 0, dpr = 1;
+  const pad = { l: 46, r: 16, t: 16, b: 34 };
+
+  function resize() {
+    const rect = canvas.getBoundingClientRect();
+    dpr = Math.max(1, window.devicePixelRatio || 1);
+    W = rect.width; H = rect.height;
+    canvas.width = Math.round(W * dpr);
+    canvas.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    render();
+  }
+
+  // Choose an x-axis span that comfortably shows the whole ladder.
+  function xMaxDays() {
+    const lastDue = nextDueDay();
+    return Math.max(8, lastDue * 1.25);
+  }
+
+  const plot = {
+    x: (day, xmax) => pad.l + (day / xmax) * (W - pad.l - pad.r),
+    y: (r) => pad.t + (1 - r) * (H - pad.t - pad.b),
+  };
+
+  function niceTicks(max, count) {
+    const raw = max / count;
+    const mag = Math.pow(10, Math.floor(Math.log10(raw)));
+    const norm = raw / mag;
+    const step = (norm >= 5 ? 5 : norm >= 2 ? 2 : 1) * mag;
+    const ticks = [];
+    for (let v = 0; v <= max + 1e-9; v += step) ticks.push(v);
+    return ticks;
+  }
+
+  // animation progress for the most recently added segment
+  let anim = 1;
+  let autoTimer = null;
+
+  function animateTo() {
+    if (reduceMotion) { anim = 1; render(); return; }
+    anim = 0;
+    const t0 = performance.now();
+    const dur = 480;
+    const step = (now) => {
+      const p = Math.min(1, (now - t0) / dur);
+      anim = 1 - Math.pow(1 - p, 3); // easeOutCubic
+      render();
+      if (p < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+
+  function render() {
+    if (!W || !H) return;
+    ctx.clearRect(0, 0, W, H);
+
+    const css = getComputedStyle(document.documentElement);
+    const C = (n) => css.getPropertyValue(n).trim();
+    const xmax = xMaxDays();
+
+    // --- grid + axes ---
+    ctx.lineWidth = 1;
+    ctx.font = '11px ui-monospace, "SF Mono", Menlo, monospace';
+    ctx.textBaseline = "middle";
+
+    // horizontal gridlines (retrievability 0..100)
+    ctx.strokeStyle = C("--grid");
+    ctx.fillStyle = C("--muted");
+    for (let r = 0; r <= 1.0001; r += 0.25) {
+      const y = plot.y(r);
+      ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(W - pad.r, y); ctx.stroke();
+      ctx.textAlign = "right";
+      ctx.fillText((r * 100).toFixed(0) + "%", pad.l - 8, y);
+    }
+
+    // vertical gridlines (days)
+    const xticks = niceTicks(xmax, 6);
+    ctx.textAlign = "center";
+    ctx.textBaseline = "top";
+    for (const d of xticks) {
+      const x = plot.x(d, xmax);
+      ctx.strokeStyle = C("--grid");
+      ctx.beginPath(); ctx.moveTo(x, pad.t); ctx.lineTo(x, H - pad.b); ctx.stroke();
+      ctx.fillStyle = C("--muted");
+      ctx.fillText(d % 1 === 0 ? d : d.toFixed(0), x, H - pad.b + 8);
+    }
+    // axis label
+    ctx.fillStyle = C("--muted");
+    ctx.textBaseline = "alphabetic";
+    ctx.fillText("days", (pad.l + W - pad.r) / 2, H - 4);
+
+    // --- target retention line ---
+    const yt = plot.y(target);
+    ctx.save();
+    ctx.setLineDash([5, 4]);
+    ctx.strokeStyle = C("--danger");
+    ctx.lineWidth = 1.25;
+    ctx.beginPath(); ctx.moveTo(pad.l, yt); ctx.lineTo(W - pad.r, yt); ctx.stroke();
+    ctx.restore();
+    ctx.fillStyle = C("--danger");
+    ctx.textAlign = "left";
+    ctx.textBaseline = "bottom";
+    ctx.fillText("target " + Math.round(target * 100) + "%", pad.l + 4, yt - 3);
+
+    // --- ladder of decay curves ---
+    const accent = C("--accent");
+    const accentDim = C("--accent-dim");
+
+    for (let i = 0; i < segments.length; i++) {
+      const seg = segments[i];
+      const isLast = i === segments.length - 1;
+      // each curve runs from its own start until it crosses the target (its due day)
+      const endDay = (isLast)
+        ? Math.min(xmax, seg.start + intervalFor(seg.S, target))
+        : segments[i + 1].start; // ends where the next review begins
+      // animate the newest segment drawing in
+      const drawEnd = isLast && segments.length > 1
+        ? seg.start + (endDay - seg.start) * anim
+        : endDay;
+
+      ctx.lineWidth = isLast ? 2.4 : 1.6;
+      ctx.strokeStyle = isLast ? accent : accentDim;
+      ctx.globalAlpha = isLast ? 1 : 0.55;
+      ctx.beginPath();
+      const steps = 80;
+      for (let k = 0; k <= steps; k++) {
+        const day = seg.start + (drawEnd - seg.start) * (k / steps);
+        const r = retrievability(day - seg.start, seg.S);
+        const px = plot.x(day, xmax), py = plot.y(r);
+        k === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+
+      // review marker: the point where this curve hit the target (= next curve's start)
+      if (i + 1 < segments.length || (isLast && false)) {
+        const mday = seg.start + intervalFor(seg.S, target);
+        const mx = plot.x(mday, xmax), my = plot.y(target);
+        ctx.fillStyle = accent;
+        ctx.strokeStyle = C("--bg");
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(mx, my, 4.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      }
+    }
+
+    // --- "due now" marker on the active curve at the target crossing ---
+    {
+      const seg = cur();
+      const dueDay = seg.start + intervalFor(seg.S, target);
+      if (dueDay <= xmax + 1e-6 && (segments.length === 1 || anim >= 0.999)) {
+        const dx = plot.x(dueDay, xmax), dy = plot.y(target);
+        ctx.save();
+        if (!reduceMotion) {
+          const pulse = 0.5 + 0.5 * Math.sin(performance.now() / 350);
+          ctx.globalAlpha = 0.25 + 0.35 * pulse;
+        } else { ctx.globalAlpha = 0.5; }
+        ctx.fillStyle = C("--danger");
+        ctx.beginPath(); ctx.arc(dx, dy, 8, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+        ctx.fillStyle = C("--danger");
+        ctx.beginPath(); ctx.arc(dx, dy, 4, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = C("--ink");
+        ctx.font = '11px ui-monospace, "SF Mono", Menlo, monospace';
+        ctx.textAlign = "center"; ctx.textBaseline = "bottom";
+        ctx.fillText("due", dx, dy - 12);
+      }
+    }
+  }
+
+  // keep the "due now" pulse animating
+  function tick() {
+    if (!reduceMotion) render();
+    requestAnimationFrame(tick);
+  }
+
+  // ---- wiring ----
+  $("target").addEventListener("input", (e) => {
+    target = parseInt(e.target.value, 10) / 100;
+    $("targetVal").textContent = e.target.value + "%";
+    render();
+    syncReadout();
+  });
+  $("review").addEventListener("click", () => doReview());
+  $("reset").addEventListener("click", reset);
+
+  // auto-schedule: review on a comfortable cadence
+  $("auto").addEventListener("change", (e) => {
+    if (e.target.checked) {
+      $("review").disabled = true;
+      const loop = () => {
+        if (!$("auto").checked) return;
+        if (cur().S < 5000) doReview();
+        autoTimer = setTimeout(loop, 1100);
+      };
+      autoTimer = setTimeout(loop, 350);
+    } else {
+      $("review").disabled = false;
+      clearTimeout(autoTimer);
+    }
+  });
+
+  window.addEventListener("resize", resize);
+  // observe container size for responsive redraw
+  if (window.ResizeObserver) {
+    new ResizeObserver(resize).observe(canvas.parentElement);
+  }
+
+  reset();
+  resize();
+  if (!reduceMotion) tick();
+})();
+</script>
+</body>
+</html>

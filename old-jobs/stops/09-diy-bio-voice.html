@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stop 9: DIY Bio Bench &amp; Voice Bridge (Bonus Stop) (bench-voice-copilot) — Daniel Siegle</title>
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<div class="page">
+  <header class="masthead">
+    <a class="brand" href="../index.html">← Automate My Old Jobs</a>
+    <nav>
+      <a href="https://danielsiegle.com/">danielsiegle.com</a>
+      <a href="https://possiblefutures.bio" target="_blank" rel="noopener">Possible Futures ↗</a>
+    </nav>
+  </header>
+
+  <section class="hero" style="padding-top:2.25rem;">
+    <div class="eyebrow">Stop 9 of 9 · tridiybio / Voice Seam from duck</div>
+    <h1 style="max-width:24ch;">DIY Bio Bench &amp; Voice Bridge (Bonus Stop)</h1>
+    <div class="stop-meta" style="margin-top:0.85rem;">
+      <span class="badge live">Live</span> <span class="badge bonus">Bonus Gap-Filler</span>
+      <code>bench-voice-copilot</code>
+      <span style="font-size:0.88rem;color:var(--soft);">Build time: 0.7 hrs</span>
+    </div>
+    <p class="lead">At a wet-lab bench with gloves on and a pipette in hand, typing is awkward—yet a naive voice assistant that ignores SI units or tells you to pipette 0.05 µL ruins the experiment.</p>
+    <div class="tags" style="margin-top:1rem;"><span class="tag">life-sciences</span><span class="tag">voice</span><span class="tag">edge</span></div>
+    <div style="display:flex;flex-wrap:wrap;gap:0.75rem;margin-top:1.35rem;">
+      
+      <a class="btn" href="https://github.com/5x5x5x5/bench-voice-copilot" target="_blank" rel="noopener">View Repository on GitHub ↗</a>
+    </div>
+  </section>
+
+  <section class="band">
+    <h2>Human vs. Machine Boundary</h2>
+    <div class="grid-2">
+      <div class="card">
+        <h3>Automated by <code>bench-voice-copilot</code></h3>
+        <ul><li>Spoken-style C1·V1 = C2·V2 solver with deterministic SI unit normalization (`nM`..`M`, `µL`..`L`) sharing `duck`&#x27;s swappable STT/Brain/TTS Protocol seam.</li><li>Physical safety guards: refuses missing units, refuses C2 &gt; C1, and mandates serial dilution when stock volume &lt; 0.5 µL.</li><li>Hands-free countdown timers and structured ELN event logging.</li></ul>
+      </div>
+      <div class="card">
+        <h3>Stays Human</h3>
+        <ul><li>Physical pipetting, reagent label verification, and biosafety judgment.</li><li>Voice read-back confirmation before dispensing critical reagents.</li></ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <h2>Measured Proof &amp; Scorecard</h2>
+    <table class="scorecard">
+      <tbody><tr><th>Command &amp; Math Accuracy (10 utterances)</th><td>100.0% vs. 40.0% naive unverified calculator</td></tr><tr><th>Unsafe / Ambiguous Commands Passed</th><td>0/5 (0.0%) vs. 5/5 (100.0%) naive</td></tr><tr><th>Physical Guardrails</th><td>Catches 1,000× µL/mL traps, C2 &gt; C1 impossibility, and sub-0.5 µL pipette floor</td></tr><tr><th>Voice Pipeline Companion</th><td>Shares Protocol architecture with `duck` (Pipecat 1.4 barge-in + `duck stats` p50/p95 latency)</td></tr></tbody>
+    </table>
+  </section>
+
+  <section class="band">
+    <h2>Where It Fails (Honest Limits)</h2>
+    <div class="card fail-box">
+      <ul><li>Noisy fume-hood ASR confusions (e.g., &#x27;15 mM&#x27; heard as &#x27;50 mM&#x27;) require mandatory spoken read-back confirmation.</li><li>Mass-to-molar conversions (`mg/mL` ↔ `mM`) refuse when molecular weight is omitted.</li></ul>
+    </div>
+  </section>
+
+  <nav class="pager" aria-label="Tour pagination">
+    <div><a href="08-clinical-doc-reconcile.html">← Stop 8: Scientific Programmer (Bonus Stop)</a></div>
+    <div><a href="../index.html">Back to Route Map →</a></div>
+  </nav>
+
+  <footer>
+    <span>Field Report · Stop 9</span>
+    <span><a href="../index.html">All Stops</a> · <a href="mailto:hello@possiblefutures.bio">hello@possiblefutures.bio</a></span>
+  </footer>
+</div>
+</body>
+</html>

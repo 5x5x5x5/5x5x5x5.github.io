@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stop 5: Founder &amp; Organizer (dlrtp-ops-demo) — Daniel Siegle</title>
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<div class="page">
+  <header class="masthead">
+    <a class="brand" href="../index.html">← Automate My Old Jobs</a>
+    <nav>
+      <a href="https://danielsiegle.com/">danielsiegle.com</a>
+      <a href="https://possiblefutures.bio" target="_blank" rel="noopener">Possible Futures ↗</a>
+    </nav>
+  </header>
+
+  <section class="hero" style="padding-top:2.25rem;">
+    <div class="eyebrow">Stop 5 of 9 · Deep Learning RTP (1,700+ Members · 400+ Events)</div>
+    <h1 style="max-width:24ch;">Founder &amp; Organizer</h1>
+    <div class="stop-meta" style="margin-top:0.85rem;">
+      <span class="badge live">Live</span>
+      <code>dlrtp-ops-demo</code>
+      <span style="font-size:0.88rem;color:var(--soft);">Build time: 1.2 hrs (public PII-free sandbox)</span>
+    </div>
+    <p class="lead">Running a weekly practitioner paper-reading community requires event fan-out (ICS, website, Discord, Luma/Meetup), inbound triage, local seminar radar curation, and recaps—without letting an autonomous agent spam members or fake personal relationships.</p>
+    <div class="tags" style="margin-top:1rem;"><span class="tag">agents</span><span class="tag">ops</span></div>
+    <div style="display:flex;flex-wrap:wrap;gap:0.75rem;margin-top:1.35rem;">
+      
+      <a class="btn" href="https://github.com/5x5x5x5/dlrtp-ops-demo" target="_blank" rel="noopener">View Repository on GitHub ↗</a>
+    </div>
+  </section>
+
+  <section class="band">
+    <h2>Human vs. Machine Boundary</h2>
+    <div class="grid-2">
+      <div class="card">
+        <h3>Automated by <code>dlrtp-ops-demo</code></h3>
+        <ul><li>Herald: deterministic post-PR fan-out (ICS, Discord embed, manual paste payload; zero LLM at runtime).</li><li>Funnel: untrusted inbound triage into quarantined queues with zero send credentials in context (architectural prompt-injection defense).</li><li>Radar + Scribe + Ledger: anti-vendor policy filter, human-seeded recap drafts, and heartbeat/freshness dead-man switches.</li></ul>
+      </div>
+      <div class="card">
+        <h3>Stays Human</h3>
+        <ul><li>Running the room and picking the three surprising takeaways (Scribe refuses empty human seeds).</li><li>Every relationship speech act (champion asks, lapsed-regular check-ins, thank-yous—Funnel refuses to auto-draft).</li><li>Moderation, consent, and final publish/paste gates (~3 content-object gates/week).</li></ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <h2>Measured Proof &amp; Scorecard</h2>
+    <table class="scorecard">
+      <tbody><tr><th>Weekly Publishing Hour</th><td>Compressed from 75–90 min → ~25–30 min (freeing time for Friday relationship work)</td></tr><tr><th>Prompt-Injection Containment</th><td>4/4 adversarial payloads quarantined · 0 unauthorized external sends</td></tr><tr><th>PR &amp; Seed Gates</th><td>100% unapproved events blocked (GateError); 100% empty-seed recaps refused</td></tr><tr><th>Dead-Man Switches</th><td>100% detection of missed cron heartbeats, stale radar, and &lt;4-week schedule depth</td></tr></tbody>
+    </table>
+  </section>
+
+  <section class="band">
+    <h2>Where It Fails (Honest Limits)</h2>
+    <div class="card fail-box">
+      <ul><li>Subtle vendor pitches disguised as technical talks still need human review in the weekly Radar PR.</li><li>Meetup and personal LinkedIn resist APIs; last-mile delivery intentionally stops at clipboard paste rather than brittle browser automation.</li><li>Production `dlrtp-ops` remains private to protect real member emails and attendance; this public repo runs on 100% synthetic fixtures.</li></ul>
+    </div>
+  </section>
+
+  <nav class="pager" aria-label="Tour pagination">
+    <div><a href="04-bioinformatics-ngs-qc.html">← Stop 4: Bioinformatics Software Engineer</a></div>
+    <div><a href="06-teaching-ncssm.html">Stop 6: AI Instructor (Health &amp; Life Sciences) →</a></div>
+  </nav>
+
+  <footer>
+    <span>Field Report · Stop 5</span>
+    <span><a href="../index.html">All Stops</a> · <a href="mailto:hello@possiblefutures.bio">hello@possiblefutures.bio</a></span>
+  </footer>
+</div>
+</body>
+</html>

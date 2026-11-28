@@ -35,6 +35,12 @@ Triangle with 400+ past events focused on deep learning and AI.
 
 ## Key Projects
 
+- **Automate My Old Jobs (Portfolio Tour)**: Nine-stop tour automating one aspect
+  of each past role (fisheries observer, biomanufacturing, pharma QSAR, NGS
+  bioinformatics, Deep Learning RTP ops, NCSSM teaching, Possible Futures
+  consulting, plus clinical lab reconciliation and wet-lab voice safety),
+  benchmarked honestly with explicit human boundaries
+  (https://danielsiegle.com/old-jobs/)
 - **Applied ML Portfolio**: Applied ML and pharma projects — AWS MLOps, RAG,
   CNNs, drug discovery (https://danielsiegle.com/applied-ml-portfolio/)
 - **dear-reader-bench**: LLM benchmark for translating comedic narration —
